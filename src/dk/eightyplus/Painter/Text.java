@@ -4,20 +4,17 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 
-import java.io.Serializable;
-
 /**
  */
-public class Text extends Graphic {
+public class Text extends Component {
 
-  String text = "This is a test text!";
+  private String text = "This is a test text!";
 
   private float x = 10;
   private float y = 30;
 
   @Override
   public void onDraw(Canvas canvas, Paint paint) {
-    super.onDraw(canvas, paint);
     paint.setColor(color);
     paint.setStrokeWidth(1.0f);
 
@@ -27,6 +24,10 @@ public class Text extends Graphic {
     paint.setAntiAlias(true);
 
     canvas.drawText(text, x, y, paint);
+  }
+
+  public void setText(String text) {
+    this.text = text;
   }
 
   @Override

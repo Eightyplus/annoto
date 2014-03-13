@@ -4,12 +4,10 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 
-import java.io.Serializable;
-
 /**
  *
  */
-public class Polygon extends Graphic {
+public class Polygon extends Component {
 
   private Path path = new Path();
 
@@ -29,7 +27,6 @@ public class Polygon extends Graphic {
 
   @Override
   public void onDraw(Canvas canvas, Paint paint) {
-    super.onDraw(canvas, paint);
     paint.setColor(color);
     paint.setStrokeWidth(width);
     canvas.drawPath(path, paint);

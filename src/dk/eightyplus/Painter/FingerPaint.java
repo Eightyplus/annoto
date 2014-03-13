@@ -37,7 +37,7 @@ import java.util.List;
 
 public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.OnColorChangedListener {
 
-  private final List<Graphic> pathList = new ArrayList<Graphic>();
+  private final List<Component> pathList = new ArrayList<Component>();
   private final List<Integer> colorList = new ArrayList<Integer>();
 
 
@@ -188,7 +188,7 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
       mCanvas = new Canvas(mBitmap);
     }
 
-    void drawPath(int color, Graphic path) {
+    void drawPath(int color, Component path) {
       mPaint.setColor(color);
       path.onDraw(mCanvas, mPaint);
       invalidate();
@@ -314,7 +314,7 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
         return true;
 
       case MOVE_MENU_ID:
-        Graphic path = getLastPath();
+        Component path = getLastPath();
         int lastIndex = colorList.size() - 1;
         int color = colorList.get(lastIndex);
         colorList.remove(lastIndex);
@@ -326,8 +326,8 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
     return super.onOptionsItemSelected(item);
   }
 
-  private Graphic getLastPath() {
-    Graphic path = pathList.get(pathList.size() - 1 );
+  private Component getLastPath() {
+    Component path = pathList.get(pathList.size() - 1 );
     pathList.remove(path);
     redraw();
     return path;
@@ -344,7 +344,7 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
       @Override
       public void run() {
         for (int i = 0; i < pathList.size(); i++) {
-          final Graphic path = pathList.get(i);
+          final Component path = pathList.get(i);
           int pathColor = colorList.get(i);
 
           if (delay > 0) {
@@ -411,14 +411,14 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
     private int _xDelta;
     private int _yDelta;
     private Bitmap mBitmap;
-    private Graphic graphic;
+    private Component component;
     private Paint   mBitmapPaint;
     private Paint mPaint;
     private int color;
 
-    public MoveView(Context context, Graphic graphic, int color) {
+    public MoveView(Context context, Component component, int color) {
       super(context);
-      this.graphic = graphic;
+      this.component = component;
       this.color = color;
 
 
@@ -443,7 +443,7 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
     @Override
     protected void onDraw(Canvas canvas) {
       canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
-      graphic.onDraw(canvas, mPaint);
+      component.onDraw(canvas, mPaint);
     }
 
     @Override
@@ -457,9 +457,9 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
           _yDelta = Y - lParams.topMargin;
           break;
         case MotionEvent.ACTION_UP:
-          moveView.graphic.move(X - _xDelta, Y - _yDelta);
+          moveView.component.move(X - _xDelta, Y - _yDelta);
 
-          pathList.add(moveView.graphic);
+          pathList.add(moveView.component);
           colorList.add(moveView.color);
           layout.removeView(moveView);
           moveView = null;
