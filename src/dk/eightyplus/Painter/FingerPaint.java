@@ -35,8 +35,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FingerPaint extends GraphicsActivity
-    implements ColorPickerDialog.OnColorChangedListener {
+public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.OnColorChangedListener {
 
   private final List<Graphic> pathList = new ArrayList<Graphic>();
   private final List<Integer> colorList = new ArrayList<Integer>();
@@ -78,7 +77,26 @@ public class FingerPaint extends GraphicsActivity
   private MaskFilter  mEmboss;
   private MaskFilter  mBlur;
 
+  private Bitmap createImageFromText(final String text, final Rect bounds, final float fontSize) {
+    final Paint textPaint = new Paint() {
+      {
+        setColor(0xFF00FF00);
+        setTextAlign(Paint.Align.LEFT);
+        setTypeface(Typeface.create("HelveticaNeue", Typeface.BOLD));
+        setTextSize(fontSize);
+        setAntiAlias(true);
+      }
+    };
+
+    //use ALPHA_8 (instead of ARGB_8888) to get text mask
+    final Bitmap bmp = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
+    final Canvas canvas = new Canvas(bmp);
+    canvas.drawText(text, 0, bounds.height(), textPaint);
+    return bmp;
+  }
+
   public void colorChanged(int color) {
+    view.color = color;
     mPaint.setColor(color);
   }
 
@@ -91,6 +109,7 @@ public class FingerPaint extends GraphicsActivity
     private Canvas  mCanvas;
     private Polygon    mPath;
     private Paint   mBitmapPaint;
+    private int color = 0;
 
     public MyView(Context c) {
       super(c);
@@ -121,12 +140,12 @@ public class FingerPaint extends GraphicsActivity
     private static final float TOUCH_TOLERANCE = 4;
 
     private void touch_start(float x, float y) {
-      int color = (int) (0xFFAAAAAA * Math.random());
+      int color = this.color != 0 ? this.color : (int) (0xFFAAAAAA * Math.random());
       mPaint.setColor(color);
       colorList.add(color);
 
-      mPath.reset();
-      mPath.moveTo(x, y);
+      mPath.getPath().reset();
+      mPath.getPath().moveTo(x, y);
       mX = x;
       mY = y;
     }
@@ -134,20 +153,20 @@ public class FingerPaint extends GraphicsActivity
       float dx = Math.abs(x - mX);
       float dy = Math.abs(y - mY);
       if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-        mPath.quadTo(mX, mY, (x + mX)/2, (y + mY)/2);
+        mPath.getPath().quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
         mX = x;
         mY = y;
       }
     }
     private void touch_up() {
-      mPath.lineTo(mX, mY);
+      mPath.getPath().lineTo(mX, mY);
       // commit the path to our offscreen
-      mCanvas.drawPath(mPath, mPaint);
+      mPath.onDraw(mCanvas, mPaint);
       // kill this so we don't double draw
 
       pathList.add(new Polygon(mPath));
 
-      mPath.reset();
+      mPath.getPath().reset();
     }
 
     private Path getPath(MotionEvent event) {
@@ -212,10 +231,10 @@ public class FingerPaint extends GraphicsActivity
     super.onCreateOptionsMenu(menu);
 
     menu.add(0, COLOR_MENU_ID, 0, "Color").setShortcut('3', 'c');
-    menu.add(0, EMBOSS_MENU_ID, 0, "Emboss").setShortcut('4', 's');
-    menu.add(0, BLUR_MENU_ID, 0, "Blur").setShortcut('5', 'z');
-    menu.add(0, ERASE_MENU_ID, 0, "Erase").setShortcut('5', 'z');
-    menu.add(0, SRCATOP_MENU_ID, 0, "SrcATop").setShortcut('5', 'z');
+    //menu.add(0, EMBOSS_MENU_ID, 0, "Emboss").setShortcut('4', 's');
+    //menu.add(0, BLUR_MENU_ID, 0, "Blur").setShortcut('5', 'z');
+    //menu.add(0, ERASE_MENU_ID, 0, "Erase").setShortcut('5', 'z');
+    //menu.add(0, SRCATOP_MENU_ID, 0, "SrcATop").setShortcut('5', 'z');
 
     menu.add(0, SHARE_MENU_ID, 0, "Share");
     menu.add(0, REDRAW_MENU_ID, 0, "Redraw");

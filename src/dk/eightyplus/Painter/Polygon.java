@@ -9,26 +9,30 @@ import java.io.Serializable;
 /**
  *
  */
-public class Polygon extends Path implements Graphic, Serializable {
+public class Polygon extends Graphic {
 
-  private int color = 0xFFFFFF00;
-  private float width = 1.0f;
+  private Path path = new Path();
 
   public Polygon() {
     super();
   }
 
   public Polygon(Polygon src) {
-    super(src);
+    path = new Path(src.path);
     color = src.color;
     width = src.width;
   }
 
+  public Path getPath() {
+    return path;
+  }
+
   @Override
   public void onDraw(Canvas canvas, Paint paint) {
+    super.onDraw(canvas, paint);
     paint.setColor(color);
     paint.setStrokeWidth(width);
-    canvas.drawPath(this, paint);
+    canvas.drawPath(path, paint);
   }
 
   @Override
@@ -43,6 +47,6 @@ public class Polygon extends Path implements Graphic, Serializable {
 
   @Override
   public void move(float dx, float dy) {
-    offset(dx, dy);
+    path.offset(dx, dy);
   }
 }
