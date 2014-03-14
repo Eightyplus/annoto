@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="selected">@color/Blue</color>
+    <color name="un_selected">@color/Black</color>
+    <color name="highlight">@color/BlueViolet</color>
+</resources>
