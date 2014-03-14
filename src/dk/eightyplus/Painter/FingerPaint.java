@@ -22,10 +22,7 @@ import android.graphics.*;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
+import android.view.*;
 import android.widget.RelativeLayout;
 
 import java.io.DataOutputStream;
@@ -37,15 +34,24 @@ import java.util.List;
 
 public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.OnColorChangedListener {
 
-  private final List<Component> pathList = new ArrayList<Component>();
-  private final List<Integer> colorList = new ArrayList<Integer>();
-
+  private final List<Component> components = new ArrayList<Component>();
+  private final List<Component> undoComponents = new ArrayList<Component>();
+  // TODO crete user interaction -> private final List<State> undos = new ArrayList<State>();
 
   private static final String TAG = FingerPaint.class.toString();
   private FingerPaint.MyView view;
 
   private MoveView moveView;
   private RelativeLayout layout;
+
+  enum State {
+    DrawPath,
+    Move,
+    Delete,
+    WriteText
+  }
+
+  private State state = State.DrawPath;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +61,18 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
     setContentView(layout);
     layout.addView(view);
 
-    pathList.add(new Text());
-    colorList.add(0xFFFFFF00);
+    /*TODO test code */ {
+      components.add(new Text());
+      Composite composite = new Composite();
+      composite.add(new Text("composite element"));
+      composite.move(300, 300);
+      composite.add(new Text("composite element 2"));
+      composite.move(100, 100);
+      Polygon polygon = new Polygon();
+      composite.add(polygon);
+      polygon.getPath().quadTo(100, 100, 100, 100);
+      components.add(composite);
+    }
 
     mPaint = new Paint();
     mPaint.setAntiAlias(true);
@@ -76,24 +92,6 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
   private Paint       mPaint;
   private MaskFilter  mEmboss;
   private MaskFilter  mBlur;
-
-  private Bitmap createImageFromText(final String text, final Rect bounds, final float fontSize) {
-    final Paint textPaint = new Paint() {
-      {
-        setColor(0xFF00FF00);
-        setTextAlign(Paint.Align.LEFT);
-        setTypeface(Typeface.create("HelveticaNeue", Typeface.BOLD));
-        setTextSize(fontSize);
-        setAntiAlias(true);
-      }
-    };
-
-    //use ALPHA_8 (instead of ARGB_8888) to get text mask
-    final Bitmap bmp = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888);
-    final Canvas canvas = new Canvas(bmp);
-    canvas.drawText(text, 0, bounds.height(), textPaint);
-    return bmp;
-  }
 
   public void colorChanged(int color) {
     view.color = color;
@@ -140,10 +138,10 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
     private static final float TOUCH_TOLERANCE = 4;
 
     private void touch_start(float x, float y) {
-      int color = this.color != 0 ? this.color : (int) (0xFFAAAAAA * Math.random());
+      int color = this.color != 0 ? this.color : (int) (0xFFFFFF00 * Math.random());
       mPaint.setColor(color);
-      colorList.add(color);
 
+      mPath.setColor(color);
       mPath.getPath().reset();
       mPath.getPath().moveTo(x, y);
       mX = x;
@@ -164,7 +162,7 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
       mPath.onDraw(mCanvas, mPaint);
       // kill this so we don't double draw
 
-      pathList.add(new Polygon(mPath));
+      components.add(new Polygon(mPath));
 
       mPath.getPath().reset();
     }
@@ -199,19 +197,67 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
       float x = event.getX();
       float y = event.getY();
 
-      switch (event.getAction()) {
-        case MotionEvent.ACTION_DOWN:
-          touch_start(x, y);
-          invalidate();
-          break;
-        case MotionEvent.ACTION_MOVE:
-          touch_move(x, y);
-          invalidate();
-          break;
-        case MotionEvent.ACTION_UP:
-          touch_up();
-          invalidate();
-          break;
+      switch (state) {
+        case Delete: {
+          Component deleteComponent = null;
+          float minimumDistance = Float.MAX_VALUE;
+          for (Component component : components) {
+            float distance = component.centerDist(x, y);
+            if (distance < minimumDistance) {
+              deleteComponent = component;
+              minimumDistance = distance;
+            }
+          }
+
+          if (deleteComponent != null) {
+            components.remove(deleteComponent);
+            undoComponents.add(deleteComponent);
+            redraw();
+          }
+        }
+
+        break;
+        case Move: {
+          if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            Component moveComponent = null;
+            float minimumDistance = Float.MAX_VALUE;
+            for (Component component : components) {
+              float distance = component.centerDist(x, y);
+              if (distance < minimumDistance) {
+                moveComponent = component;
+                minimumDistance = distance;
+              }
+            }
+
+            if (moveComponent != null) {
+              components.remove(moveComponent);
+              redraw();
+
+              //Component path = getLastPath();
+              moveView = new MoveView(getApplicationContext(), moveComponent);
+              layout.addView(moveView);
+              moveView.onTouchEvent(event);
+            }
+          }
+        }
+        break;
+        case DrawPath:
+        default:
+
+          switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+              touch_start(x, y);
+              invalidate();
+              break;
+            case MotionEvent.ACTION_MOVE:
+              touch_move(x, y);
+              invalidate();
+              break;
+            case MotionEvent.ACTION_UP:
+              touch_up();
+              invalidate();
+              break;
+          }
       }
       return true;
     }
@@ -227,26 +273,114 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
   private static final int MOVE_MENU_ID = Menu.FIRST + 7;
 
   @Override
-  public boolean onCreateOptionsMenu(Menu menu) {
-    super.onCreateOptionsMenu(menu);
+  public boolean onCreateOptionsMenu(final Menu menu) {
+    final MenuInflater inflater = getMenuInflater();
+    inflater.inflate(R.menu.menu, menu);
 
+    MenuItem path = menu.findItem(R.id.menu_path);
+    if (path != null) {
+      path.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          state = State.DrawPath;
+          return true;
+        }
+      });
+    }
+
+    MenuItem menuMove = menu.findItem(R.id.menu_move);
+    if (menuMove != null) {
+      menuMove.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          state = State.Move;
+          return true;
+        }
+      });
+    }
+
+    MenuItem menuRedraw = menu.findItem(R.id.menu_redraw);
+    if (menuRedraw != null) {
+      menuRedraw.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          redraw(50, true);
+          return true;
+        }
+      });
+    }
+
+    MenuItem menuShare = menu.findItem(R.id.menu_share);
+    if (menuShare != null) {
+      menuShare.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          try {
+            File file = writeToFile(getApplicationContext(), view.mBitmap);
+
+            final Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+            sharingIntent.setType("image/png");
+            sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Subject");
+            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Some test");
+            //sharingIntent.putExtra(android.content.Intent.EXTRA_STREAM, file.toURI());
+
+            sharingIntent.putExtra(android.content.Intent.EXTRA_STREAM, Uri.fromFile(file));
+
+            startActivity(Intent.createChooser(sharingIntent, "Share image using"));
+
+          } catch (IOException e) {
+            Log.e(TAG, "IOException", e);
+          }
+          return true;
+        }
+      });
+    }
+
+    MenuItem menuColor = menu.findItem(R.id.menu_color);
+    if (menuColor != null) {
+      menuColor.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          new ColorPickerDialog(FingerPaint.this, FingerPaint.this, mPaint.getColor()).show();
+          return true;
+        }
+      });
+    }
+
+    MenuItem menuDelete = menu.findItem(R.id.menu_delete);
+    if (menuDelete != null) {
+      menuDelete.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          state = State.Delete;
+          return true;
+        }
+      });
+    }
+
+    MenuItem menuUndo = menu.findItem(R.id.menu_undo);
+    if (menuUndo != null) {
+      menuUndo.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          undo();
+          return true;
+        }
+      });
+    }
+
+    /*
     menu.add(0, COLOR_MENU_ID, 0, "Color").setShortcut('3', 'c');
-    //menu.add(0, EMBOSS_MENU_ID, 0, "Emboss").setShortcut('4', 's');
-    //menu.add(0, BLUR_MENU_ID, 0, "Blur").setShortcut('5', 'z');
-    //menu.add(0, ERASE_MENU_ID, 0, "Erase").setShortcut('5', 'z');
-    //menu.add(0, SRCATOP_MENU_ID, 0, "SrcATop").setShortcut('5', 'z');
+    menu.add(0, EMBOSS_MENU_ID, 0, "Emboss").setShortcut('4', 's');
+    menu.add(0, BLUR_MENU_ID, 0, "Blur").setShortcut('5', 'z');
+    menu.add(0, ERASE_MENU_ID, 0, "Erase").setShortcut('5', 'z');
+    menu.add(0, SRCATOP_MENU_ID, 0, "SrcATop").setShortcut('5', 'z');
 
     menu.add(0, SHARE_MENU_ID, 0, "Share");
     menu.add(0, REDRAW_MENU_ID, 0, "Redraw");
     menu.add(0, MOVE_MENU_ID, 0, "Move last");
-    /****   Is this the mechanism to extend with filter effects?
-     Intent intent = new Intent(null, getIntent().getData());
-     intent.addCategory(Intent.CATEGORY_ALTERNATIVE);
-     menu.addIntentOptions(
-     Menu.ALTERNATIVE, 0,
-     new ComponentName(this, NotesList.class),
-     null, intent, 0, null);
-     *****/
+    */
+
     return true;
   }
 
@@ -290,36 +424,17 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
         return true;
 
       case SHARE_MENU_ID:
-        try {
-          File file = writeToFile(getApplicationContext(), view.mBitmap );
 
-          final Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-          sharingIntent.setType("image/png");
-          sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Subject");
-          sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Some test");
-          //sharingIntent.putExtra(android.content.Intent.EXTRA_STREAM, file.toURI());
-
-          sharingIntent.putExtra(android.content.Intent.EXTRA_STREAM, Uri.fromFile(file));
-
-          startActivity(Intent.createChooser(sharingIntent, "Share image using"));
-
-        } catch (IOException e) {
-          Log.e(TAG, "IOException", e);
-        }
         return true;
 
       case REDRAW_MENU_ID:
-        redraw(50, true);
+
 
         return true;
 
       case MOVE_MENU_ID:
         Component path = getLastPath();
-        int lastIndex = colorList.size() - 1;
-        int color = colorList.get(lastIndex);
-        colorList.remove(lastIndex);
-
-        moveView = new MoveView(getApplicationContext(), path, color);
+        moveView = new MoveView(getApplicationContext(), path);
         layout.addView(moveView);
         return true;
     }
@@ -327,8 +442,8 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
   }
 
   private Component getLastPath() {
-    Component path = pathList.get(pathList.size() - 1 );
-    pathList.remove(path);
+    Component path = components.get(components.size() - 1 );
+    components.remove(path);
     redraw();
     return path;
   }
@@ -343,9 +458,8 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
     new Thread(new Runnable() {
       @Override
       public void run() {
-        for (int i = 0; i < pathList.size(); i++) {
-          final Component path = pathList.get(i);
-          int pathColor = colorList.get(i);
+        for (int i = 0; i < components.size(); i++) {
+          final Component component = components.get(i);
 
           if (delay > 0) {
             try {
@@ -354,12 +468,12 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
 
             }
           }
-          final int color = randomColor ? (int) (0xFFAAAAAA * Math.random()) : pathColor;
-          if (randomColor) colorList.set(i, color);
+          final int color = randomColor ? (int) (0xFFAAAAAA * Math.random()) : component.getColor();
+          component.setColor(color);
           runOnUiThread(new Runnable() {
             @Override
             public void run() {
-              view.drawPath(color, path);
+              view.drawPath(color, component);
             }
           });
         }
@@ -372,36 +486,28 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
         view.invalidate();
       }
     });
-
-    /*new Thread(new Runnable() {
-      @Override
-      public void run() {
-        runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-            for (int i = 0; i < pathList.size(); i++) {
-              final Path path = pathList.get(i);
-              final int color = colorList.get(i);
-
-              RectF bounds = new RectF();
-              path.computeBounds(bounds, false);
-              view.drawPath(color, path);
-            }
-          }
-        });
-      }
-    }).start();*/
   }
 
   @Override
   public void onBackPressed() {
-    if (pathList.size() > 0) {
-      getLastPath();
+    if (undoComponents.size() > 0) {
+      Component component = undoComponents.remove(0);
+      components.add(component);
+      redraw();
     } else {
       super.onBackPressed();
     }
   }
 
+
+  private void undo() {
+    if (undoComponents.size() > 0) {
+      Component component = undoComponents.remove(undoComponents.size() - 1);
+      //State undo = undos.remove(0);
+      components.add(component);
+      redraw();
+    }
+  }
 
 
   private class MoveView extends View {
@@ -414,18 +520,14 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
     private Component component;
     private Paint   mBitmapPaint;
     private Paint mPaint;
-    private int color;
 
-    public MoveView(Context context, Component component, int color) {
+    public MoveView(Context context, Component component) {
       super(context);
       this.component = component;
-      this.color = color;
-
 
       mPaint = new Paint();
       mPaint.setAntiAlias(true);
       mPaint.setDither(true);
-      mPaint.setColor(color);
       mPaint.setStyle(Paint.Style.STROKE);
       mPaint.setStrokeJoin(Paint.Join.ROUND);
       mPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -437,13 +539,21 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
       super.onSizeChanged(w, h, oldw, oldh);
-      mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+      mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888); // TODO create smaller bitmap (from bounds)
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
       canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
       component.onDraw(canvas, mPaint);
+
+      RectF bounds = component.getBounds();
+
+      mPaint.setColor(0xFF000000);
+      mPaint.setStrokeWidth(1.0f);
+      mPaint.setPathEffect(new DashPathEffect(new float[] {10,20}, 0));
+      canvas.drawRoundRect(bounds, 5.0f, 5.0f, mPaint);
+      mPaint.setPathEffect(null);
     }
 
     @Override
@@ -459,8 +569,7 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
         case MotionEvent.ACTION_UP:
           moveView.component.move(X - _xDelta, Y - _yDelta);
 
-          pathList.add(moveView.component);
-          colorList.add(moveView.color);
+          components.add(moveView.component);
           layout.removeView(moveView);
           moveView = null;
           redraw();

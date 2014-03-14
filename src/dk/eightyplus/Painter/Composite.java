@@ -2,6 +2,7 @@ package dk.eightyplus.Painter;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.RectF;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
 public class Composite extends Component {
   protected List<Component> componentList;
 
-  void onDraw(Canvas canvas, Paint paint) {
+  public void onDraw(Canvas canvas, Paint paint) {
     if (componentList != null) {
       for (Component component : componentList) {
         component.onDraw(canvas, paint);
@@ -48,11 +49,54 @@ public class Composite extends Component {
   }
 
   @Override
-  void move(float dx, float dy) {
+  public void move(float dx, float dy) {
     if (componentList != null) {
       for (Component component : componentList) {
         component.move(dx, dy); // TODO move ?
       }
     }
+  }
+
+  @Override
+  public float centerDist(float x, float y) {
+    float minimumDistance = Float.MAX_VALUE;
+    if (componentList != null) {
+      for (Component component : componentList) {
+        float distance = component.centerDist(x, y);
+        if (distance < minimumDistance) {
+          minimumDistance = distance;
+        }
+      }
+    }
+
+    return minimumDistance;
+  }
+
+  @Override
+  public RectF getBounds() {
+    RectF bounds = new RectF(Float.MAX_VALUE, Float.MAX_VALUE, Float.MIN_VALUE, Float.MIN_VALUE);
+    if (componentList != null) {
+      for (Component component : componentList) {
+        RectF componentBounds = component.getBounds();
+
+        if (componentBounds.left < bounds.left) {
+          bounds.left = componentBounds.left;
+        }
+
+        if (componentBounds.top < bounds.top) {
+          bounds.top = componentBounds.top;
+        }
+
+        if (componentBounds.right > bounds.right) {
+          bounds.right = componentBounds.right;
+        }
+
+        if (componentBounds.bottom > bounds.bottom) {
+          bounds.bottom = componentBounds.bottom;
+        }
+
+      }
+    }
+    return bounds;
   }
 }

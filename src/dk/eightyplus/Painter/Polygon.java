@@ -1,8 +1,6 @@
 package dk.eightyplus.Painter;
 
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.Path;
+import android.graphics.*;
 
 /**
  *
@@ -45,5 +43,17 @@ public class Polygon extends Component {
   @Override
   public void move(float dx, float dy) {
     path.offset(dx, dy);
+  }
+
+  @Override
+  public float centerDist(float x, float y) {
+    return calculateCenterDistance(x, y, getBounds());
+  }
+
+  @Override
+  public RectF getBounds() {
+    RectF bounds = new RectF();
+    path.computeBounds(bounds, false);
+    return bounds;
   }
 }
