@@ -1,13 +1,16 @@
 package dk.eightyplus.Painter;
 
-import android.graphics.*;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.RectF;
 
 /**
  *
  */
 public class Polygon extends Component {
 
-  private Path path = new Path();
+  private transient Path path = new Path();
 
   public Polygon() {
     super();

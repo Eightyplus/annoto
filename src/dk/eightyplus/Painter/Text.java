@@ -10,8 +10,8 @@ public class Text extends Component {
 
   private float x = 10;
   private float y = 30;
-  private Typeface typeFace = Typeface.create("HelveticaNeue", Typeface.NORMAL);;
   private int fontSize = 40;
+  private transient Typeface typeFace = Typeface.create("HelveticaNeue", Typeface.NORMAL);
 
   public Text() {}
   public Text(String text) {
