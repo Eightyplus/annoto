@@ -88,6 +88,26 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
     mBlur = new BlurMaskFilter(8, BlurMaskFilter.Blur.NORMAL);
   }
 
+  @Override
+  protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    super.onRestoreInstanceState(savedInstanceState);
+
+    int i = 0;
+    Component component;
+    while ((component = (Component) savedInstanceState.get("COMPONTENT" + i++)) != null) {
+      components.add(component);
+    }
+  }
+
+  @Override
+  protected void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+
+    for (int i = 0; i < components.size(); i++) {
+      Component component = components.get(i);
+      outState.putSerializable("COMPONTENT" + i , component);
+    }
+  }
 
   private Paint       mPaint;
   private MaskFilter  mEmboss;
@@ -124,6 +144,7 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
       super.onSizeChanged(w, h, oldw, oldh);
       mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
       mCanvas = new Canvas(mBitmap);
+      redraw();
     }
 
     @Override
