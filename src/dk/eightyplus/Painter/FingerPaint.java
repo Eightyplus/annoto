@@ -61,7 +61,10 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
     setContentView(layout);
     layout.addView(view);
 
-    /*TODO test code */ {
+    boolean show = savedInstanceState == null || !savedInstanceState.getBoolean("TESTCODE", false);
+
+    /*TODO test code */
+    if (show) {
       components.add(new Text());
       Composite composite = new Composite();
       composite.add(new Text("composite element"));
@@ -102,6 +105,8 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
   @Override
   protected void onSaveInstanceState(Bundle outState) {
     super.onSaveInstanceState(outState);
+
+    outState.putBoolean("TESTCODE", true);
 
     for (int i = 0; i < components.size(); i++) {
       Component component = components.get(i);
