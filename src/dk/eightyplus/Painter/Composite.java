@@ -61,6 +61,7 @@ public class Composite extends Component {
   public float centerDist(float x, float y) {
     float minimumDistance = Float.MAX_VALUE;
     if (componentList != null) {
+      minimumDistance = calculateCenterDistance(x, y, getBounds());
       for (Component component : componentList) {
         float distance = component.centerDist(x, y);
         if (distance < minimumDistance) {
