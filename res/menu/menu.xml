@@ -13,12 +13,6 @@
           android:showAsAction="always"
           android:visible="true"
           android:enabled="true" />
-    <item android:id="@+id/menu_redraw"
-          android:title="Redraw"
-          android:icon="@android:drawable/ic_menu_rotate"
-          android:showAsAction="always"
-          android:visible="true"
-          android:enabled="true" />
     <item android:id="@+id/menu_color"
           android:title="Color"
           android:showAsAction="always"
@@ -50,6 +44,12 @@
           android:showAsAction="ifRoom"
           android:visible="true"
           android:enabled="true" />
+    <item android:id="@+id/menu_redraw"
+          android:title="Randomize colors"
+          android:showAsAction="ifRoom"
+          android:visible="true"
+          android:enabled="true" />
+
 
     <group android:id="@+id/hide_all_maybe"
            android:visible="false">
