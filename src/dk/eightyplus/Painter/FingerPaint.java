@@ -362,6 +362,21 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
       });
     }
 
+    MenuItem menuSave = menu.findItem(R.id.menu_save);
+    if (menuSave != null) {
+      menuSave.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          try {
+            writeToFile(getApplicationContext(), view.mBitmap);
+          } catch (IOException e) {
+            Log.e(TAG, "IOException", e);
+          }
+          return true;
+        }
+      });
+    }
+
     MenuItem menuColor = menu.findItem(R.id.menu_color);
     if (menuColor != null) {
       menuColor.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {

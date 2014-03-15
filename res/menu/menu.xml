@@ -4,6 +4,7 @@
 
     <item android:id="@+id/menu_path"
           android:title="Path"
+          android:icon="@android:drawable/ic_menu_edit"
           android:showAsAction="always"
           android:visible="true"
           android:enabled="true" />
@@ -14,11 +15,7 @@
           android:enabled="true" />
     <item android:id="@+id/menu_redraw"
           android:title="Redraw"
-          android:showAsAction="always"
-          android:visible="true"
-          android:enabled="true" />
-    <item android:id="@+id/menu_share"
-          android:title="Share"
+          android:icon="@android:drawable/ic_menu_rotate"
           android:showAsAction="always"
           android:visible="true"
           android:enabled="true" />
@@ -28,6 +25,7 @@
           android:visible="true"
           android:enabled="true" />
     <item android:id="@+id/menu_delete"
+          android:icon="@android:drawable/ic_menu_delete"
           android:title="Delete"
           android:showAsAction="always"
           android:visible="true"
@@ -35,7 +33,21 @@
 
     <item android:id="@+id/menu_undo"
           android:title="Undo"
+          android:icon="@android:drawable/ic_menu_revert"
           android:showAsAction="always"
+          android:visible="true"
+          android:enabled="true" />
+
+    <item android:id="@+id/menu_share"
+          android:icon="@android:drawable/ic_menu_share"
+          android:title="Share"
+          android:showAsAction="ifRoom"
+          android:visible="true"
+          android:enabled="true" />
+    <item android:id="@+id/menu_save"
+          android:icon="@android:drawable/ic_menu_save"
+          android:title="Save"
+          android:showAsAction="ifRoom"
           android:visible="true"
           android:enabled="true" />
 
