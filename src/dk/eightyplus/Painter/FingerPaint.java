@@ -31,11 +31,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.OnColorChangedListener {
 
   private final List<Component> components = new ArrayList<Component>();
-  private final List<Component> undoComponents = new ArrayList<Component>();
+  private final Stack<Undo> undo = new Stack<Undo>();
   // TODO crete user interaction -> private final List<State> undos = new ArrayList<State>();
 
   private static final String TAG = FingerPaint.class.toString();
@@ -43,13 +44,6 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
 
   private MoveView moveView;
   private RelativeLayout layout;
-
-  enum State {
-    DrawPath,
-    Move,
-    Delete,
-    WriteText
-  }
 
   private State state = State.DrawPath;
 
@@ -188,7 +182,10 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
       mPath.onDraw(mCanvas, mPaint);
       // kill this so we don't double draw
 
-      components.add(new Polygon(mPath));
+      Component component = new Polygon(mPath);
+      components.add(component);
+
+      undo.add(new Undo(component, State.DrawPath));
 
       mPath.getPath().reset();
     }
@@ -237,7 +234,7 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
 
           if (deleteComponent != null) {
             components.remove(deleteComponent);
-            undoComponents.add(deleteComponent);
+            undo.add(new Undo(deleteComponent, State.Delete));
             redraw();
           }
         }
@@ -531,23 +528,21 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
 
   @Override
   public void onBackPressed() {
-    if (undoComponents.size() > 0) {
-      Component component = undoComponents.remove(0);
-      components.add(component);
-      redraw();
-    } else {
+    if (!undo()) {
       super.onBackPressed();
     }
   }
 
 
-  private void undo() {
-    if (undoComponents.size() > 0) {
-      Component component = undoComponents.remove(undoComponents.size() - 1);
-      //State undo = undos.remove(0);
-      components.add(component);
-      redraw();
+  private boolean undo() {
+    if (undo.size() > 0) {
+      Undo uno = undo.pop();
+      if (uno.undo(components)) {
+        redraw();
+        return true;
+      }
     }
+    return false;
   }
 
 
@@ -608,9 +603,11 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
           _yDelta = Y - lParams.topMargin;
           break;
         case MotionEvent.ACTION_UP:
-          moveView.component.move(X - _xDelta, Y - _yDelta);
+          RectF bounds = component.getBounds();
+          undo.add(new Undo(component, bounds.left, bounds.top, State.Move));
+          component.move(X - _xDelta, Y - _yDelta);
 
-          components.add(moveView.component);
+          components.add(component);
           layout.removeView(moveView);
           moveView = null;
           redraw();
