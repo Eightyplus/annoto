@@ -37,6 +37,7 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
 
   private final List<Component> components = new ArrayList<Component>();
   private final Stack<Undo> undo = new Stack<Undo>();
+  private final Stack<Undo> redo = new Stack<Undo>();
   // TODO crete user interaction -> private final List<State> undos = new ArrayList<State>();
 
   private static final String TAG = FingerPaint.class.toString();
@@ -407,6 +408,17 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
       });
     }
 
+    MenuItem menuRedo = menu.findItem(R.id.menu_redo);
+    if (menuRedo != null) {
+      menuRedo.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          redo();
+          return true;
+        }
+      });
+    }
+
     /*
     menu.add(0, COLOR_MENU_ID, 0, "Color").setShortcut('3', 'c');
     menu.add(0, EMBOSS_MENU_ID, 0, "Emboss").setShortcut('4', 's');
@@ -536,8 +548,20 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
 
   private boolean undo() {
     if (undo.size() > 0) {
-      Undo uno = undo.pop();
-      if (uno.undo(components)) {
+      Undo undo = this.undo.pop();
+      if (undo.undo(components)) {
+        redo.add(undo);
+        redraw();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean redo() {
+    if (redo.size() > 0) {
+      Undo redo = this.redo.pop();
+      if (redo.redo(components)) {
         redraw();
         return true;
       }

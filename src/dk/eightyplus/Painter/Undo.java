@@ -15,6 +15,22 @@ public class Undo {
 
   private State undoAction;
 
+  /**
+   * Undo for components being moved
+   * @param component component being moved
+   * @param state action to be undo
+   */
+  public Undo(final Component component, State state) {
+    this(component, 0, 0, state);
+  }
+
+  /**
+   * Undo for components being moved
+   * @param component component being moved
+   * @param x previous x-coordinate
+   * @param y previous y-coordinate
+   * @param state action to be undo
+   */
   public Undo(final Component component, float x, float y, State state) {
     this.component = component;
     this.x = x;
@@ -22,12 +38,12 @@ public class Undo {
     this.undoAction = state;
   }
 
-  public Undo(final Component component, State state) {
-    this(component, 0, 0, state);
-  }
-
+  /**
+   * Undo action taken on component
+   * @param components list of components
+   * @return true if undo was successful
+   */
   public boolean undo(final List<Component> components) {
-
     switch (undoAction) {
       default:
       case Delete:
@@ -38,6 +54,8 @@ public class Undo {
         float x = bounds.left;
         float y = bounds.top;
         component.move(this.x - x, this.y - y);
+        this.x = x;
+        this.y = y;
         return true;
 
       case WriteText:
@@ -47,8 +65,12 @@ public class Undo {
     }
   }
 
+  /**
+   * Redo action taken on component
+   * @param components list of components
+   * @return true if redo was successful
+   */
   public boolean redo(final List<Component> components) {
-
     switch (undoAction) {
       default:
       case Delete:
@@ -58,7 +80,9 @@ public class Undo {
         RectF bounds = component.getBounds();
         float x = bounds.left;
         float y = bounds.top;
-        component.move(x - this.x, y - this.y);
+        component.move(this.x - x, this.y - y);
+        this.x = x;
+        this.y = y;
         return true;
 
       case WriteText:
