@@ -212,7 +212,7 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
       mCanvas = new Canvas(mBitmap);
     }
 
-    void drawPath(int color, Component path) {
+    void drawComponent(int color, Component path) {
       mPaint.setColor(color);
       path.onDraw(mCanvas, mPaint);
       invalidate();
@@ -514,7 +514,7 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
           runOnUiThread(new Runnable() {
             @Override
             public void run() {
-              view.drawPath(color, component);
+              view.drawComponent(color, component);
             }
           });
         }
