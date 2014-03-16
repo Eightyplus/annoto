@@ -5,6 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <SeekBar android:id="@+id/slider"
+        android:background="@drawable/rectangle_rounded_white"
+        android:max="100"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"/>
 </LinearLayout>
