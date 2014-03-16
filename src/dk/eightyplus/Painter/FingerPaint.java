@@ -16,6 +16,7 @@
 
 package dk.eightyplus.Painter;
 
+import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -25,10 +26,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.ViewGroup;
+import android.view.*;
+import android.widget.RadioGroup;
 import dk.eightyplus.Painter.action.State;
 import dk.eightyplus.Painter.component.Component;
 import dk.eightyplus.Painter.dialog.ColorPickerDialog;
@@ -61,8 +60,6 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     view = new DrawingView(getApplicationContext(), this);
     drawableArea.addView(view);
 
-
-    /*
     getActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
     getActionBar().setCustomView(R.layout.action_bar_layout);
 
@@ -78,24 +75,33 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       }
     });
 
-    for (int i = 0; i < radioGroup.getChildCount(); i++) {
-      final View view = radioGroup.getChildAt(i);
-      view.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-          radioGroup.check(view.getId());
-        }
-      });
-    }
-
-
-    ??? radioGroup.findViewById(R.id.two).setOnClickListener(new View.OnClickListener() {
+    View editButton = radioGroup.findViewById(R.id.action_bar_edit);
+    editButton.setSelected(true);
+    editButton.setOnClickListener(new View.OnClickListener() {
       @Override
-      public void onClick(View v) {
-        radioGroup.check(R.id.two);
+      public void onClick(View view) {
+        radioGroup.check(view.getId());
+        state = State.DrawPath;
       }
-    });??
-     */
+    });
+
+    View moveButton = radioGroup.findViewById(R.id.action_bar_move);
+    moveButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        radioGroup.check(view.getId());
+        state = State.Move;
+      }
+    });
+
+    View deleteButton = radioGroup.findViewById(R.id.action_bar_delete);
+    deleteButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        radioGroup.check(view.getId());
+        state = State.Delete;
+      }
+    });
 
     /*TODO test code
     boolean show = savedInstanceState == null || !savedInstanceState.getBoolean("TESTCODE", false);

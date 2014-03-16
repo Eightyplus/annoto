@@ -6,14 +6,24 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
-    <Button android:id="@+id/one"
-        android:text="one"
-        android:background="@drawable/selector_color"
+    <Button android:id="@+id/action_bar_edit"
+        android:drawableStart="@android:drawable/ic_menu_edit"
+        android:background="@drawable/action_bar_toggle_button"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-    <Button android:id="@+id/two"
-        android:text="two"
-        android:background="@drawable/selector_color"
+        android:layout_height="wrap_content"
+        />
+    <Button android:id="@+id/action_bar_move"
+        android:drawableStart="@android:drawable/ic_menu_more"
+        android:background="@drawable/action_bar_toggle_button"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="1dp"
+        android:layout_marginRight="1dp"
+        />
+  <Button android:id="@+id/action_bar_delete"
+        android:drawableStart="@android:drawable/ic_menu_delete"
+        android:background="@drawable/action_bar_toggle_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
 </RadioGroup>

@@ -2,7 +2,8 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
   <item>
-    <rotate android:fromDegrees="120"
+    <rotate
+        android:fromDegrees="120"
         android:toDegrees="120">
       <shape android:shape="rectangle" >
         <size android:width="3dp" android:height="30dp"/>
@@ -66,7 +67,7 @@
         android:toDegrees="40">
       <shape android:shape="rectangle" >
         <size android:width="3dp" android:height="30dp"/>
-        <solid android:color="@color/LightGreen" />
+        <solid android:color="@color/LawnGreen" />
       </shape>
     </rotate>
   </item>
@@ -76,7 +77,7 @@
         android:toDegrees="15">
       <shape android:shape="rectangle" >
         <size android:width="3dp" android:height="30dp"/>
-        <solid android:color="@color/Yellow" />
+        <solid android:color="@color/Gold" />
       </shape>
     </rotate>
   </item>
