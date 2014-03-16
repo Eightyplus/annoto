@@ -16,35 +16,31 @@ import dk.eightyplus.Painter.R;
 public class SliderFragment extends DialogFragment {
 
   private Callback callback;
+  private final int width;
 
-  private int width = 1;
-
-  public SliderFragment(final Callback callback) {
+  public SliderFragment(final Callback callback, int width) {
     this.callback = callback;
+    this.width = width;
   }
-
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.slider, container, false);
 
     SeekBar slider = (SeekBar) view.findViewById(R.id.slider);
+    slider.setProgress(width);
     slider.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
       @Override
-      public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        width = progress;
-      }
+      public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) { }
 
       @Override
       public void onStartTrackingTouch(SeekBar seekBar) { }
 
       @Override
       public void onStopTrackingTouch(SeekBar seekBar) {
-        callback.setStrokeWidth(width);
+        callback.setStrokeWidth(seekBar.getProgress());
       }
     });
-
-    Log.d(getTag(), "on create");
 
     return view;
   }

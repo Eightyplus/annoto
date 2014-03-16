@@ -1,8 +1,10 @@
 package dk.eightyplus.Painter.view;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.*;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.MotionEvent;
 import android.view.View;
 import dk.eightyplus.Painter.Callback;
@@ -41,6 +43,8 @@ public class DrawingView extends View {
     super(context);
 
     this.callback = callback;
+
+    getSavedStrokeWidth();
 
     mPath = new Polygon();
     mPath.setStrokeWidth(strokeWidth);
@@ -299,7 +303,24 @@ public class DrawingView extends View {
   }
 
   public void setStrokeWidth(int strokeWidth) {
-    mPaint.setStrokeWidth(strokeWidth);
     this.strokeWidth = strokeWidth;
+    mPath.setStrokeWidth(strokeWidth);
+    saveStrokeWidth(strokeWidth);
+  }
+
+  public int getStrokeWidth() {
+    return strokeWidth;
+  }
+
+  private void saveStrokeWidth(int strokeWidth) {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+    SharedPreferences.Editor editor = preferences.edit();
+    editor.putInt("STROKE_WIDTH", strokeWidth);
+    editor.commit();
+  }
+
+  private void getSavedStrokeWidth() {
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+    strokeWidth = preferences.getInt("STROKE_WIDTH", strokeWidth);
   }
 }

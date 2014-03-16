@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
@@ -113,6 +114,18 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   }
 
   @Override
+  protected void onPause() {
+    super.onPause();
+
+    Fragment fragment = getSupportFragmentManager().findFragmentByTag(Tags.FRAGMENT_SLIDER);
+    if (fragment != null) {
+      FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+      transaction.remove(fragment);
+      transaction.commit();
+    }
+  }
+
+  @Override
   protected void onRestoreInstanceState(Bundle savedInstanceState) {
     super.onRestoreInstanceState(savedInstanceState);
     view.onRestoreInstanceState(savedInstanceState);
@@ -156,10 +169,16 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       menuWidth.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem item) {
-          SliderFragment sliderFragment = new SliderFragment(FingerPaint.this);
+          Fragment fragment = getSupportFragmentManager().findFragmentByTag(Tags.FRAGMENT_SLIDER);
 
           FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-          transaction.replace(R.id.configuration, sliderFragment, "SLIDER");
+          if (fragment == null) {
+            SliderFragment sliderFragment = new SliderFragment(FingerPaint.this, view.getStrokeWidth());
+            transaction.replace(R.id.configuration, sliderFragment, Tags.FRAGMENT_SLIDER);
+          } else {
+            transaction.remove(fragment);
+          }
+
           transaction.commit();
           return true;
         }
