@@ -2,36 +2,36 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/menu_path"
+    <!--item android:id="@+id/menu_path"
           android:title="Path"
           android:icon="@android:drawable/ic_menu_edit"
           android:showAsAction="always"
           android:visible="true"
-          android:enabled="true" />
+          android:enabled="true" /-->
     <item android:id="@+id/menu_width"
           android:title="Width"
           android:icon="@drawable/line"
           android:showAsAction="always"
           android:visible="true"
           android:enabled="true" />
-    <item android:id="@+id/menu_move"
+    <!--item android:id="@+id/menu_move"
           android:title="Move"
         android:icon="@android:drawable/ic_menu_set_as"
           android:showAsAction="always"
           android:visible="true"
-          android:enabled="true" />
+          android:enabled="true" /-->
     <item android:id="@+id/menu_color"
           android:title="Color"
         android:icon="@drawable/rainbow"
           android:showAsAction="always"
           android:visible="true"
           android:enabled="true" />
-    <item android:id="@+id/menu_delete"
+    <!--item android:id="@+id/menu_delete"
           android:icon="@android:drawable/ic_menu_delete"
           android:title="Delete"
           android:showAsAction="always"
           android:visible="true"
-          android:enabled="true" />
+          android:enabled="true" /-->
 
     <item android:id="@+id/menu_undo"
           android:title="Undo"

@@ -31,7 +31,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RadioGroup;
 import dk.eightyplus.Painter.action.State;
 import dk.eightyplus.Painter.component.Component;
 import dk.eightyplus.Painter.dialog.ColorPickerDialog;
@@ -64,48 +63,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     view = new DrawingView(getApplicationContext(), this);
     drawableArea.addView(view);
 
-    getActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-    getActionBar().setCustomView(R.layout.action_bar_layout);
-
-    final RadioGroup radioGroup = (RadioGroup) getActionBar().getCustomView().findViewById(R.id.action_bar_toggle_group);
-    radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-      @Override
-      public void onCheckedChanged(final RadioGroup group, final int checkedId) {
-        for (int i = 0; i < group.getChildCount(); i++) {
-          final View view = group.getChildAt(i);
-          view.setSelected(view.getId() == checkedId);
-          view.setEnabled(view.getId() != checkedId);
-        }
-      }
-    });
-
-    View editButton = radioGroup.findViewById(R.id.action_bar_edit);
-    editButton.setSelected(true);
-    editButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        radioGroup.check(view.getId());
-        state = State.DrawPath;
-      }
-    });
-
-    View moveButton = radioGroup.findViewById(R.id.action_bar_move);
-    moveButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        radioGroup.check(view.getId());
-        state = State.Move;
-      }
-    });
-
-    View deleteButton = radioGroup.findViewById(R.id.action_bar_delete);
-    deleteButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        radioGroup.check(view.getId());
-        state = State.Delete;
-      }
-    });
+    setupActionBar();
 
     /*TODO test code
     boolean show = savedInstanceState == null || !savedInstanceState.getBoolean("TESTCODE", false);
@@ -121,6 +79,53 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       polygon.getPath().quadTo(100, 100, 100, 100);
       components.add(composite);
     }*/
+  }
+
+  private void setupActionBar() {
+
+    // TODO API level 11
+
+    getActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+    getActionBar().setCustomView(R.layout.action_bar_layout);
+
+    final View actionBar = getActionBar().getCustomView().findViewById(R.id.action_bar_toggle_group);
+    final View editButton = actionBar.findViewById(R.id.action_bar_edit);
+    final View moveButton = actionBar.findViewById(R.id.action_bar_move);
+    final View deleteButton = actionBar.findViewById(R.id.action_bar_delete);
+
+    editButton.setSelected(true);
+    editButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        editButton.setSelected(true);
+        moveButton.setSelected(false);
+        deleteButton.setSelected(false);
+
+        state = State.DrawPath;
+      }
+    });
+
+    moveButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        editButton.setSelected(false);
+        moveButton.setSelected(true);
+        deleteButton.setSelected(false);
+
+        state = State.Move;
+      }
+    });
+
+    deleteButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        editButton.setSelected(false);
+        moveButton.setSelected(false);
+        deleteButton.setSelected(true);
+
+        state = State.Delete;
+      }
+    });
   }
 
   @Override

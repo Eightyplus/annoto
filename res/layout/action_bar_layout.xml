@@ -1,29 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/action_bar_toggle_group"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
-    <Button android:id="@+id/action_bar_edit"
-        android:drawableStart="@android:drawable/ic_menu_edit"
+  <RelativeLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_margin="5dp"
+      >
+    <Button
+        android:id="@+id/action_bar_edit"
         android:background="@drawable/action_bar_toggle_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/icon_edit"
+        android:layout_alignBottom="@+id/icon_edit"
+        android:layout_alignLeft="@+id/icon_edit"
+        android:layout_alignRight="@+id/icon_edit"
         />
-    <Button android:id="@+id/action_bar_move"
-        android:drawableStart="@android:drawable/ic_menu_more"
-        android:background="@drawable/action_bar_toggle_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="1dp"
-        android:layout_marginRight="1dp"
-        />
-  <Button android:id="@+id/action_bar_delete"
-        android:drawableStart="@android:drawable/ic_menu_delete"
-        android:background="@drawable/action_bar_toggle_button"
+    <ImageView android:id="@id/icon_edit"
+        android:padding="5dp"
+        android:src="@android:drawable/ic_menu_edit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         />
-</RadioGroup>
+  </RelativeLayout>
+
+  <RelativeLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_margin="5dp"
+      >
+    <Button
+        android:id="@+id/action_bar_move"
+        android:background="@drawable/action_bar_toggle_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/menu_move"
+        android:layout_alignBottom="@+id/menu_move"
+        android:layout_alignLeft="@+id/menu_move"
+        android:layout_alignRight="@+id/menu_move"
+        />
+    <ImageView android:id="@id/menu_move"
+        android:padding="5dp"
+        android:src="@android:drawable/ic_menu_more"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+  </RelativeLayout>
+
+
+  <RelativeLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_margin="5dp"
+      >
+    <Button
+        android:id="@+id/action_bar_delete"
+        android:background="@drawable/action_bar_toggle_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/icon_delete"
+        android:layout_alignBottom="@+id/icon_delete"
+        android:layout_alignLeft="@+id/icon_delete"
+        android:layout_alignRight="@+id/icon_delete"
+        />
+    <ImageView android:id="@id/icon_delete"
+        android:padding="5dp"
+        android:src="@android:drawable/ic_menu_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+  </RelativeLayout>
+</LinearLayout>
