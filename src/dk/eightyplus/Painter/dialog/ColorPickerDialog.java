@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package dk.eightyplus.Painter;
+package dk.eightyplus.Painter.dialog;
 
 import android.os.Bundle;
 import android.app.Dialog;

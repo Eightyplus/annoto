@@ -1,4 +1,4 @@
-package dk.eightyplus.Painter;
+package dk.eightyplus.Painter.component;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -18,11 +18,11 @@ public abstract class Component implements Serializable {
   public abstract float centerDist(float x, float y);
   public abstract RectF getBounds();
 
-  void setColor(int color) {
+  public void setColor(int color) {
     this.color = color;
   }
 
-  void setStrokeWidth(float width) {
+  public void setStrokeWidth(float width) {
     this.width = width;
   }
 

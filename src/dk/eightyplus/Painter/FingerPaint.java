@@ -21,19 +21,26 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import dk.eightyplus.Painter.action.State;
+import dk.eightyplus.Painter.component.Component;
+import dk.eightyplus.Painter.dialog.ColorPickerDialog;
+import dk.eightyplus.Painter.fragment.SliderFragment;
+import dk.eightyplus.Painter.view.DrawingView;
+import dk.eightyplus.Painter.view.MoveView;
 
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.OnColorChangedListener, Callback {
+public class FingerPaint extends FragmentActivity implements ColorPickerDialog.OnColorChangedListener, Callback {
 
   private static final String TAG = FingerPaint.class.toString();
   private DrawingView view;
@@ -149,7 +156,7 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
       menuWidth.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem item) {
-          SliderFragment sliderFragment = new SliderFragment();
+          SliderFragment sliderFragment = new SliderFragment(FingerPaint.this);
 
           FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
           transaction.replace(R.id.configuration, sliderFragment, "SLIDER");
@@ -286,6 +293,11 @@ public class FingerPaint extends GraphicsActivity implements ColorPickerDialog.O
     moveView = new MoveView(getApplicationContext(), moveComponent, FingerPaint.this);
     layout.addView(moveView);
     view.redraw();
+  }
+
+  @Override
+  public void setStrokeWidth(int width) {
+    view.setStrokeWidth(width);
   }
 
   @Override

@@ -1,10 +1,15 @@
-package dk.eightyplus.Painter;
+package dk.eightyplus.Painter.view;
 
 import android.content.Context;
 import android.graphics.*;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import dk.eightyplus.Painter.Callback;
+import dk.eightyplus.Painter.action.State;
+import dk.eightyplus.Painter.component.Component;
+import dk.eightyplus.Painter.component.Polygon;
+import dk.eightyplus.Painter.action.Undo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +29,13 @@ public class DrawingView extends View {
 
   private Bitmap mBitmap;
   private Canvas mCanvas;
-  private Polygon    mPath;
+  private Polygon mPath;
   private Paint   mBitmapPaint;
   private int color = 0;
 
   private float mX, mY;
   private static final float TOUCH_TOLERANCE = 4;
+  private int strokeWidth = 12;
 
   public DrawingView(final Context context, Callback callback) {
     super(context);
@@ -37,7 +43,7 @@ public class DrawingView extends View {
     this.callback = callback;
 
     mPath = new Polygon();
-    mPath.setStrokeWidth(12);
+    mPath.setStrokeWidth(strokeWidth);
     mBitmapPaint = new Paint(Paint.DITHER_FLAG);
 
     mPaint = new Paint();
@@ -51,7 +57,7 @@ public class DrawingView extends View {
     setLayerType(LAYER_TYPE_HARDWARE, mPaint); // TODO API level 11
   }
 
-  protected void onRestoreInstanceState(Bundle savedInstanceState) {
+  public void onRestoreInstanceState(Bundle savedInstanceState) {
     int i = 0;
     Component component;
     while ((component = (Component) savedInstanceState.get("COMPONTENT_" + i++)) != null) {
@@ -59,7 +65,7 @@ public class DrawingView extends View {
     }
   }
 
-  protected void onSaveInstanceState(Bundle bundle) {
+  public void onSaveInstanceState(Bundle bundle) {
     for (int i = 0; i < components.size(); i++) {
       Component component = components.get(i);
       bundle.putSerializable("COMPONTENT_" + i, component);
@@ -111,6 +117,7 @@ public class DrawingView extends View {
 
     Component component = new Polygon(mPath);
     components.add(component);
+    component.setStrokeWidth(strokeWidth);
     RectF bounds = component.getBounds();
     undo.add(new Undo(component, State.DrawPath));
 
@@ -289,5 +296,10 @@ public class DrawingView extends View {
 
   public Bitmap getBitmap() {
     return mBitmap;
+  }
+
+  public void setStrokeWidth(int strokeWidth) {
+    mPaint.setStrokeWidth(strokeWidth);
+    this.strokeWidth = strokeWidth;
   }
 }

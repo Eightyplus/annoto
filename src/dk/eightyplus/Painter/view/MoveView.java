@@ -1,10 +1,12 @@
-package dk.eightyplus.Painter;
+package dk.eightyplus.Painter.view;
 
 import android.content.Context;
 import android.graphics.*;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
+import dk.eightyplus.Painter.Callback;
+import dk.eightyplus.Painter.component.Component;
 
 /**
  * MoveView to put a single component into and show moves by user

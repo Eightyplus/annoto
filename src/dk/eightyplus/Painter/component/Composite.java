@@ -1,4 +1,4 @@
-package dk.eightyplus.Painter;
+package dk.eightyplus.Painter.component;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;

@@ -1,6 +1,8 @@
-package dk.eightyplus.Painter;
+package dk.eightyplus.Painter.action;
 
 import android.graphics.RectF;
+import dk.eightyplus.Painter.component.Component;
+
 import java.util.List;
 
 /**
