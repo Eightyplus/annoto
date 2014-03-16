@@ -8,6 +8,12 @@
           android:showAsAction="always"
           android:visible="true"
           android:enabled="true" />
+    <item android:id="@+id/menu_width"
+          android:title="Width"
+          android:icon="@drawable/line"
+          android:showAsAction="always"
+          android:visible="true"
+          android:enabled="true" />
     <item android:id="@+id/menu_move"
           android:title="Move"
           android:showAsAction="always"
@@ -46,10 +52,15 @@
           android:enabled="true" />
     <item android:id="@+id/menu_redraw"
           android:title="Randomize colors"
-          android:showAsAction="ifRoom"
+          android:showAsAction="never"
           android:visible="true"
           android:enabled="true" />
 
+    <item android:id="@+id/menu_redo"
+          android:title="Redo"
+          android:showAsAction="never"
+          android:visible="true"
+          android:enabled="true" />
 
     <group android:id="@+id/hide_all_maybe"
            android:visible="false">

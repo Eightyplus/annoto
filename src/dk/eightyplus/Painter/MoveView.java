@@ -17,13 +17,9 @@ public class MoveView extends View {
   private Paint mBitmapPaint;
   private Paint mPaint;
 
-  private MoveCallBack callBack;
+  private Callback callBack;
 
-  public interface MoveCallBack {
-    public void move(Component component, float dx, float dy);
-  }
-
-  public MoveView(final Context context, final Component component, final MoveCallBack callBack) {
+  public MoveView(final Context context, final Component component, final Callback callBack) {
     super(context);
     this.component = component;
     this.callBack = callBack;
