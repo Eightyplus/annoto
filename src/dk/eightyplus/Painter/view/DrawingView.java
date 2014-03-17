@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import android.view.MotionEvent;
 import android.view.View;
 import dk.eightyplus.Painter.Callback;
+import dk.eightyplus.Painter.utilities.Compatibility;
 import dk.eightyplus.Painter.action.State;
 import dk.eightyplus.Painter.action.Undo;
 import dk.eightyplus.Painter.component.Component;
@@ -65,7 +66,7 @@ public class DrawingView extends View {
     mPaint.setStrokeJoin(Paint.Join.ROUND);
     mPaint.setStrokeCap(Paint.Cap.ROUND);
 
-    setLayerType(LAYER_TYPE_HARDWARE, mPaint); // TODO API level 11
+    Compatibility.get().setHardwareAccelerated(this, mPaint);
   }
 
   public void onRestoreInstanceState(Bundle savedInstanceState) {

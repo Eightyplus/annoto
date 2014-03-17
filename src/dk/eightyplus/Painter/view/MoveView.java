@@ -6,6 +6,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
 import dk.eightyplus.Painter.Callback;
+import dk.eightyplus.Painter.utilities.Compatibility;
 import dk.eightyplus.Painter.component.Component;
 
 /**
@@ -33,7 +34,7 @@ public class MoveView extends View {
     mPaint.setStrokeJoin(Paint.Join.ROUND);
     mPaint.setStrokeCap(Paint.Cap.ROUND);
     mPaint.setStrokeWidth(12);
-    setLayerType(LAYER_TYPE_HARDWARE, mPaint); // TODO API level 11
+    Compatibility.get().setHardwareAccelerated(this, mPaint);
     mBitmapPaint = new Paint(Paint.DITHER_FLAG);
   }
 

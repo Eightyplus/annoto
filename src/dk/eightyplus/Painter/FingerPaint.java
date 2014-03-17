@@ -35,6 +35,7 @@ import dk.eightyplus.Painter.action.State;
 import dk.eightyplus.Painter.component.Component;
 import dk.eightyplus.Painter.dialog.ColorPickerDialog;
 import dk.eightyplus.Painter.fragment.SliderFragment;
+import dk.eightyplus.Painter.utilities.Compatibility;
 import dk.eightyplus.Painter.view.DrawingView;
 import dk.eightyplus.Painter.view.MoveView;
 
@@ -85,50 +86,49 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   }
 
   private void setupActionBar() {
+    if (Compatibility.get().supportActionBar()) {
+      getActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+      getActionBar().setCustomView(R.layout.action_bar_layout);
 
-    // TODO API level 11
+      final View actionBar = getActionBar().getCustomView().findViewById(R.id.action_bar_toggle_group);
+      final View editButton = actionBar.findViewById(R.id.action_bar_edit);
+      final View moveButton = actionBar.findViewById(R.id.action_bar_move);
+      final View deleteButton = actionBar.findViewById(R.id.action_bar_delete);
 
-    getActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-    getActionBar().setCustomView(R.layout.action_bar_layout);
+      editButton.setSelected(true);
+      editButton.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+          editButton.setSelected(true);
+          moveButton.setSelected(false);
+          deleteButton.setSelected(false);
 
-    final View actionBar = getActionBar().getCustomView().findViewById(R.id.action_bar_toggle_group);
-    final View editButton = actionBar.findViewById(R.id.action_bar_edit);
-    final View moveButton = actionBar.findViewById(R.id.action_bar_move);
-    final View deleteButton = actionBar.findViewById(R.id.action_bar_delete);
+          state = State.DrawPath;
+        }
+      });
 
-    editButton.setSelected(true);
-    editButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        editButton.setSelected(true);
-        moveButton.setSelected(false);
-        deleteButton.setSelected(false);
+      moveButton.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+          editButton.setSelected(false);
+          moveButton.setSelected(true);
+          deleteButton.setSelected(false);
 
-        state = State.DrawPath;
-      }
-    });
+          state = State.Move;
+        }
+      });
 
-    moveButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        editButton.setSelected(false);
-        moveButton.setSelected(true);
-        deleteButton.setSelected(false);
+      deleteButton.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+          editButton.setSelected(false);
+          moveButton.setSelected(false);
+          deleteButton.setSelected(true);
 
-        state = State.Move;
-      }
-    });
-
-    deleteButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        editButton.setSelected(false);
-        moveButton.setSelected(false);
-        deleteButton.setSelected(true);
-
-        state = State.Delete;
-      }
-    });
+          state = State.Delete;
+        }
+      });
+    }
   }
 
   @Override
