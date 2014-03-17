@@ -39,13 +39,13 @@ public class DrawingView extends View {
 
   private Bitmap mBitmap;
   private Canvas mCanvas;
-  private Polygon mPath;
+  private Polygon polygon;
   private Paint   mBitmapPaint;
   private int color = 0;
 
   private float mX, mY;
   private static final float TOUCH_TOLERANCE = 4;
-  private int strokeWidth = 12;
+  private int strokeWidth = 8;
 
   public DrawingView(final Context context, Callback callback) {
     super(context);
@@ -54,8 +54,8 @@ public class DrawingView extends View {
 
     getSavedStrokeWidth();
 
-    mPath = new Polygon();
-    mPath.setStrokeWidth(strokeWidth);
+    polygon = new Polygon();
+    polygon.setStrokeWidth(strokeWidth);
     mBitmapPaint = new Paint(Paint.DITHER_FLAG);
 
     mPaint = new Paint();
@@ -85,7 +85,7 @@ public class DrawingView extends View {
     }
   }
 
-  public void save(ObjectOutputStream outputStream) throws IOException {
+  public void save(final ObjectOutputStream outputStream) throws IOException {
     outputStream.writeInt(components.size());
 
     for (int i = 0; i < components.size(); i++) {
@@ -94,20 +94,13 @@ public class DrawingView extends View {
     }
   }
 
-  public void load(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
+  public void load(final ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
     components.clear();
-
     int size = inputStream.readInt();
-
     for (int i = 0 ; i < size; i++) {
       Component component = (Component) inputStream.readObject();
       components.add(component);
     }
-
-    /*Component component;
-    while((component = (Component) inputStream.readObject()) != null) {
-      components.add(component);
-    }*/
   }
 
   @Override
@@ -123,16 +116,16 @@ public class DrawingView extends View {
     canvas.drawColor(0xFFAAAAAA);
     canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
 
-    mPath.onDraw(canvas, mPaint);
+    polygon.onDraw(canvas, mPaint);
   }
 
   private void touch_start(float x, float y) {
     int color = this.color != 0 ? this.color : (int) (0xFF000000 + 0x00FFFFFF * Math.random());
     mPaint.setColor(color);
 
-    mPath.setColor(color);
-    mPath.getPath().reset();
-    mPath.getPath().moveTo(x, y);
+    polygon.setColor(color);
+    polygon.getPath().reset();
+    polygon.getPath().moveTo(x, y);
     mX = x;
     mY = y;
   }
@@ -141,39 +134,24 @@ public class DrawingView extends View {
     float dx = Math.abs(x - mX);
     float dy = Math.abs(y - mY);
     if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-      mPath.getPath().quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
+      polygon.getPath().quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
       mX = x;
       mY = y;
     }
   }
 
   private void touch_up() {
-    mPath.getPath().lineTo(mX, mY);
-    // commit the path to our offscreen
-    mPath.onDraw(mCanvas, mPaint);
-    // kill this so we don't double draw
+    polygon.getPath().lineTo(mX, mY);
+    polygon.onDraw(mCanvas, mPaint);
 
-    Component component = new Polygon(mPath);
-    components.add(component);
-    component.setStrokeWidth(strokeWidth);
-    RectF bounds = component.getBounds();
-    undo.add(new Undo(component, State.DrawPath));
+    components.add(polygon);
+    undo.add(new Undo(polygon, State.DrawPath));
 
-    mPath.getPath().reset();
+    polygon = new Polygon();
+    polygon.setStrokeWidth(strokeWidth);
   }
 
-  private Path getPath(MotionEvent event) {
-    Path path = new Path();
-    int historySize = event.getHistorySize();
-    for (int i = 0; i < historySize; i++) {
-      float historicalX = event.getHistoricalX(i);
-      float historicalY = event.getHistoricalY(i);
-      path.lineTo(historicalX, historicalY);
-    }
-    return path;
-  }
-
-  void clear() {
+  private void clear() {
     int w = mBitmap.getWidth();
     int h = mBitmap.getHeight();
 
@@ -181,7 +159,7 @@ public class DrawingView extends View {
     mCanvas = new Canvas(mBitmap);
   }
 
-  void drawComponent(int color, Component path) {
+  private void drawComponent(int color, final Component path) {
     mPaint.setColor(color);
     path.onDraw(mCanvas, mPaint);
     invalidate();
@@ -338,7 +316,7 @@ public class DrawingView extends View {
 
   public void setStrokeWidth(int strokeWidth) {
     this.strokeWidth = strokeWidth;
-    mPath.setStrokeWidth(strokeWidth);
+    polygon.setStrokeWidth(strokeWidth);
     saveStrokeWidth(strokeWidth);
   }
 

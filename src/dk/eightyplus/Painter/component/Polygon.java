@@ -10,14 +10,14 @@ import android.graphics.RectF;
  */
 public class Polygon extends Component {
 
-  private transient Path path = new Path();
+  private CustomPath path = new CustomPath();
 
   public Polygon() {
     super();
   }
 
   public Polygon(Polygon src) {
-    path = new Path(src.path);
+    path = new CustomPath(src.path);
     color = src.color;
     width = src.width;
   }
@@ -31,16 +31,6 @@ public class Polygon extends Component {
     paint.setColor(color);
     paint.setStrokeWidth(width);
     canvas.drawPath(path, paint);
-  }
-
-  @Override
-  public void setColor(int color) {
-    this.color = color;
-  }
-
-  @Override
-  public void setStrokeWidth(float width) {
-    this.width = width;
   }
 
   @Override
