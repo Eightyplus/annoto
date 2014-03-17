@@ -2,17 +2,24 @@ package dk.eightyplus.Painter.view;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.*;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.MotionEvent;
 import android.view.View;
 import dk.eightyplus.Painter.Callback;
 import dk.eightyplus.Painter.action.State;
+import dk.eightyplus.Painter.action.Undo;
 import dk.eightyplus.Painter.component.Component;
 import dk.eightyplus.Painter.component.Polygon;
-import dk.eightyplus.Painter.action.Undo;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -62,6 +69,7 @@ public class DrawingView extends View {
   }
 
   public void onRestoreInstanceState(Bundle savedInstanceState) {
+    components.clear();
     int i = 0;
     Component component;
     while ((component = (Component) savedInstanceState.get("COMPONTENT_" + i++)) != null) {
@@ -74,6 +82,31 @@ public class DrawingView extends View {
       Component component = components.get(i);
       bundle.putSerializable("COMPONTENT_" + i, component);
     }
+  }
+
+  public void save(ObjectOutputStream outputStream) throws IOException {
+    outputStream.writeInt(components.size());
+
+    for (int i = 0; i < components.size(); i++) {
+      Component component = components.get(i);
+      outputStream.writeObject(component);
+    }
+  }
+
+  public void load(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
+    components.clear();
+
+    int size = inputStream.readInt();
+
+    for (int i = 0 ; i < size; i++) {
+      Component component = (Component) inputStream.readObject();
+      components.add(component);
+    }
+
+    /*Component component;
+    while((component = (Component) inputStream.readObject()) != null) {
+      components.add(component);
+    }*/
   }
 
   @Override

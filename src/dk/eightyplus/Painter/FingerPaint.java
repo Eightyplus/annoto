@@ -40,8 +40,11 @@ import dk.eightyplus.Painter.view.MoveView;
 
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 public class FingerPaint extends FragmentActivity implements ColorPickerDialog.OnColorChangedListener, Callback {
 
@@ -249,9 +252,28 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
         @Override
         public boolean onMenuItemClick(MenuItem item) {
           try {
-            writeToFile(getApplicationContext(), view.getBitmap());
+            //writeToFile(getApplicationContext(), view.getBitmap());
+            writeToFile();
           } catch (IOException e) {
             Log.e(TAG, "IOException", e);
+          }
+          return true;
+        }
+      });
+    }
+
+    MenuItem menuLoad = menu.findItem(R.id.menu_load);
+    if (menuLoad != null) {
+      menuLoad.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          try {
+            //writeToFile(getApplicationContext(), view.getBitmap());
+            loadFromFile();
+          } catch (IOException e) {
+            Log.e(TAG, "IOException", e);
+          } catch (ClassNotFoundException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
           }
           return true;
         }
@@ -336,11 +358,34 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
 
   @Override
   public void onBackPressed() {
-    //if (!undo()) { // TODO undo?
-      super.onBackPressed();
+    //if (!undo()) {
+    super.onBackPressed();
     //}
   }
 
+  private void writeToFile() throws IOException {
+    File file = getFilename(getApplicationContext(), "file.note");
+
+    ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
+    view.save(out);
+    out.flush();
+    out.close();
+  }
+
+  private void loadFromFile() throws IOException, ClassNotFoundException {
+    File file = getFilename(getApplicationContext(), "file.note");
+
+    ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
+
+    view.load(in);
+    in.close();
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        view.redraw();
+      }
+    });
+  }
 
   private static File writeToFile(final Context context, final Bitmap bitmap) throws IOException {
     File file

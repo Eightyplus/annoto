@@ -52,6 +52,11 @@
           android:showAsAction="ifRoom"
           android:visible="true"
           android:enabled="true" />
+  <item android:id="@+id/menu_load"
+      android:title="Load"
+      android:showAsAction="ifRoom"
+      android:visible="true"
+      android:enabled="true" />
     <item android:id="@+id/menu_redraw"
           android:title="Randomize colors"
           android:showAsAction="never"
