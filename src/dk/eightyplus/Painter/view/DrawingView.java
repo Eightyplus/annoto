@@ -5,18 +5,17 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.MotionEvent;
 import android.view.View;
 import dk.eightyplus.Painter.Callback;
-import dk.eightyplus.Painter.utilities.Compatibility;
 import dk.eightyplus.Painter.action.State;
 import dk.eightyplus.Painter.action.Undo;
 import dk.eightyplus.Painter.component.Component;
 import dk.eightyplus.Painter.component.Polygon;
+import dk.eightyplus.Painter.utilities.Compatibility;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -45,7 +44,7 @@ public class DrawingView extends View {
 
   private float mX, mY;
   private static final float TOUCH_TOLERANCE = 4;
-  private int strokeWidth = 8;
+  private int strokeWidth = 6;
 
   public DrawingView(final Context context, Callback callback) {
     super(context);
