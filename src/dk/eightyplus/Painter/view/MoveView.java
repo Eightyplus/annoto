@@ -47,7 +47,9 @@ public class MoveView extends View {
   @Override
   protected void onDraw(Canvas canvas) {
     canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
+    component.setVisible(true);
     component.onDraw(canvas, mPaint);
+    component.setVisible(false);
 
     RectF bounds = component.getBounds();
 

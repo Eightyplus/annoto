@@ -27,15 +27,17 @@ public class Text extends Component {
 
   @Override
   public void onDraw(Canvas canvas, Paint paint) {
-    paint.setColor(color);
-    paint.setStrokeWidth(1.0f);
+    if (visible) {
+      paint.setColor(color);
+      paint.setStrokeWidth(1.0f);
 
-    paint.setTextAlign(Paint.Align.LEFT);
-    paint.setTypeface(typeFace);
-    paint.setTextSize(fontSize);
-    paint.setAntiAlias(true);
+      paint.setTextAlign(Paint.Align.LEFT);
+      paint.setTypeface(typeFace);
+      paint.setTextSize(fontSize);
+      paint.setAntiAlias(true);
 
-    canvas.drawText(text, x, y, paint);
+      canvas.drawText(text, x, y, paint);
+    }
   }
 
   public void setText(String text) {

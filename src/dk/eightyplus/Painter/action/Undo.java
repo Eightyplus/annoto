@@ -2,8 +2,7 @@ package dk.eightyplus.Painter.action;
 
 import android.graphics.RectF;
 import dk.eightyplus.Painter.component.Component;
-
-import java.util.List;
+import dk.eightyplus.Painter.view.ComponentList;
 
 /**
  * Undo (Redo) class contains the reverse action of an user interaction, so these can be reversed.
@@ -45,7 +44,7 @@ public class Undo {
    * @param components list of components
    * @return true if undo was successful
    */
-  public boolean undo(final List<Component> components) {
+  public boolean undo(final ComponentList components) {
     switch (undoAction) {
       default:
       case Delete:
@@ -72,7 +71,7 @@ public class Undo {
    * @param components list of components
    * @return true if redo was successful
    */
-  public boolean redo(final List<Component> components) {
+  public boolean redo(final ComponentList components) {
     switch (undoAction) {
       default:
       case Delete:

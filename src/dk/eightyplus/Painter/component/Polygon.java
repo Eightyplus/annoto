@@ -29,9 +29,11 @@ public class Polygon extends Component {
 
   @Override
   public void onDraw(Canvas canvas, Paint paint) {
-    paint.setColor(color);
-    paint.setStrokeWidth(width);
-    canvas.drawPath(path, paint);
+    if (visible) {
+      paint.setColor(color);
+      paint.setStrokeWidth(width);
+      canvas.drawPath(path, paint);
+    }
   }
 
   @Override

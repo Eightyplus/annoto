@@ -14,7 +14,7 @@ public class Composite extends Component {
   protected List<Component> componentList;
 
   public void onDraw(Canvas canvas, Paint paint) {
-    if (componentList != null) {
+    if (visible && componentList != null) {
       for (Component component : componentList) {
         component.onDraw(canvas, paint);
       }

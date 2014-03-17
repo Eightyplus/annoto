@@ -12,6 +12,7 @@ import java.io.Serializable;
 public abstract class Component implements Serializable {
   protected int color = 0xFFFFFF00;
   protected float width = 6.0f;
+  protected boolean visible = true;
 
   public abstract void onDraw(Canvas canvas, Paint paint);
   public abstract void move(float dx, float dy);
@@ -28,6 +29,10 @@ public abstract class Component implements Serializable {
 
   public int getColor() {
     return color;
+  }
+
+  public void setVisible(boolean visible) {
+    this.visible = visible;
   }
 
   protected float calculateCenterDistance(float x, float y, RectF bounds) {

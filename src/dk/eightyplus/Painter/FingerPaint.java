@@ -29,9 +29,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import dk.eightyplus.Painter.action.State;
+import dk.eightyplus.Painter.action.Undo;
 import dk.eightyplus.Painter.component.Component;
 import dk.eightyplus.Painter.dialog.ColorPickerDialog;
 import dk.eightyplus.Painter.fragment.SliderFragment;
@@ -46,14 +48,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Stack;
 
 public class FingerPaint extends FragmentActivity implements ColorPickerDialog.OnColorChangedListener, Callback {
 
   private static final String TAG = FingerPaint.class.toString();
-  private DrawingView view;
 
-  private MoveView moveView;
+  private final Stack<Undo> undo = new Stack<Undo>();
+  private final Stack<Undo> redo = new Stack<Undo>();
+
   private ViewGroup layout;
+  private DrawingView view;
+  private MoveView moveView;
 
   private State state = State.DrawPath;
 
@@ -65,7 +71,10 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     layout = (ViewGroup) findViewById(R.id.main);
     ViewGroup drawableArea = (ViewGroup) findViewById(R.id.drawable_area);
     view = new DrawingView(getApplicationContext(), this);
+
     drawableArea.addView(view);
+    TouchView touchView = new TouchView(getApplicationContext());
+    drawableArea.addView(touchView);
 
     setupActionBar();
 
@@ -83,6 +92,53 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       polygon.getPath().quadTo(100, 100, 100, 100);
       components.add(composite);
     }*/
+  }
+
+  /**
+   * TouchView delegates user interaction to correct views from user toggles
+   */
+  public class TouchView extends View  {
+    public TouchView(Context context) {
+      super(context);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+
+
+      switch (getState()) {
+        case Delete: {
+          if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            float x = event.getX();
+            float y = event.getY();
+            Component deleteComponent = view.findComponent(x, y);
+
+            if (deleteComponent != null) {
+              view.remove(deleteComponent);
+              add(new Undo(deleteComponent, State.Delete));
+              view.redraw();
+            }
+          }
+          return true;
+        }
+        case Move: {
+          if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            float x = event.getX();
+            float y = event.getY();
+            Component moveComponent = view.findComponent(x, y);
+
+            if (moveComponent != null) {
+              moveComponent.setVisible(false);
+              startMove(moveComponent);
+            }
+          }
+          return true;
+        }
+        case DrawPath:
+        default:
+            return view.onTouchEvent(event);
+          }
+      }
   }
 
   private void setupActionBar() {
@@ -163,6 +219,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   public void move(Component component, float dx, float dy) {
     layout.removeView(moveView);
     moveView = null;
+    component.setVisible(true);
     view.move(component, dx, dy);
   }
 
@@ -192,7 +249,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
           FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
           if (fragment == null) {
             SliderFragment sliderFragment = new SliderFragment(FingerPaint.this, view.getStrokeWidth());
-            transaction.replace(R.id.configuration, sliderFragment, Tags.FRAGMENT_SLIDER);
+            transaction.replace(R.id.configuration_top, sliderFragment, Tags.FRAGMENT_SLIDER);
           } else {
             transaction.remove(fragment);
           }
@@ -307,7 +364,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       menuUndo.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem item) {
-          view.undo();
+          undo();
           return true;
         }
       });
@@ -318,7 +375,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       menuRedo.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem item) {
-          view.redo();
+          redo();
           return true;
         }
       });
@@ -357,10 +414,32 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   }
 
   @Override
-  public void onBackPressed() {
-    //if (!undo()) {
-    super.onBackPressed();
-    //}
+  public void add(Undo undo) {
+    this.undo.add(undo);
+  }
+
+  public boolean undo() {
+    if (undo.size() > 0) {
+      Undo undo = this.undo.pop();
+      if (undo.undo(view)) {
+        redo.add(undo);
+        view.redraw();
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public boolean redo() {
+    if (redo.size() > 0) {
+      Undo redo = this.redo.pop();
+      if (redo.redo(view)) {
+        undo.add(redo);
+        view.redraw();
+        return true;
+      }
+    }
+    return false;
   }
 
   private void writeToFile() throws IOException {

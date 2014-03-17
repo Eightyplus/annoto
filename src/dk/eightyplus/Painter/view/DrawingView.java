@@ -21,17 +21,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
 
 /**
  *
  */
-public class DrawingView extends View {
+public class DrawingView extends View implements ComponentList {
 
-  private final List<Component> components = new ArrayList<Component>();
-  private final Stack<Undo> undo = new Stack<Undo>();
-  private final Stack<Undo> redo = new Stack<Undo>();
+  private final ArrayList<Component> components = new ArrayList<Component>();
 
   private final Callback callback;
   private Paint mPaint;
@@ -144,7 +140,7 @@ public class DrawingView extends View {
     polygon.onDraw(mCanvas, mPaint);
 
     components.add(polygon);
-    undo.add(new Undo(polygon, State.DrawPath));
+    callback.add(new Undo(polygon, State.DrawPath));
 
     polygon = new Polygon();
     polygon.setStrokeWidth(strokeWidth);
@@ -169,54 +165,33 @@ public class DrawingView extends View {
     float x = event.getX();
     float y = event.getY();
 
-    switch (callback.getState()) {
-      case Delete: {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-          Component deleteComponent = findComponent(x, y);
-
-          if (deleteComponent != null) {
-            components.remove(deleteComponent);
-            undo.add(new Undo(deleteComponent, State.Delete));
-            redraw();
-          }
-        }
-      }
-
-      break;
-      case Move: {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-          Component moveComponent = findComponent(x, y);
-
-          if (moveComponent != null) {
-            components.remove(moveComponent);
-            redraw();
-            callback.startMove(moveComponent);
-          }
-        }
-      }
-      break;
-      case DrawPath:
-      default:
-
-        switch (event.getAction()) {
-          case MotionEvent.ACTION_DOWN:
-            touch_start(x, y);
-            invalidate();
-            break;
-          case MotionEvent.ACTION_MOVE:
-            touch_move(x, y);
-            invalidate();
-            break;
-          case MotionEvent.ACTION_UP:
-            touch_up();
-            invalidate();
-            break;
-        }
+    switch (event.getAction()) {
+      case MotionEvent.ACTION_DOWN:
+        touch_start(x, y);
+        invalidate();
+        break;
+      case MotionEvent.ACTION_MOVE:
+        touch_move(x, y);
+        invalidate();
+        break;
+      case MotionEvent.ACTION_UP:
+        touch_up();
+        invalidate();
+        break;
     }
+
     return true;
   }
 
-  private Component findComponent(float x, float y) {
+  public void add(Component component) {
+    components.add(component);
+  }
+
+  public void remove(Component component) {
+    components.remove(component);
+  }
+
+  public Component findComponent(float x, float y) {
     Component moveComponent = null;
     float minimumDistance = Float.MAX_VALUE;
     for (Component component : components) {
@@ -235,30 +210,6 @@ public class DrawingView extends View {
 
   public void setColor(int color) {
     this.color = color;
-  }
-
-  public boolean undo() {
-    if (undo.size() > 0) {
-      Undo undo = this.undo.pop();
-      if (undo.undo(components)) {
-        redo.add(undo);
-        redraw();
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public boolean redo() {
-    if (redo.size() > 0) {
-      Undo redo = this.redo.pop();
-      if (redo.redo(components)) {
-        undo.add(redo);
-        redraw();
-        return true;
-      }
-    }
-    return false;
   }
 
   public void redraw() {
@@ -303,9 +254,9 @@ public class DrawingView extends View {
 
   public void move(Component component, float dx, float dy) {
     RectF bounds = component.getBounds();
-    undo.add(new Undo(component, bounds.left, bounds.top, State.Move));
+    callback.add(new Undo(component, bounds.left, bounds.top, State.Move));
     component.move(dx, dy);
-    components.add(component);
+    //components.add(component);
     redraw();
   }
 
