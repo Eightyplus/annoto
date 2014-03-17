@@ -6,7 +6,7 @@ import android.graphics.Path;
 import android.graphics.RectF;
 
 /**
- *
+ * Polygon class to be used drawing polygon objects: paths, lines, etc.
  */
 public class Polygon extends Component {
 
@@ -16,6 +16,7 @@ public class Polygon extends Component {
     super();
   }
 
+  @SuppressWarnings("unused")
   public Polygon(Polygon src) {
     path = new CustomPath(src.path);
     color = src.color;

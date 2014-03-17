@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Composite class to server as drawing interface/component collection for the Composite pattern
  */
 public class Composite extends Component {
   protected List<Component> componentList;

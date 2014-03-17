@@ -1,8 +1,15 @@
 package dk.eightyplus.Painter.component;
 
-import android.graphics.*;
+
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.Typeface;
 
 /**
+ * Text class to give drawing capabilities
  */
 public class Text extends Component {
 

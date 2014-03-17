@@ -2,13 +2,13 @@ package dk.eightyplus.Painter.component;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.RectF;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
+/**
+ * Component drawing class to server as drawing interface for the Composite pattern
+ */
 public abstract class Component implements Serializable {
   protected int color = 0xFFFFFF00;
   protected float width = 6.0f;
