@@ -2,8 +2,11 @@ package dk.eightyplus.Painter.utilities;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -70,6 +73,15 @@ public class Storage {
     bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
     out.close();
     return file;
+  }
+
+  public Bitmap loadFromFile(final Context context) throws IOException {
+    File file = getFilename(context, "image.png");
+    Bitmap bitmap = null;
+    if (file.exists()) {
+      bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+    }
+    return bitmap;
   }
 
   public File getFilename(final Context context, final String filename) {
