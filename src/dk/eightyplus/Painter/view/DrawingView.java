@@ -16,6 +16,7 @@ import dk.eightyplus.Painter.action.Undo;
 import dk.eightyplus.Painter.component.Component;
 import dk.eightyplus.Painter.component.Polygon;
 import dk.eightyplus.Painter.utilities.Compatibility;
+import dk.eightyplus.Painter.utilities.SaveLoad;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -25,7 +26,7 @@ import java.util.ArrayList;
 /**
  *
  */
-public class DrawingView extends View implements ComponentList {
+public class DrawingView extends View implements ComponentList, SaveLoad {
 
   private final ArrayList<Component> components = new ArrayList<Component>();
 

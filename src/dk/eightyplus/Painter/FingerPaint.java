@@ -19,7 +19,6 @@ package dk.eightyplus.Painter;
 import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -38,16 +37,12 @@ import dk.eightyplus.Painter.component.Component;
 import dk.eightyplus.Painter.dialog.ColorPickerDialog;
 import dk.eightyplus.Painter.fragment.SliderFragment;
 import dk.eightyplus.Painter.utilities.Compatibility;
+import dk.eightyplus.Painter.utilities.Storage;
 import dk.eightyplus.Painter.view.DrawingView;
 import dk.eightyplus.Painter.view.MoveView;
 
-import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.Stack;
 
 public class FingerPaint extends FragmentActivity implements ColorPickerDialog.OnColorChangedListener, Callback {
@@ -288,7 +283,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
         @Override
         public boolean onMenuItemClick(MenuItem item) {
           try {
-            File file = writeToFile(getApplicationContext(), view.getBitmap());
+            File file = Storage.getStorage(getApplicationContext()).writeToFile(getApplicationContext(), view.getBitmap());
             final Intent sharingIntent = new Intent(Intent.ACTION_SEND);
             sharingIntent.setType("image/png");
             sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Subject");
@@ -310,7 +305,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
         public boolean onMenuItemClick(MenuItem item) {
           try {
             //writeToFile(getApplicationContext(), view.getBitmap());
-            writeToFile();
+            Storage.getStorage(getApplicationContext()).writeToFile(view);
           } catch (IOException e) {
             Log.e(TAG, "IOException", e);
           }
@@ -326,11 +321,17 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
         public boolean onMenuItemClick(MenuItem item) {
           try {
             //writeToFile(getApplicationContext(), view.getBitmap());
-            loadFromFile();
+            Storage.getStorage(getApplicationContext()).loadFromFile(view);
+            runOnUiThread(new Runnable() {
+              @Override
+              public void run() {
+                view.redraw();
+              }
+            });
           } catch (IOException e) {
             Log.e(TAG, "IOException", e);
           } catch (ClassNotFoundException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            Log.e(TAG, "ClassNotFoundException", e);
           }
           return true;
         }
@@ -442,45 +443,4 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     return false;
   }
 
-  private void writeToFile() throws IOException {
-    File file = getFilename(getApplicationContext(), "file.note");
-
-    ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
-    view.save(out);
-    out.flush();
-    out.close();
-  }
-
-  private void loadFromFile() throws IOException, ClassNotFoundException {
-    File file = getFilename(getApplicationContext(), "file.note");
-
-    ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
-
-    view.load(in);
-    in.close();
-    runOnUiThread(new Runnable() {
-      @Override
-      public void run() {
-        view.redraw();
-      }
-    });
-  }
-
-  private static File writeToFile(final Context context, final Bitmap bitmap) throws IOException {
-    File file
-        = getFilename(context, "image.png");
-    //  = File.createTempFile("image", ".png", context.getCacheDir());
-    DataOutputStream out = new DataOutputStream(new FileOutputStream(file));
-    bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
-    out.close();
-    return file;
-  }
-
-  public static File getFilename(final Context context, final String filename) {
-    File applicationPath = context.getExternalFilesDir(null);
-    if (filename == null) {
-      return new File(applicationPath,  File.separator);
-    }
-    return new File(applicationPath, File.separator + filename);
-  }
 }
