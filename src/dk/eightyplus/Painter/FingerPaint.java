@@ -86,7 +86,25 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       composite.add(polygon);
       polygon.getPath().quadTo(100, 100, 100, 100);
       components.add(composite);
-    }*/
+    }
+
+    List<Integer> drawables = Storage.getStorage(getApplicationContext()).getDrawableResources();
+    for (int i = 50; i < 100; i+=10) {
+      int resource = drawables.get(i); // android.R.drawable.star_big_off;
+
+      Bitmap bitmap = BitmapFactory.decodeResource(getResources(), resource);
+      view.add(new Picture(bitmap));
+    }
+
+    try {
+      Bitmap bitmap = Storage.getStorage(getApplicationContext()).loadFromFile(getApplicationContext());
+      if (bitmap !=null) {
+        view.add(new Picture(bitmap));
+      }
+    } catch (IOException e) {
+
+    }
+    */
   }
 
   /**
