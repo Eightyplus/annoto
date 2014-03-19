@@ -10,7 +10,10 @@ import java.util.List;
 /**
  * Composite class to server as drawing interface/component collection for the Composite pattern
  */
+@SuppressWarnings("unused")
 public class Composite extends Component {
+  private static final long serialVersionUID = 1224616367662001461L;
+
   protected List<Component> componentList;
 
   public void onDraw(Canvas canvas, Paint paint) {

@@ -15,7 +15,9 @@ import java.io.ObjectOutputStream;
 /**
  * Picture component in the Composite pattern
  */
+@SuppressWarnings("unused")
 public class Picture extends Component {
+  private static final long serialVersionUID = 9170000361129876541L;
 
   private float x = 0.0f;
   private float y = 0.0f;

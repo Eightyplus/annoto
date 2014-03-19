@@ -9,6 +9,7 @@ import android.graphics.RectF;
  * Polygon class to be used drawing polygon objects: paths, lines, etc.
  */
 public class Polygon extends Component {
+  private static final long serialVersionUID = -1111222344567787467L;
 
   private CustomPath path = new CustomPath();
 

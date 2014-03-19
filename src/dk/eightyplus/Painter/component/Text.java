@@ -13,13 +13,15 @@ import android.graphics.Typeface;
  */
 public class Text extends Component {
 
-  private String text = "This is a test text!";
+  private static final long serialVersionUID = 4256622835983660086L;
 
+  private String text;
   private float x = 10;
   private float y = 30;
   private int fontSize = 40;
   private transient Typeface typeFace = Typeface.create("HelveticaNeue", Typeface.NORMAL);
 
+  @SuppressWarnings("unused")
   public Text() {}
   public Text(String text) {
     this.text = text;
