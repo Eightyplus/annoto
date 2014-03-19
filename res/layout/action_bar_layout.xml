@@ -76,4 +76,28 @@
         android:layout_height="wrap_content"
         />
   </RelativeLayout>
+
+
+  <RelativeLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_margin="5dp"
+      >
+    <Button
+        android:id="@+id/action_bar_text"
+        android:background="@drawable/action_bar_toggle_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/icon_text"
+        android:layout_alignBottom="@+id/icon_text"
+        android:layout_alignLeft="@+id/icon_text"
+        android:layout_alignRight="@+id/icon_text"
+        />
+    <ImageView android:id="@id/icon_text"
+        android:padding="5dp"
+        android:src="@android:drawable/ic_menu_sort_alphabetically"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
+  </RelativeLayout>
 </LinearLayout>

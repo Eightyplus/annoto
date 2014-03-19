@@ -31,10 +31,12 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import dk.eightyplus.Painter.action.State;
 import dk.eightyplus.Painter.action.Undo;
 import dk.eightyplus.Painter.component.Component;
 import dk.eightyplus.Painter.dialog.ColorPickerDialog;
+import dk.eightyplus.Painter.fragment.EditorFragment;
 import dk.eightyplus.Painter.fragment.SliderFragment;
 import dk.eightyplus.Painter.utilities.Compatibility;
 import dk.eightyplus.Painter.utilities.Storage;
@@ -55,6 +57,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   private ViewGroup layout;
   private DrawingView view;
   private MoveView moveView;
+  private EditText editText;
 
   private State state = State.DrawPath;
 
@@ -147,11 +150,64 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
           }
           return true;
         }
+        case WriteText:
+          if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (isEditorVisibile()) {
+              hideEditor();
+            } else {
+              float x = event.getX();
+              float y = event.getY();
+              Component editComponent = view.findComponent(x, y);
+
+              showEditor(editComponent, event.getX(), event.getY());
+            }
+          }
+          return true;
         case DrawPath:
         default:
             return view.onTouchEvent(event);
           }
       }
+  }
+
+
+  private boolean isEditorVisibile() {
+    return getSupportFragmentManager().findFragmentByTag(Tags.FRAGMENT_EDITOR) != null;
+  }
+
+  private void showEditor (Component component, float x, float y) {
+    Fragment fragment = getSupportFragmentManager().findFragmentByTag(Tags.FRAGMENT_EDITOR);
+
+    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+    if (fragment == null) {
+      EditorFragment editorFragment = new EditorFragment(FingerPaint.this, component, x, y);
+      transaction.replace(R.id.configuration_top, editorFragment, Tags.FRAGMENT_EDITOR);
+    } else {
+      transaction.remove(fragment);
+    }
+
+    transaction.commit();
+  }
+
+  private void hideEditor() {
+    Fragment fragment = getSupportFragmentManager().findFragmentByTag(Tags.FRAGMENT_EDITOR);
+
+    if (fragment != null) {
+      Component component = ((EditorFragment)fragment).getText();
+      view.add(component);
+      view.redraw();
+    }
+    if (fragment != null) {
+      FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+      transaction.remove(fragment);
+      transaction.commit();
+    }
+  }
+
+  @Override
+  public void textEditDone() {
+
+    hideEditor();
   }
 
   private void setupActionBar() {
@@ -163,6 +219,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       final View editButton = actionBar.findViewById(R.id.action_bar_edit);
       final View moveButton = actionBar.findViewById(R.id.action_bar_move);
       final View deleteButton = actionBar.findViewById(R.id.action_bar_delete);
+      final View textButton = actionBar.findViewById(R.id.action_bar_text);
 
       editButton.setSelected(true);
       editButton.setOnClickListener(new View.OnClickListener() {
@@ -171,6 +228,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
           editButton.setSelected(true);
           moveButton.setSelected(false);
           deleteButton.setSelected(false);
+          textButton.setSelected(false);
 
           state = State.DrawPath;
         }
@@ -182,6 +240,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
           editButton.setSelected(false);
           moveButton.setSelected(true);
           deleteButton.setSelected(false);
+          textButton.setSelected(false);
 
           state = State.Move;
         }
@@ -193,8 +252,21 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
           editButton.setSelected(false);
           moveButton.setSelected(false);
           deleteButton.setSelected(true);
+          textButton.setSelected(false);
 
           state = State.Delete;
+        }
+      });
+
+      textButton.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+          editButton.setSelected(false);
+          moveButton.setSelected(false);
+          deleteButton.setSelected(false);
+          textButton.setSelected(true);
+
+          state = State.WriteText;
         }
       });
     }

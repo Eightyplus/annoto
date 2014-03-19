@@ -3,11 +3,14 @@ package dk.eightyplus.Painter;
 import dk.eightyplus.Painter.action.State;
 import dk.eightyplus.Painter.action.Undo;
 import dk.eightyplus.Painter.component.Component;
+import dk.eightyplus.Painter.component.Text;
 
 /**
  *
  */
 public interface Callback {
+
+  public void textEditDone();
 
   public void move(Component component, float dx, float dy);
 

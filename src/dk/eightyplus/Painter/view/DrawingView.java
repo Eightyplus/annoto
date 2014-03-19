@@ -185,7 +185,9 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
   }
 
   public void add(Component component) {
-    components.add(component);
+    if (component != null && !components.contains(component)) {
+      components.add(component);
+    }
   }
 
   public void remove(Component component) {
@@ -257,7 +259,10 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
     RectF bounds = component.getBounds();
     callback.add(new Undo(component, bounds.left, bounds.top, State.Move));
     component.move(dx, dy);
-    //components.add(component);
+
+    if (!components.contains(component)) {
+      components.add(component);
+    }
     redraw();
   }
 

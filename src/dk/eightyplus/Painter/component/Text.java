@@ -34,7 +34,8 @@ public class Text extends Component {
       paint.setStrokeWidth(1.0f);
 
       paint.setTextAlign(Paint.Align.LEFT);
-      paint.setTypeface(typeFace);
+      //paint.setTypeface(typeFace);
+      paint.setStyle(Paint.Style.FILL);
       paint.setTextSize(fontSize);
       paint.setAntiAlias(true);
 
@@ -44,6 +45,10 @@ public class Text extends Component {
 
   public void setText(String text) {
     this.text = text;
+  }
+
+  public String getText() {
+    return text;
   }
 
   @Override

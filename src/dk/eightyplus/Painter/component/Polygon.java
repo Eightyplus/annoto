@@ -32,6 +32,7 @@ public class Polygon extends Component {
   public void onDraw(Canvas canvas, Paint paint) {
     if (visible) {
       paint.setColor(color);
+      paint.setStyle(Paint.Style.STROKE);
       paint.setStrokeWidth(width);
       canvas.drawPath(path, paint);
     }

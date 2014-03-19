@@ -30,7 +30,6 @@ public class MoveView extends View {
     mPaint = new Paint();
     mPaint.setAntiAlias(true);
     mPaint.setDither(true);
-    mPaint.setStyle(Paint.Style.STROKE);
     mPaint.setStrokeJoin(Paint.Join.ROUND);
     mPaint.setStrokeCap(Paint.Cap.ROUND);
     mPaint.setStrokeWidth(12);
@@ -55,6 +54,7 @@ public class MoveView extends View {
 
     mPaint.setColor(0xFF000000);
     mPaint.setStrokeWidth(1.0f);
+    mPaint.setStyle(Paint.Style.STROKE);
     mPaint.setPathEffect(new DashPathEffect(new float[] {10,20}, 0));
     canvas.drawRoundRect(bounds, 5.0f, 5.0f, mPaint);
     mPaint.setPathEffect(null);
