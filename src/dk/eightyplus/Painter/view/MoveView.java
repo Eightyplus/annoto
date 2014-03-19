@@ -44,29 +44,38 @@ public class MoveView extends View {
     Compatibility.get().setHardwareAccelerated(this, mPaint);
     mBitmapPaint = new Paint(Paint.DITHER_FLAG);
 
-    createBitmap();
+    setupSize();
   }
 
   public void destroy() {
-    callBack = null;
-    mBitmap.recycle();
+    if (mBitmap != null) {
+      mBitmap.recycle();
+    }
     mBitmap = null;
+    callBack = null;
     mPaint = null;
     component = null;
   }
 
-  private void createBitmap() {
+  private void setupSize() {
     RectF bounds = component.getBounds();
     xOffset = bounds.left - margin;
     yOffset = bounds.top - margin;
 
     int width = (int) (bounds.width() + 2 * margin);
     int height = (int) (bounds.height() + 2 * margin);
+    setViewBounds(width, height);
+    createBitmap(width, height);
+  }
+
+  private void setViewBounds(int width, int height) {
     RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(width, height);
     layoutParams.leftMargin = (int) xOffset;
     layoutParams.topMargin = (int) yOffset;
-
     setLayoutParams(layoutParams);
+  }
+
+  private void createBitmap(int width, int height) {
     mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
   }
 
