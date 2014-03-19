@@ -10,7 +10,7 @@ import java.io.Serializable;
  * Component drawing class to server as drawing interface for the Composite pattern
  */
 public abstract class Component implements Serializable {
-  protected int color = 0xFFFFFF00;
+  protected int color = 0xFFFFFFFF;
   protected float width = 6.0f;
   protected boolean visible = true;
 
