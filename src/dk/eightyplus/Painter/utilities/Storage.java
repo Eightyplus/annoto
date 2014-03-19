@@ -47,20 +47,26 @@ public class Storage {
     }
   }
 
-  public void writeToFile(SaveLoad save) throws IOException {
-    File file = getFilename("file.note");
-
+  public void writeToFile(SaveLoad save, String fileName) throws IOException {
+    File file = getFilename(fileName);
     ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
     save.save(out);
     out.flush();
     out.close();
   }
 
-  public void loadFromFile(SaveLoad load) throws IOException, ClassNotFoundException {
-    File file = getFilename("file.note");
+  public void loadFromFile(SaveLoad load, String fileName) throws IOException, ClassNotFoundException {
+    loadFromFile(load, fileName, false);
+  }
 
-    ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
-
+  public void loadFromFile(SaveLoad load, String fileName, boolean isAsset) throws IOException, ClassNotFoundException {
+    ObjectInputStream in;
+    if (isAsset) {
+      in = new ObjectInputStream(context.getAssets().open(fileName));
+    } else {
+      File file = getFilename(fileName);
+      in = new ObjectInputStream(new FileInputStream(file));
+    }
     load.load(in);
     in.close();
   }

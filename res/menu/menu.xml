@@ -69,6 +69,12 @@
       android:visible="true"
       android:enabled="true" />
 
+  <item android:id="@+id/menu_replay"
+      android:title="Demo"
+      android:showAsAction="never"
+      android:visible="true"
+      android:enabled="true" />
+
   <group android:id="@+id/hide_all_maybe"
       android:visible="false">
     <item android:id="@+id/menu_blur"

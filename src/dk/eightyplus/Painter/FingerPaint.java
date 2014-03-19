@@ -121,7 +121,6 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-
       switch (getState()) {
         case Delete: {
           if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -401,7 +400,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
         public boolean onMenuItemClick(MenuItem item) {
           try {
             //writeToFile(getApplicationContext(), view.getBitmap());
-            Storage.getStorage(getApplicationContext()).writeToFile(view);
+            Storage.getStorage(getApplicationContext()).writeToFile(view, "file.note");
           } catch (IOException e) {
             Log.e(TAG, "IOException", e);
           }
@@ -417,7 +416,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
         public boolean onMenuItemClick(MenuItem item) {
           try {
             //writeToFile(getApplicationContext(), view.getBitmap());
-            Storage.getStorage(getApplicationContext()).loadFromFile(view);
+            Storage.getStorage(getApplicationContext()).loadFromFile(view, "file.note");
             runOnUiThread(new Runnable() {
               @Override
               public void run() {
@@ -477,6 +476,31 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
         }
       });
     }
+
+    MenuItem menuReplay = menu.findItem(R.id.menu_replay);
+    if (menuReplay != null) {
+      menuReplay.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          try {
+            //writeToFile(getApplicationContext(), view.getBitmap());
+            Storage.getStorage(getApplicationContext()).loadFromFile(view, "file.note", true);
+            runOnUiThread(new Runnable() {
+              @Override
+              public void run() {
+                view.redraw(100, false);
+              }
+            });
+          } catch (IOException e) {
+            Log.e(TAG, "IOException", e);
+          } catch (ClassNotFoundException e) {
+            Log.e(TAG, "ClassNotFoundException", e);
+          }
+          return true;
+        }
+      });
+    }
+
 
     return true;
   }
