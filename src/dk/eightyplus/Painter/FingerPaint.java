@@ -25,16 +25,17 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import dk.eightyplus.Painter.action.State;
 import dk.eightyplus.Painter.action.Undo;
 import dk.eightyplus.Painter.component.Component;
+import dk.eightyplus.Painter.component.Text;
 import dk.eightyplus.Painter.dialog.ColorPickerDialog;
 import dk.eightyplus.Painter.fragment.EditorFragment;
 import dk.eightyplus.Painter.fragment.SliderFragment;
@@ -57,7 +58,6 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   private ViewGroup layout;
   private DrawingView view;
   private MoveView moveView;
-  private EditText editText;
 
   private State state = State.DrawPath;
 
@@ -193,9 +193,15 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     Fragment fragment = getSupportFragmentManager().findFragmentByTag(Tags.FRAGMENT_EDITOR);
 
     if (fragment != null) {
-      Component component = ((EditorFragment)fragment).getText();
-      view.add(component);
-      view.redraw();
+      EditorFragment editorFragment = (EditorFragment) fragment;
+      Pair<Text, Undo> textChanges = editorFragment.getTextChanges();
+      if (textChanges.first != null) {
+        view.add(textChanges.first);
+        view.redraw();
+        if (textChanges.second != null) {
+          add(textChanges.second);
+        }
+      }
     }
     if (fragment != null) {
       FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();

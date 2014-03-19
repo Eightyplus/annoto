@@ -2,6 +2,7 @@ package dk.eightyplus.Painter.action;
 
 import android.graphics.RectF;
 import dk.eightyplus.Painter.component.Component;
+import dk.eightyplus.Painter.component.Text;
 import dk.eightyplus.Painter.view.ComponentList;
 
 /**
@@ -13,6 +14,7 @@ public class Undo {
 
   private float x;
   private float y;
+  private String text;
 
   private State undoAction;
 
@@ -33,10 +35,16 @@ public class Undo {
    * @param state action to be undo
    */
   public Undo(final Component component, float x, float y, State state) {
-    this.component = component;
+    this(component, null, state);
     this.x = x;
     this.y = y;
     this.undoAction = state;
+  }
+
+  public Undo(final Component component, String text, State state) {
+    this.component = component;
+    this.undoAction = state;
+    this.text = text;
   }
 
   /**
@@ -51,15 +59,10 @@ public class Undo {
         components.add(component);
         return true;
       case Move:
-        RectF bounds = component.getBounds();
-        float x = bounds.left;
-        float y = bounds.top;
-        component.move(this.x - x, this.y - y);
-        this.x = x;
-        this.y = y;
-        return true;
-
+        return move();
       case WriteText:
+        return changeText();
+      case Add:
       case DrawPath:
         components.remove(component);
         return true;
@@ -78,18 +81,34 @@ public class Undo {
         components.remove(component);
         return true;
       case Move:
-        RectF bounds = component.getBounds();
-        float x = bounds.left;
-        float y = bounds.top;
-        component.move(this.x - x, this.y - y);
-        this.x = x;
-        this.y = y;
-        return true;
-
+        return move();
       case WriteText:
+        return changeText();
+      case Add:
       case DrawPath:
         components.add(component);
         return true;
     }
+  }
+
+  private boolean move() {
+    RectF bounds = component.getBounds();
+    float x = bounds.left;
+    float y = bounds.top;
+    component.move(this.x - x, this.y - y);
+    this.x = x;
+    this.y = y;
+    return true;
+  }
+
+
+  private boolean changeText() {
+    if (component instanceof Text) {
+      String tmp = ((Text)component).getText();
+      ((Text)component).setText(text);
+      text = tmp;
+      return true;
+    }
+    return false;
   }
 }

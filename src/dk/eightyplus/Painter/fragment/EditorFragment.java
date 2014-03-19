@@ -2,6 +2,7 @@ package dk.eightyplus.Painter.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import dk.eightyplus.Painter.Callback;
 import dk.eightyplus.Painter.R;
+import dk.eightyplus.Painter.action.State;
+import dk.eightyplus.Painter.action.Undo;
 import dk.eightyplus.Painter.component.Component;
 import dk.eightyplus.Painter.component.Text;
 
@@ -53,15 +56,19 @@ public class EditorFragment extends DialogFragment {
     return view;
   }
 
-  public Text getText() {
+  public Pair<Text, Undo> getTextChanges() {
+    Undo undo = null;
     String text = editText.getText().toString();
     if (text.length() > 0) {
       if (component == null) {
         component = new Text();
         component.move(x, y);
+        undo = new Undo(component, State.Add);
+      } else {
+        undo = new Undo(component, component.getText(), State.WriteText);
       }
       component.setText(text);
     }
-    return component;
+    return new Pair<Text, Undo>(component, undo);
   }
 }
