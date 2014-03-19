@@ -5,15 +5,15 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.StreamCorruptedException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +28,7 @@ public class Storage {
 
   private static Storage storage;
   /** The application context. */
-  protected static Context context;
+  protected Context context;
 
   private Storage(final Context context) {
     this.context = context.getApplicationContext();
@@ -48,7 +48,7 @@ public class Storage {
   }
 
   public void writeToFile(SaveLoad save) throws IOException {
-    File file = getFilename(context, "file.note");
+    File file = getFilename("file.note");
 
     ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
     save.save(out);
@@ -57,7 +57,7 @@ public class Storage {
   }
 
   public void loadFromFile(SaveLoad load) throws IOException, ClassNotFoundException {
-    File file = getFilename(context, "file.note");
+    File file = getFilename("file.note");
 
     ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));
 
@@ -65,9 +65,9 @@ public class Storage {
     in.close();
   }
 
-  public File writeToFile(final Context context, final Bitmap bitmap) throws IOException {
+  public File writeToFile(final Bitmap bitmap) throws IOException {
     File file
-        = getFilename(context, "image.png");
+        = getFilename("image.png");
     //  = File.createTempFile("image", ".png", context.getCacheDir());
     DataOutputStream out = new DataOutputStream(new FileOutputStream(file));
     bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
@@ -75,8 +75,8 @@ public class Storage {
     return file;
   }
 
-  public Bitmap loadFromFile(final Context context) throws IOException {
-    File file = getFilename(context, "image.png");
+  public Bitmap loadFromFile() throws IOException {
+    File file = getFilename("image.png");
     Bitmap bitmap = null;
     if (file.exists()) {
       bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
@@ -84,7 +84,68 @@ public class Storage {
     return bitmap;
   }
 
-  public File getFilename(final Context context, final String filename) {
+  public void saveList(List<? extends Object> list, String fileName) {
+    File file = getFilename(fileName);
+
+    ObjectOutputStream out = null;
+    try {
+      out = new ObjectOutputStream(new FileOutputStream(file));
+      out.writeInt(list.size());
+      for (Object object : list) {
+        out.writeObject(object);
+      }
+      out.flush();
+    } catch (IOException e) {
+      Log.d(TAG, "Exception ", e);
+    } finally {
+      if (out != null) {
+        try {
+          out.close();
+        } catch (IOException e) {
+
+        }
+      }
+    }
+  }
+
+  public List<Object> loadDemo(String fileName) {
+
+    List<Object> list = new ArrayList<Object>();
+    File file = getFilename(fileName);
+    ObjectInputStream in = null;
+    try {
+      if (file.exists()) {
+        //in = new ObjectInputStream(context.getAssets().open(fileName));
+        in = new ObjectInputStream(new FileInputStream(file));
+        int length = in.readInt();
+        for (int i=0; i< length; i++) {
+          list.add(in.readObject());
+        }
+
+      }
+    } catch (FileNotFoundException e) {
+      Log.d(TAG, "Exception ", e);
+    } catch (StreamCorruptedException e) {
+      Log.d(TAG, "Exception ", e);
+    } catch (IOException e) {
+      Log.d(TAG, "Exception ", e);
+    } catch (ClassNotFoundException e) {
+      Log.d(TAG, "Exception ", e);
+    } finally {
+      if (in != null) {
+        try {
+          in.close();
+        } catch (IOException e) {
+          Log.d(TAG, "Exception ", e);
+        }
+      }
+    }
+
+    return list;
+  }
+
+
+  public File getFilename(final String filename) {
     File applicationPath = context.getExternalFilesDir(null);
     if (filename == null) {
       return new File(applicationPath,  File.separator);
@@ -109,11 +170,12 @@ public class Storage {
         }
       }
 
-      Field[] drawables = RDrawable.getFields();
-      for(Field dr : drawables) {
-        list.add(dr.getInt(null));
+      if (RDrawable != null) {
+        Field[] drawables = RDrawable.getFields();
+        for(Field dr : drawables) {
+          list.add(dr.getInt(null));
+        }
       }
-
 
 /*
       List<Map<String, Object>> drinfo = new ArrayList<Map<String, Object>>();

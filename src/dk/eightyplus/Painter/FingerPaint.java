@@ -379,7 +379,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
         @Override
         public boolean onMenuItemClick(MenuItem item) {
           try {
-            File file = Storage.getStorage(getApplicationContext()).writeToFile(getApplicationContext(), view.getBitmap());
+            File file = Storage.getStorage(getApplicationContext()).writeToFile(view.getBitmap());
             final Intent sharingIntent = new Intent(Intent.ACTION_SEND);
             sharingIntent.setType("image/png");
             sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Subject");
