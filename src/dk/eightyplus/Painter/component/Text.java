@@ -14,6 +14,7 @@ import android.graphics.Typeface;
 public class Text extends Component {
 
   private static final long serialVersionUID = 4256622835983660086L;
+  private final String NEW_LINE = "\n";
 
   private String text;
   private float x = 10;
@@ -39,7 +40,11 @@ public class Text extends Component {
       paint.setTextSize(fontSize);
       paint.setAntiAlias(true);
 
-      canvas.drawText(text, x, y, paint);
+      String[] lines = text.split(NEW_LINE);
+      float height = getBounds().height() / lines.length;
+      for (int i = 0; i < lines.length; i++) {
+        canvas.drawText(lines[i], x, y + height * i, paint);
+      }
     }
   }
 
@@ -74,7 +79,18 @@ public class Text extends Component {
     };
 
     Rect bounds = new Rect();
-    textPaint.getTextBounds(text, 0, text.length(), bounds);
+    for (String line : text.split(NEW_LINE)) {
+      Rect lineBounds = new Rect();
+      textPaint.getTextBounds(line, 0, line.length(), lineBounds);
+
+      if (bounds.right < lineBounds.right) {
+        bounds.right = lineBounds.right;
+      }
+      if (bounds.top > lineBounds.top) {
+        bounds.top = lineBounds.top;
+      }
+      bounds.bottom += Math.abs(lineBounds.top - lineBounds.bottom);
+    }
     bounds.offset((int)this.x, (int)this.y);
     return new RectF(bounds);
   }
