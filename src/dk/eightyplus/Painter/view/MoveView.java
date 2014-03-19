@@ -1,7 +1,11 @@
 package dk.eightyplus.Painter.view;
 
 import android.content.Context;
-import android.graphics.*;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.DashPathEffect;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -22,6 +26,10 @@ public class MoveView extends View {
 
   private Callback callBack;
 
+  private float xOffset;
+  private float yOffset;
+  private int margin = 10;
+
   public MoveView(final Context context, final Component component, final Callback callBack) {
     super(context);
     this.component = component;
@@ -35,28 +43,60 @@ public class MoveView extends View {
     mPaint.setStrokeWidth(12);
     Compatibility.get().setHardwareAccelerated(this, mPaint);
     mBitmapPaint = new Paint(Paint.DITHER_FLAG);
+
+    createBitmap();
   }
 
+  public void destroy() {
+    callBack = null;
+    mBitmap.recycle();
+    mBitmap = null;
+    mPaint = null;
+    component = null;
+  }
+
+  private void createBitmap() {
+    RectF bounds = component.getBounds();
+    xOffset = bounds.left - margin;
+    yOffset = bounds.top - margin;
+
+    int width = (int) (bounds.width() + 2 * margin);
+    int height = (int) (bounds.height() + 2 * margin);
+    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(width, height);
+    layoutParams.leftMargin = (int) xOffset;
+    layoutParams.topMargin = (int) yOffset;
+
+    setLayoutParams(layoutParams);
+    mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+  }
+
+  /*
   @Override
   protected void onSizeChanged(int w, int h, int oldw, int oldh) {
     super.onSizeChanged(w, h, oldw, oldh);
-    mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888); // TODO create smaller bitmap (from bounds)
-  }
+    mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+  }*/
 
   @Override
   protected void onDraw(Canvas canvas) {
     canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
-    component.setVisible(true);
-    component.onDraw(canvas, mPaint);
-    component.setVisible(false);
 
     RectF bounds = component.getBounds();
+    component.move(-xOffset, -yOffset);
+    component.setVisible(true);
+
+    component.onDraw(canvas, mPaint);
+
+    component.move(xOffset, yOffset);
+    component.setVisible(false);
+
+    RectF rect = new RectF(0, 0, bounds.width() + 2 * margin - 1, bounds.height() + 2 * margin - 1);
 
     mPaint.setColor(0xFF000000);
     mPaint.setStrokeWidth(1.0f);
     mPaint.setStyle(Paint.Style.STROKE);
     mPaint.setPathEffect(new DashPathEffect(new float[] {10,20}, 0));
-    canvas.drawRoundRect(bounds, 5.0f, 5.0f, mPaint);
+    canvas.drawRoundRect(rect, 5.0f, 5.0f, mPaint);
     mPaint.setPathEffect(null);
   }
 
@@ -73,7 +113,7 @@ public class MoveView extends View {
       case MotionEvent.ACTION_UP:
         float dx = X - _xDelta;
         float dy = Y - _yDelta;
-        callBack.move(component, dx, dy);
+        callBack.move(component, dx - xOffset, dy - yOffset);
         break;
       case MotionEvent.ACTION_POINTER_DOWN:
         break;
