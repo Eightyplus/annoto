@@ -159,7 +159,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
         }
         case WriteText:
           if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            if (isEditorVisibile()) {
+            if (isEditorVisible()) {
               hideEditor();
             } else {
               float x = event.getX();
@@ -178,7 +178,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   }
 
 
-  private boolean isEditorVisibile() {
+  private boolean isEditorVisible() {
     return getSupportFragmentManager().findFragmentByTag(Tags.FRAGMENT_EDITOR) != null;
   }
 
