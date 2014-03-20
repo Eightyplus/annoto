@@ -32,6 +32,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import dk.eightyplus.Painter.action.State;
 import dk.eightyplus.Painter.action.Undo;
 import dk.eightyplus.Painter.component.Component;
@@ -215,6 +216,9 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       transaction.remove(fragment);
       transaction.commit();
     }
+
+    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+    imm.hideSoftInputFromWindow(layout.getWindowToken(), 0);
   }
 
   @Override
