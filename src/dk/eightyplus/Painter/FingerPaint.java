@@ -221,6 +221,27 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     imm.hideSoftInputFromWindow(layout.getWindowToken(), 0);
   }
 
+  private void showWidthSlider() {
+    Fragment fragment = getSupportFragmentManager().findFragmentByTag(Tags.FRAGMENT_SLIDER);
+    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+    if (fragment == null) {
+      SliderFragment sliderFragment = new SliderFragment(this, view.getStrokeWidth());
+      transaction.replace(R.id.configuration_top, sliderFragment, Tags.FRAGMENT_SLIDER);
+    } else {
+      transaction.remove(fragment);
+    }
+    transaction.commit();
+  }
+
+  private void hideWidthSlider() {
+    Fragment fragment = getSupportFragmentManager().findFragmentByTag(Tags.FRAGMENT_SLIDER);
+    if (fragment != null) {
+      FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+      transaction.remove(fragment);
+      transaction.commit();
+    }
+  }
+
   @Override
   public void textEditDone() {
 
@@ -292,13 +313,8 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   @Override
   protected void onPause() {
     super.onPause();
-
-    Fragment fragment = getSupportFragmentManager().findFragmentByTag(Tags.FRAGMENT_SLIDER);
-    if (fragment != null) {
-      FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-      transaction.remove(fragment);
-      transaction.commit();
-    }
+    hideEditor();
+    hideWidthSlider();
   }
 
   @Override
@@ -408,17 +424,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       menuWidth.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem item) {
-          Fragment fragment = getSupportFragmentManager().findFragmentByTag(Tags.FRAGMENT_SLIDER);
-
-          FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-          if (fragment == null) {
-            SliderFragment sliderFragment = new SliderFragment(FingerPaint.this, view.getStrokeWidth());
-            transaction.replace(R.id.configuration_top, sliderFragment, Tags.FRAGMENT_SLIDER);
-          } else {
-            transaction.remove(fragment);
-          }
-
-          transaction.commit();
+          showWidthSlider();
           return true;
         }
       });
