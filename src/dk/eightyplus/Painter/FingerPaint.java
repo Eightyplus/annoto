@@ -76,7 +76,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
 
     setupActionBar();
 
-    /*TODO test code
+    /*
     boolean show = savedInstanceState == null || !savedInstanceState.getBoolean("TESTCODE", false);
     if (show) {
       components.add(new Text());
@@ -123,7 +123,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
 
       switch (getState()) {
         case Delete: {
-          if (event.getAction() == MotionEvent.ACTION_DOWN) {
+          if (event.getAction() == MotionEvent.ACTION_MOVE) {
             float x = event.getX();
             float y = event.getY();
             Component deleteComponent = view.findComponent(x, y);
@@ -146,6 +146,9 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
               moveComponent.setVisible(false);
               startMove(moveComponent);
             }
+          } else if (moveView != null && (event.getAction() == MotionEvent.ACTION_DOWN ||
+              event.getAction() == MotionEvent.ACTION_MOVE)) {
+            moveView.onTouchEvent(event);
           }
           return true;
         }
@@ -307,11 +310,11 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
 
   @Override
   public void move(Component component, float dx, float dy) {
+    component.setVisible(true);
+    view.move(component, dx, dy);
     layout.removeView(moveView);
     moveView.destroy();
     moveView = null;
-    component.setVisible(true);
-    view.move(component, dx, dy);
   }
 
   @Override
