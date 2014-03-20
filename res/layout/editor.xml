@@ -5,11 +5,14 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-  <EditText android:id="@+id/edit"
+  <dk.eightyplus.Painter.view.EditTextCustom
+      android:id="@+id/edit"
+      android:background="@drawable/rectangle_rounded_white"
       android:layout_height="match_parent"
       android:layout_width="match_parent"
-      android:lines="2"
+      android:imeActionId="@id/edit"
       android:layout_marginRight="50dp"
       android:layout_marginLeft="50dp"
-      android:inputType="text" />
+      android:imeOptions="actionNone"
+      android:inputType="textMultiLine" />
 </LinearLayout>

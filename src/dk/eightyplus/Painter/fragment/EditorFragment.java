@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.TextView;
 import dk.eightyplus.Painter.Callback;
 import dk.eightyplus.Painter.R;
@@ -18,18 +17,20 @@ import dk.eightyplus.Painter.action.State;
 import dk.eightyplus.Painter.action.Undo;
 import dk.eightyplus.Painter.component.Component;
 import dk.eightyplus.Painter.component.Text;
+import dk.eightyplus.Painter.view.EditTextCustom;
 
 /**
- * 
+ * EditorFragment for presenting edit text
  */
 public class EditorFragment extends DialogFragment {
-
+  @SuppressWarnings("unused")
   private static final String TAG = EditorFragment.class.toString();
+
   private final float x;
   private final float y;
   private Text component;
   private Callback callback;
-  private EditText editText;
+  private EditTextCustom editText;
 
   public EditorFragment(final Callback callback, Component component, float x, float y) {
     this.callback = callback;
@@ -42,7 +43,14 @@ public class EditorFragment extends DialogFragment {
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.editor, container, false);
 
-    editText = (EditText) view.findViewById(R.id.edit);
+    editText = (EditTextCustom) view.findViewById(R.id.edit);
+    editText.setOnKeyBoardDownListener(new View.OnKeyListener() {
+      @Override
+      public boolean onKey(View v, int keyCode, KeyEvent event) {
+        callback.textEditDone();
+        return true;
+      }
+    });
 
     if (component != null) {
       editText.setText(component.getText());
