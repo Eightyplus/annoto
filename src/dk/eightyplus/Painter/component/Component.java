@@ -37,9 +37,9 @@ public abstract class Component implements Serializable {
 
   protected float calculateCenterDistance(float x, float y, RectF bounds) {
     if (bounds.contains(x, y)) {
-      float cx = bounds.left - bounds.right;
-      float cy = bounds.top - bounds.bottom;
-      return (float) Math.sqrt(cx * cx + cy * cy);
+      float cx = bounds.centerX() - x;
+      float cy = bounds.centerY() - y;
+      return /* <ignore> Math.sqrt */ cx * cx + cy * cy;
     }
 
     return Float.MAX_VALUE;
