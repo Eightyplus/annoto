@@ -20,7 +20,6 @@ public class MoveView extends View {
   @SuppressWarnings("unused")
   private static final String TAG = MoveView.class.toString();
 
-  private boolean uninitialized = true;
   private int _xDelta;
   private int _yDelta;
   private Bitmap mBitmap;
@@ -122,7 +121,6 @@ public class MoveView extends View {
         RelativeLayout.LayoutParams lParams = (RelativeLayout.LayoutParams) getLayoutParams();
         _xDelta = X - lParams.leftMargin;
         _yDelta = Y - lParams.topMargin;
-        uninitialized = false;
         break;
       case MotionEvent.ACTION_UP:
         float dx = X - _xDelta;
@@ -135,12 +133,6 @@ public class MoveView extends View {
         break;
       case MotionEvent.ACTION_MOVE:
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) getLayoutParams();
-        if (uninitialized) {
-          _xDelta = X - layoutParams.leftMargin;
-          _yDelta = Y - layoutParams.topMargin;
-          uninitialized = false;
-        }
-
         layoutParams.leftMargin = X - _xDelta;
         layoutParams.topMargin = Y - _yDelta;
         layoutParams.rightMargin = -250;

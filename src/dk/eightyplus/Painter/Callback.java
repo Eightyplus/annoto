@@ -16,8 +16,6 @@ public interface Callback {
 
   public State getState();
 
-  public void startMove(Component moveComponent);
-
   public void setStrokeWidth(int width);
 
   public void add(Undo undo);
