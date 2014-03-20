@@ -155,12 +155,6 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
     mCanvas = new Canvas(mBitmap);
   }
 
-  private void drawComponent(int color, final Component path) {
-    mPaint.setColor(color);
-    path.onDraw(mCanvas, mPaint);
-    invalidate();
-  }
-
   @Override
   public boolean onTouchEvent(MotionEvent event) {
     float x = event.getX();
@@ -216,7 +210,17 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
   }
 
   public void redraw() {
-    redraw(0, false);
+    clear();
+    getHandler().post(new Runnable() {
+      @Override
+      public void run() {
+        for (Component component : components) {
+          component.onDraw(mCanvas, mPaint);
+        }
+
+        invalidate();
+      }
+    });
   }
 
   public void redraw(final int delay, final boolean randomColor) {
@@ -240,19 +244,13 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
           getHandler().post(new Runnable() {
             @Override
             public void run() {
-              drawComponent(color, component);
+              component.onDraw(mCanvas, mPaint);
+              invalidate();
             }
           });
         }
       }
     }).start();
-
-    getHandler().post(new Runnable() {
-      @Override
-      public void run() {
-        invalidate();
-      }
-    });
   }
 
   public void move(Component component, float dx, float dy) {
