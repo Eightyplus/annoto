@@ -323,210 +323,6 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   }
 
   @Override
-  public boolean onCreateOptionsMenu(final Menu menu) {
-    final MenuInflater inflater = getMenuInflater();
-    inflater.inflate(R.menu.menu, menu);
-
-    MenuItem path = menu.findItem(R.id.menu_path);
-    if (path != null) {
-      path.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-        @Override
-        public boolean onMenuItemClick(MenuItem item) {
-          state = State.DrawPath;
-          return true;
-        }
-      });
-    }
-
-    MenuItem menuWidth = menu.findItem(R.id.menu_width);
-    if (menuWidth != null) {
-      menuWidth.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-        @Override
-        public boolean onMenuItemClick(MenuItem item) {
-          Fragment fragment = getSupportFragmentManager().findFragmentByTag(Tags.FRAGMENT_SLIDER);
-
-          FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-          if (fragment == null) {
-            SliderFragment sliderFragment = new SliderFragment(FingerPaint.this, view.getStrokeWidth());
-            transaction.replace(R.id.configuration_top, sliderFragment, Tags.FRAGMENT_SLIDER);
-          } else {
-            transaction.remove(fragment);
-          }
-
-          transaction.commit();
-          return true;
-        }
-      });
-    }
-
-    MenuItem menuMove = menu.findItem(R.id.menu_move);
-    if (menuMove != null) {
-      menuMove.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-        @Override
-        public boolean onMenuItemClick(MenuItem item) {
-          state = State.Move;
-          return true;
-        }
-      });
-    }
-
-    MenuItem menuRedraw = menu.findItem(R.id.menu_redraw);
-    if (menuRedraw != null) {
-      menuRedraw.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-        @Override
-        public boolean onMenuItemClick(MenuItem item) {
-          view.redraw(50, true);
-          return true;
-        }
-      });
-    }
-
-    MenuItem menuShare = menu.findItem(R.id.menu_share);
-    if (menuShare != null) {
-      menuShare.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-        @Override
-        public boolean onMenuItemClick(MenuItem item) {
-          try {
-            File file = Storage.getStorage(getApplicationContext()).writeToFile(view.getBitmap());
-            final Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-            sharingIntent.setType("image/png");
-            sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Subject");
-            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, "Some test");
-            sharingIntent.putExtra(android.content.Intent.EXTRA_STREAM, Uri.fromFile(file));
-            startActivity(Intent.createChooser(sharingIntent, "Share image using"));
-          } catch (IOException e) {
-            Log.e(TAG, "IOException", e);
-          }
-          return true;
-        }
-      });
-    }
-
-    MenuItem menuSave = menu.findItem(R.id.menu_save);
-    if (menuSave != null) {
-      menuSave.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-        @Override
-        public boolean onMenuItemClick(MenuItem item) {
-          try {
-            //writeToFile(getApplicationContext(), view.getBitmap());
-            Storage.getStorage(getApplicationContext()).writeToFile(view, "file.note");
-          } catch (IOException e) {
-            Log.e(TAG, "IOException", e);
-          }
-          return true;
-        }
-      });
-    }
-
-    MenuItem menuLoad = menu.findItem(R.id.menu_load);
-    if (menuLoad != null) {
-      menuLoad.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-        @Override
-        public boolean onMenuItemClick(MenuItem item) {
-          try {
-            //writeToFile(getApplicationContext(), view.getBitmap());
-            Storage.getStorage(getApplicationContext()).loadFromFile(view, "file.note");
-            runOnUiThread(new Runnable() {
-              @Override
-              public void run() {
-                view.redraw();
-              }
-            });
-          } catch (IOException e) {
-            Log.e(TAG, "IOException", e);
-          } catch (ClassNotFoundException e) {
-            Log.e(TAG, "ClassNotFoundException", e);
-          }
-          return true;
-        }
-      });
-    }
-
-    MenuItem menuColor = menu.findItem(R.id.menu_color);
-    if (menuColor != null) {
-      menuColor.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-        @Override
-        public boolean onMenuItemClick(MenuItem item) {
-          new ColorPickerDialog(FingerPaint.this, FingerPaint.this, view.getColor()).show();
-          return true;
-        }
-      });
-    }
-
-    MenuItem menuDelete = menu.findItem(R.id.menu_delete);
-    if (menuDelete != null) {
-      menuDelete.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-        @Override
-        public boolean onMenuItemClick(MenuItem item) {
-          state = State.Delete;
-          return true;
-        }
-      });
-    }
-
-    MenuItem menuUndo = menu.findItem(R.id.menu_undo);
-    if (menuUndo != null) {
-      menuUndo.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-        @Override
-        public boolean onMenuItemClick(MenuItem item) {
-          undo();
-          return true;
-        }
-      });
-    }
-
-    MenuItem menuRedo = menu.findItem(R.id.menu_redo);
-    if (menuRedo != null) {
-      menuRedo.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-        @Override
-        public boolean onMenuItemClick(MenuItem item) {
-          redo();
-          return true;
-        }
-      });
-    }
-
-    MenuItem menuReplay = menu.findItem(R.id.menu_replay);
-    if (menuReplay != null) {
-      menuReplay.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-        @Override
-        public boolean onMenuItemClick(MenuItem item) {
-          try {
-            //writeToFile(getApplicationContext(), view.getBitmap());
-            Storage.getStorage(getApplicationContext()).loadFromFile(view, "file.note", true);
-            runOnUiThread(new Runnable() {
-              @Override
-              public void run() {
-                view.redraw(100, false);
-              }
-            });
-          } catch (IOException e) {
-            Log.e(TAG, "IOException", e);
-          } catch (ClassNotFoundException e) {
-            Log.e(TAG, "ClassNotFoundException", e);
-          }
-          return true;
-        }
-      });
-    }
-
-
-    return true;
-  }
-
-  @Override
-  public boolean onPrepareOptionsMenu(Menu menu) {
-    super.onPrepareOptionsMenu(menu);
-    return true;
-  }
-
-  @Override
-  public boolean onOptionsItemSelected(MenuItem item) {
-    return super.onOptionsItemSelected(item);
-  }
-
-
-  @Override
   public State getState() {
     return state;
   }
@@ -565,4 +361,234 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     return false;
   }
 
+
+
+
+  @Override
+  public boolean onCreateOptionsMenu(final Menu menu) {
+    final MenuInflater inflater = getMenuInflater();
+    inflater.inflate(R.menu.menu, menu);
+
+    setupDrawPathMenuButton(menu);
+    setupWidthMenuButton(menu);
+    setupMoveMenuButton(menu);
+    setupRedrawMenuButton(menu);
+    setupShareMenuButton(menu);
+    setupSaveMenuButton(menu);
+    setupLoadMenuButton(menu);
+    setupColorMenuButton(menu);
+    setupDeleteMenuButton(menu);
+    setupUndoMenuButton(menu);
+    setupRedoMenuButton(menu);
+    setupReplayMenuButton(menu);
+
+    return true;
+  }
+
+  private void setupDrawPathMenuButton(Menu menu) {
+    MenuItem path = menu.findItem(R.id.menu_path);
+    if (path != null) {
+      path.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          state = State.DrawPath;
+          return true;
+        }
+      });
+    }
+  }
+
+  private void setupWidthMenuButton(Menu menu) {
+    MenuItem menuWidth = menu.findItem(R.id.menu_width);
+    if (menuWidth != null) {
+      menuWidth.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          Fragment fragment = getSupportFragmentManager().findFragmentByTag(Tags.FRAGMENT_SLIDER);
+
+          FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+          if (fragment == null) {
+            SliderFragment sliderFragment = new SliderFragment(FingerPaint.this, view.getStrokeWidth());
+            transaction.replace(R.id.configuration_top, sliderFragment, Tags.FRAGMENT_SLIDER);
+          } else {
+            transaction.remove(fragment);
+          }
+
+          transaction.commit();
+          return true;
+        }
+      });
+    }
+  }
+
+  private void setupMoveMenuButton(Menu menu) {
+    MenuItem menuMove = menu.findItem(R.id.menu_move);
+    if (menuMove != null) {
+      menuMove.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          state = State.Move;
+          return true;
+        }
+      });
+    }
+  }
+
+  private void setupRedrawMenuButton(Menu menu) {
+    MenuItem menuRedraw = menu.findItem(R.id.menu_redraw);
+    if (menuRedraw != null) {
+      menuRedraw.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          view.redraw(50, true);
+          return true;
+        }
+      });
+    }
+  }
+
+  private void setupShareMenuButton(Menu menu) {
+    MenuItem menuShare = menu.findItem(R.id.menu_share);
+    if (menuShare != null) {
+      menuShare.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          try {
+            File file = Storage.getStorage(getApplicationContext()).writeToFile(view.getBitmap());
+            final Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+            sharingIntent.setType("image/png");
+            sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Subject");
+            sharingIntent.putExtra(Intent.EXTRA_TEXT, "Some test");
+            sharingIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+            startActivity(Intent.createChooser(sharingIntent, "Share image using"));
+          } catch (IOException e) {
+            Log.e(TAG, "IOException", e);
+          }
+          return true;
+        }
+      });
+    }
+  }
+
+  private void setupSaveMenuButton(Menu menu) {
+    MenuItem menuSave = menu.findItem(R.id.menu_save);
+    if (menuSave != null) {
+      menuSave.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          try {
+            //writeToFile(getApplicationContext(), view.getBitmap());
+            Storage.getStorage(getApplicationContext()).writeToFile(view, "file.note");
+          } catch (IOException e) {
+            Log.e(TAG, "IOException", e);
+          }
+          return true;
+        }
+      });
+    }
+  }
+
+  private void setupLoadMenuButton(Menu menu) {
+    MenuItem menuLoad = menu.findItem(R.id.menu_load);
+    if (menuLoad != null) {
+      menuLoad.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          try {
+            //writeToFile(getApplicationContext(), view.getBitmap());
+            Storage.getStorage(getApplicationContext()).loadFromFile(view, "file.note");
+            runOnUiThread(new Runnable() {
+              @Override
+              public void run() {
+                view.redraw();
+              }
+            });
+          } catch (IOException e) {
+            Log.e(TAG, "IOException", e);
+          } catch (ClassNotFoundException e) {
+            Log.e(TAG, "ClassNotFoundException", e);
+          }
+          return true;
+        }
+      });
+    }
+  }
+
+  private void setupColorMenuButton(Menu menu) {
+    MenuItem menuColor = menu.findItem(R.id.menu_color);
+    if (menuColor != null) {
+      menuColor.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          new ColorPickerDialog(FingerPaint.this, FingerPaint.this, view.getColor()).show();
+          return true;
+        }
+      });
+    }
+  }
+
+  private void setupDeleteMenuButton(Menu menu) {
+    MenuItem menuDelete = menu.findItem(R.id.menu_delete);
+    if (menuDelete != null) {
+      menuDelete.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          state = State.Delete;
+          return true;
+        }
+      });
+    }
+  }
+
+  private void setupUndoMenuButton(Menu menu) {
+    MenuItem menuUndo = menu.findItem(R.id.menu_undo);
+    if (menuUndo != null) {
+      menuUndo.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          undo();
+          return true;
+        }
+      });
+    }
+  }
+
+  private void setupRedoMenuButton(Menu menu) {
+    MenuItem menuRedo = menu.findItem(R.id.menu_redo);
+    if (menuRedo != null) {
+      menuRedo.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          redo();
+          return true;
+        }
+      });
+    }
+  }
+
+  private void setupReplayMenuButton(Menu menu) {
+    MenuItem menuReplay = menu.findItem(R.id.menu_replay);
+    if (menuReplay != null) {
+      menuReplay.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          try {
+            //writeToFile(getApplicationContext(), view.getBitmap());
+            Storage.getStorage(getApplicationContext()).loadFromFile(view, "file.note", true);
+            runOnUiThread(new Runnable() {
+              @Override
+              public void run() {
+                view.redraw(100, false);
+              }
+            });
+          } catch (IOException e) {
+            Log.e(TAG, "IOException", e);
+          } catch (ClassNotFoundException e) {
+            Log.e(TAG, "ClassNotFoundException", e);
+          }
+          return true;
+        }
+      });
+    }
+  }
 }
