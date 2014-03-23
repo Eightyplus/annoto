@@ -14,6 +14,7 @@ import dk.eightyplus.Painter.Callback;
 import dk.eightyplus.Painter.action.State;
 import dk.eightyplus.Painter.action.Undo;
 import dk.eightyplus.Painter.component.Component;
+import dk.eightyplus.Painter.component.Composite;
 import dk.eightyplus.Painter.component.Polygon;
 import dk.eightyplus.Painter.utilities.Compatibility;
 import dk.eightyplus.Painter.utilities.SaveLoad;
@@ -35,13 +36,25 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
 
   private Bitmap mBitmap;
   private Canvas mCanvas;
+
+  private Component drawingComponent;
+  private Composite composite;
   private Polygon polygon;
+
   private Paint   mBitmapPaint;
+
+  private int drawingColor = 0xFF000000;
   private int color = 0;
 
   private float mX, mY;
   private static final float TOUCH_TOLERANCE = 4;
+
+  private static final float STROKE_DELTA = 0.001f;
+  private static final float STROKE_INCREMENT = 0.1f;
+  private float currentStrokeModify = 1.0f;
   private int strokeWidth = 6;
+
+  boolean variableWidth = true; // TODO make configurable
 
   public DrawingView(final Context context, Callback callback) {
     super(context);
@@ -50,14 +63,12 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
 
     getSavedStrokeWidth();
 
-    polygon = new Polygon();
-    polygon.setStrokeWidth(strokeWidth);
+    touch_reset();
     mBitmapPaint = new Paint(Paint.DITHER_FLAG);
 
     mPaint = new Paint();
     mPaint.setAntiAlias(true);
     mPaint.setDither(true);
-    mPaint.setColor(0xFFFF0000);
     mPaint.setStyle(Paint.Style.STROKE);
     mPaint.setStrokeJoin(Paint.Join.ROUND);
     mPaint.setStrokeCap(Paint.Cap.ROUND);
@@ -112,25 +123,37 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
     canvas.drawColor(0xFFAAAAAA);
     canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
 
-    polygon.onDraw(canvas, mPaint);
+    drawingComponent.onDraw(canvas, mPaint);
   }
 
-  private void touch_start(float x, float y) {
-    int color = this.color != 0 ? this.color : (int) (0xFF000000 + 0x00FFFFFF * Math.random());
-    mPaint.setColor(color);
+  private void touch_start(float x, float y, float pressure) {
+    setDrawingColor();
 
-    polygon.setColor(color);
+    polygon.setColor(getDrawingColor());
+    currentStrokeModify = pressure;
     polygon.getPath().reset();
+    polygon.setStrokeWidth(getStrokeWidth(pressure));
     polygon.getPath().moveTo(x, y);
     mX = x;
     mY = y;
   }
 
-  private void touch_move(float x, float y) {
+  private void touch_move(float x, float y, float pressure) {
     float dx = Math.abs(x - mX);
     float dy = Math.abs(y - mY);
     if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-      polygon.getPath().quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
+      polygon.setStrokeWidth(getStrokeWidth(pressure));
+
+      float xEndPoint = (x + mX) / 2;
+      float yEndPoint = (y + mY) / 2;
+      polygon.getPath().quadTo(mX, mY, xEndPoint, yEndPoint);
+
+      if (variableWidth) {
+        composite.add(polygon);
+        polygon = new Polygon();
+        polygon.getPath().moveTo(xEndPoint, yEndPoint);
+        polygon.setColor(getDrawingColor());
+      }
       mX = x;
       mY = y;
     }
@@ -138,13 +161,26 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
 
   private void touch_up() {
     polygon.getPath().lineTo(mX, mY);
-    polygon.onDraw(mCanvas, mPaint);
+    drawingComponent.onDraw(mCanvas, mPaint);
 
-    components.add(polygon);
-    callback.add(new Undo(polygon, State.DrawPath));
+    components.add(drawingComponent);
+    callback.add(new Undo(drawingComponent, State.DrawPath));
+
+    touch_reset();
+  }
+
+  private void touch_reset() {
+    currentStrokeModify = 0.5f;
 
     polygon = new Polygon();
     polygon.setStrokeWidth(strokeWidth);
+
+    if (variableWidth) {
+      composite = new Composite();
+      drawingComponent = composite;
+    } else {
+      drawingComponent = polygon;
+    }
   }
 
   private void clear() {
@@ -159,14 +195,15 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
   public boolean onTouchEvent(MotionEvent event) {
     float x = event.getX();
     float y = event.getY();
+    float p = event.getPressure();
 
     switch (event.getAction()) {
       case MotionEvent.ACTION_DOWN:
-        touch_start(x, y);
+        touch_start(x, y, p);
         invalidate();
         break;
       case MotionEvent.ACTION_MOVE:
-        touch_move(x, y);
+        touch_move(x, y, p);
         invalidate();
         break;
       case MotionEvent.ACTION_UP:
@@ -199,6 +236,14 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
       }
     }
     return moveComponent;
+  }
+
+  public int getDrawingColor() {
+    return drawingColor;
+  }
+
+  private void setDrawingColor() {
+    drawingColor = this.color != 0 ? this.color : (int) (0xFF000000 + 0x00FFFFFF * Math.random());
   }
 
   public int getColor() {
@@ -268,9 +313,21 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
     return mBitmap;
   }
 
+  private float getStrokeWidth(float eventPressure) {
+    if (variableWidth) {
+      if( Math.abs(eventPressure - currentStrokeModify) > STROKE_DELTA ) {
+        if( eventPressure > currentStrokeModify) {
+          currentStrokeModify = Math.min(eventPressure, currentStrokeModify + STROKE_INCREMENT);
+        } else {
+          currentStrokeModify = Math.max(eventPressure, currentStrokeModify - STROKE_INCREMENT);
+        }
+      }
+    }
+    return strokeWidth * currentStrokeModify;
+  }
+
   public void setStrokeWidth(int strokeWidth) {
     this.strokeWidth = strokeWidth;
-    polygon.setStrokeWidth(strokeWidth);
     saveStrokeWidth(strokeWidth);
   }
 
