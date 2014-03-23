@@ -33,6 +33,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import dk.eightyplus.Painter.action.ActionBarClickListener;
 import dk.eightyplus.Painter.action.State;
 import dk.eightyplus.Painter.action.Undo;
 import dk.eightyplus.Painter.component.Component;
@@ -47,6 +48,8 @@ import dk.eightyplus.Painter.view.MoveView;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 
 public class FingerPaint extends FragmentActivity implements ColorPickerDialog.OnColorChangedListener, Callback {
@@ -259,54 +262,17 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       final View deleteButton = actionBar.findViewById(R.id.action_bar_delete);
       final View textButton = actionBar.findViewById(R.id.action_bar_text);
 
+      List<View> actionBarButtons = new ArrayList<View>();
+      actionBarButtons.add(editButton);
+      actionBarButtons.add(moveButton);
+      actionBarButtons.add(deleteButton);
+      actionBarButtons.add(textButton);
+
       editButton.setSelected(true);
-      editButton.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-          editButton.setSelected(true);
-          moveButton.setSelected(false);
-          deleteButton.setSelected(false);
-          textButton.setSelected(false);
-
-          state = State.DrawPath;
-        }
-      });
-
-      moveButton.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-          editButton.setSelected(false);
-          moveButton.setSelected(true);
-          deleteButton.setSelected(false);
-          textButton.setSelected(false);
-
-          state = State.Move;
-        }
-      });
-
-      deleteButton.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-          editButton.setSelected(false);
-          moveButton.setSelected(false);
-          deleteButton.setSelected(true);
-          textButton.setSelected(false);
-
-          state = State.Delete;
-        }
-      });
-
-      textButton.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-          editButton.setSelected(false);
-          moveButton.setSelected(false);
-          deleteButton.setSelected(false);
-          textButton.setSelected(true);
-
-          state = State.WriteText;
-        }
-      });
+      editButton.setOnClickListener(new ActionBarClickListener(actionBarButtons, State.DrawPath, this));
+      moveButton.setOnClickListener(new ActionBarClickListener(actionBarButtons, State.Move, this));
+      deleteButton.setOnClickListener(new ActionBarClickListener(actionBarButtons, State.Delete, this));
+      textButton.setOnClickListener(new ActionBarClickListener(actionBarButtons, State.WriteText, this));
     }
   }
 
@@ -345,6 +311,11 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   @Override
   public State getState() {
     return state;
+  }
+
+  @Override
+  public void setState(State state) {
+    this.state = state;
   }
 
   @Override

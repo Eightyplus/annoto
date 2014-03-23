@@ -16,6 +16,8 @@ public interface Callback {
 
   public State getState();
 
+  public void setState(State state);
+
   public void setStrokeWidth(int width);
 
   public void add(Undo undo);
