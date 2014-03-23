@@ -123,12 +123,18 @@ public class CustomPath extends Path implements Serializable {
   }
 
   public static class ActionQuadTo extends ActionLine {
+    private static final long serialVersionUID = -2922409288151860775L;
 
     private float x2, y2;
     public ActionQuadTo(float x, float y, float x2, float y2) {
       super(x, y);
       this.x2 = x2;
       this.y2 = y2;
+    }
+
+    @Override
+    public PathActionType getType() {
+      return PathActionType.QUAD_TO;
     }
 
     @Override
