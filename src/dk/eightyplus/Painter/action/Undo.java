@@ -14,6 +14,7 @@ public class Undo {
 
   private float x;
   private float y;
+  private float scale;
   private String text;
 
   private State undoAction;
@@ -24,7 +25,7 @@ public class Undo {
    * @param state action to be undo
    */
   public Undo(final Component component, State state) {
-    this(component, 0, 0, state);
+    this(component, 0, 0, 1, state);
   }
 
   /**
@@ -34,10 +35,11 @@ public class Undo {
    * @param y previous y-coordinate
    * @param state action to be undo
    */
-  public Undo(final Component component, float x, float y, State state) {
+  public Undo(final Component component, float x, float y, float scale, State state) {
     this(component, null, state);
     this.x = x;
     this.y = y;
+    this.scale = scale;
     this.undoAction = state;
   }
 
@@ -60,7 +62,7 @@ public class Undo {
         return true;
       case Move:
         return move();
-      case WriteText:
+      case Text:
         return changeText();
       case Add:
       case DrawPath:
@@ -82,7 +84,7 @@ public class Undo {
         return true;
       case Move:
         return move();
-      case WriteText:
+      case Text:
         return changeText();
       case Add:
       case DrawPath:
@@ -95,9 +97,12 @@ public class Undo {
     RectF bounds = component.getBounds();
     float x = bounds.left;
     float y = bounds.top;
+    float scale = component.getScale();
+    component.setScale(this.scale);
     component.move(this.x - x, this.y - y);
     this.x = x;
     this.y = y;
+    this.scale = scale;
     return true;
   }
 

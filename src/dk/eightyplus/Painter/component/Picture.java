@@ -19,33 +19,22 @@ import java.io.ObjectOutputStream;
 public class Picture extends Component {
   private static final long serialVersionUID = 9170000361129876541L;
 
-  private float x = 0.0f;
-  private float y = 0.0f;
-  private float scale = 1.0f;
   private transient Bitmap bitmap;
 
   public Picture(Bitmap bitmap) {
     this.bitmap = bitmap;
   }
 
-  public void setScale(float scale) {
-    this.scale = scale;
-  }
-
   @Override
   public void onDraw(Canvas canvas, Paint paint) {
-    if (visible) {
-      if (scale == 1.0f) {
-        canvas.drawBitmap(bitmap, x, y, paint);
-      } else {
-        canvas.drawBitmap(bitmap, getMatrix(), paint);
-      }
+    if (isVisible()) {
+      canvas.drawBitmap(bitmap, getMatrix(), paint);
     }
   }
 
   private Matrix getMatrix() {
     float[] values = new float[Matrix.MPERSP_2 + 1];
-    values[Matrix.MSCALE_X] = values[Matrix.MSCALE_Y] = scale;
+    values[Matrix.MSCALE_X] = values[Matrix.MSCALE_Y] = getScale();
     values[Matrix.MTRANS_X] = x;
     values[Matrix.MTRANS_Y] = y;
     values[Matrix.MPERSP_2] = 1;
@@ -53,12 +42,6 @@ public class Picture extends Component {
     matrix.reset();
     matrix.setValues(values);
     return matrix;
-  }
-
-  @Override
-  public void move(float dx, float dy) {
-    x += dx;
-    y += dy;
   }
 
   @Override

@@ -1,11 +1,12 @@
 package dk.eightyplus.Painter.view;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.util.FloatMath;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.RelativeLayout;
@@ -22,20 +23,26 @@ public class MoveView extends View {
 
   private int _xDelta;
   private int _yDelta;
-  private Bitmap mBitmap;
   private Component component;
-  private Paint mBitmapPaint;
   private Paint mPaint;
 
   private Callback callBack;
 
-  private float xOffset;
-  private float yOffset;
-  private int margin = 20;
+  private float xOffsetComponent;
+  private float yOffsetComponent;
+  private final int margin = 20;
+
+  private final float initialScale;
+  private float scaleFactor = 1.0f;
+  private float width;
+  private float height;
+  private float oldDist;
+  private int points = 1;
 
   public MoveView(final Context context, final Component component, final Callback callBack) {
     super(context);
     this.component = component;
+    this.initialScale = component.getScale();
     this.callBack = callBack;
 
     mPaint = new Paint();
@@ -45,16 +52,11 @@ public class MoveView extends View {
     mPaint.setStrokeCap(Paint.Cap.ROUND);
     mPaint.setStrokeWidth(12);
     Compatibility.get().setHardwareAccelerated(this, mPaint);
-    mBitmapPaint = new Paint(Paint.DITHER_FLAG);
 
     setupSize();
   }
 
   public void destroy() {
-    if (mBitmap != null) {
-      mBitmap.recycle();
-    }
-    mBitmap = null;
     callBack = null;
     mPaint = null;
     component = null;
@@ -62,24 +64,23 @@ public class MoveView extends View {
 
   private void setupSize() {
     RectF bounds = component.getBounds();
-    xOffset = bounds.left - margin;
-    yOffset = bounds.top - margin;
+    xOffsetComponent = bounds.left - margin;
+    yOffsetComponent = bounds.top - margin;
 
-    int width = (int) (bounds.width() + 2 * margin);
-    int height = (int) (bounds.height() + 2 * margin);
-    setViewBounds(width, height);
-    createBitmap(width, height);
+    width = bounds.width() + 2 * margin;
+    height = bounds.height() + 2 * margin;
+    setViewBounds();
   }
 
-  private void setViewBounds(int width, int height) {
-    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(width, height);
-    layoutParams.leftMargin = (int) xOffset;
-    layoutParams.topMargin = (int) yOffset;
+  private void moveComponentFromMoveView(float dx, float dy) {
+    callBack.move(component, dx - xOffsetComponent, dy - yOffsetComponent, initialScale * scaleFactor);
+  }
+
+  private void setViewBounds() {
+    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams((int)width, (int)height);
+    layoutParams.leftMargin = (int) xOffsetComponent;
+    layoutParams.topMargin = (int) yOffsetComponent;
     setLayoutParams(layoutParams);
-  }
-
-  private void createBitmap(int width, int height) {
-    mBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
   }
 
   /*
@@ -91,18 +92,21 @@ public class MoveView extends View {
 
   @Override
   protected void onDraw(Canvas canvas) {
-    canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
+    canvas.drawColor(0x66FF00FF);
 
-    RectF bounds = component.getBounds();
-    component.move(-xOffset, -yOffset);
+    canvas.save();
+    canvas.scale(scaleFactor, scaleFactor);
+    canvas.translate( -xOffsetComponent, -yOffsetComponent);
     component.setVisible(true);
-
     component.onDraw(canvas, mPaint);
-
-    component.move(xOffset, yOffset);
     component.setVisible(false);
+    canvas.restore();
 
-    RectF rect = new RectF(0, 0, bounds.width() + 2 * margin - 1, bounds.height() + 2 * margin - 1);
+    drawDashBounds(canvas);
+  }
+
+  private void drawDashBounds(Canvas canvas) {
+    RectF rect = new RectF(0, 0, getWidth() - 1, getHeight() - 1);
 
     mPaint.setColor(0xFF000000);
     mPaint.setStrokeWidth(1.0f);
@@ -114,6 +118,7 @@ public class MoveView extends View {
 
   @Override
   public boolean onTouchEvent(MotionEvent event) {
+
     final int X = (int) event.getRawX();
     final int Y = (int) event.getRawY();
     switch (event.getAction() & MotionEvent.ACTION_MASK) {
@@ -125,21 +130,48 @@ public class MoveView extends View {
       case MotionEvent.ACTION_UP:
         float dx = X - _xDelta;
         float dy = Y - _yDelta;
-        callBack.move(component, dx - xOffset, dy - yOffset);
+        moveComponentFromMoveView(dx, dy);
         break;
       case MotionEvent.ACTION_POINTER_DOWN:
         break;
       case MotionEvent.ACTION_POINTER_UP:
         break;
       case MotionEvent.ACTION_MOVE:
+
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) getLayoutParams();
+
+        if (points != event.getPointerCount()) {
+          points = event.getPointerCount();
+          Log.d(TAG, "MotionEvent.ACTION_MOVE :" + points);
+
+          if (points == 1) {
+            _xDelta = X - layoutParams.leftMargin;
+            _yDelta = Y - layoutParams.topMargin;
+          } else {
+            oldDist = calculateDistance(event);
+          }
+        }
+
         layoutParams.leftMargin = X - _xDelta;
         layoutParams.topMargin = Y - _yDelta;
-        layoutParams.rightMargin = -250;
-        layoutParams.bottomMargin = -250;
+
+        if (points > 1) {
+          scaleFactor = calculateDistance(event) / oldDist;
+          scaleFactor = Math.max(0.1f, Math.min(scaleFactor, 5.0f));
+          layoutParams.width = (int) (width * scaleFactor);
+          layoutParams.height = (int) (height * scaleFactor);
+        }
+
         setLayoutParams(layoutParams);
         break;
     }
     return true;
   }
-};
+
+  private float calculateDistance(MotionEvent event) {
+    final float x = event.getX(0) - event.getX(1);
+    final float y = event.getY(0) - event.getY(1);
+    return FloatMath.sqrt(x * x + y * y);
+  }
+}
+

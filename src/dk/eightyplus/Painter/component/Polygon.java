@@ -1,6 +1,7 @@
 package dk.eightyplus.Painter.component;
 
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -19,6 +20,7 @@ public class Polygon extends Component {
 
   @SuppressWarnings("unused")
   public Polygon(Polygon src) {
+    this();
     path = new CustomPath(src.path);
     color = src.color;
     width = src.width;
@@ -34,14 +36,31 @@ public class Polygon extends Component {
       paint.setColor(color);
       paint.setStyle(Paint.Style.STROKE);
       paint.setStrokeWidth(width);
+
+      RectF bounds = getBounds();
+
+      canvas.save();
+      canvas.scale(scale, scale, bounds.left, bounds.top);
+      canvas.translate(x, y);
       canvas.drawPath(path, paint);
+      canvas.restore();
     }
   }
 
+  /*
   @Override
   public void move(float dx, float dy) {
     path.offset(dx, dy);
   }
+
+  @Override
+  public void setScale(float scale) {
+    Matrix scaleMatrix = new Matrix();
+    RectF rectF = new RectF();
+    path.computeBounds(rectF, true);
+    scaleMatrix.setScale(scale, scale, rectF.centerX(),rectF.centerY());
+    path.transform(scaleMatrix);
+  }*/
 
   @Override
   public float centerDist(float x, float y) {
@@ -52,6 +71,9 @@ public class Polygon extends Component {
   public RectF getBounds() {
     RectF bounds = new RectF();
     path.computeBounds(bounds, false);
+    bounds.offset(x, y);
+    bounds.right += bounds.width() * (scale - 1);
+    bounds.bottom += bounds.height() * (scale - 1);
     return bounds;
   }
 }

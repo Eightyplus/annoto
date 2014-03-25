@@ -12,7 +12,7 @@ public interface Callback {
 
   public void textEditDone();
 
-  public void move(Component component, float dx, float dy);
+  public void move(Component component, float dx, float dy, float scale);
 
   public State getState();
 

@@ -298,9 +298,10 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
     }).start();
   }
 
-  public void move(Component component, float dx, float dy) {
+  public void move(Component component, float dx, float dy, float scale) {
     RectF bounds = component.getBounds();
-    callback.add(new Undo(component, bounds.left, bounds.top, State.Move));
+    callback.add(new Undo(component, bounds.left, bounds.top,component.getScale(), State.Move));
+    component.setScale(scale);
     component.move(dx, dy);
 
     if (!components.contains(component)) {

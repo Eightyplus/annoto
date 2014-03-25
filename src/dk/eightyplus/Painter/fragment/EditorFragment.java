@@ -89,7 +89,7 @@ public class EditorFragment extends DialogFragment {
         component.move(x, y);
         undo = new Undo(component, State.Add);
       } else {
-        undo = new Undo(component, component.getText(), State.WriteText);
+        undo = new Undo(component, component.getText(), State.Text);
       }
       component.setText(text);
     }

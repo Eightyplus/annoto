@@ -17,8 +17,6 @@ public class Text extends Component {
   private final String NEW_LINE = "\n";
 
   private String text;
-  private float x = 10;
-  private float y = 30;
   private int fontSize = 40;
   private transient Typeface typeFace = Typeface.create("HelveticaNeue", Typeface.NORMAL);
 
@@ -40,11 +38,15 @@ public class Text extends Component {
       paint.setTextSize(fontSize);
       paint.setAntiAlias(true);
 
+      canvas.save();
+      canvas.scale(scale, scale, x, y);
       String[] lines = text.split(NEW_LINE);
-      float height = getBounds().height() / lines.length;
+      float height = getTextBounds().height() / lines.length;
       for (int i = 0; i < lines.length; i++) {
-        canvas.drawText(lines[i], x, y + height * i, paint);
+        canvas.drawText(lines[i], x, y + height * (i + 1), paint);
       }
+
+      canvas.restore();
     }
   }
 
@@ -57,18 +59,20 @@ public class Text extends Component {
   }
 
   @Override
-  public void move(float dx, float dy) {
-    x += dx;
-    y += dy;
-  }
-
-  @Override
   public float centerDist(float x, float y) {
     return calculateCenterDistance(x, y, getBounds());
   }
 
   @Override
   public RectF getBounds() {
+    Rect bounds = getTextBounds();
+    bounds.offset((int)this.x, (int)this.y);
+    bounds.right += bounds.width() * (scale - 1);
+    bounds.bottom += bounds.height() * (scale - 1);
+    return new RectF(bounds);
+  }
+
+  private Rect getTextBounds() {
     final Paint textPaint = new Paint() {
       {
         setTextAlign(Paint.Align.LEFT);
@@ -77,7 +81,6 @@ public class Text extends Component {
         setAntiAlias(true);
       }
     };
-
     Rect bounds = new Rect();
     for (String line : text.split(NEW_LINE)) {
       Rect lineBounds = new Rect();
@@ -86,13 +89,12 @@ public class Text extends Component {
       if (bounds.right < lineBounds.right) {
         bounds.right = lineBounds.right;
       }
-      if (bounds.top > lineBounds.top) {
+      /*if (bounds.top > lineBounds.top) {
         bounds.top = lineBounds.top;
-      }
-      bounds.bottom += Math.abs(lineBounds.top - lineBounds.bottom);
+      }*/
+      bounds.bottom += Math.abs(lineBounds.bottom - lineBounds.top);
     }
-    bounds.offset((int)this.x, (int)this.y);
-    return new RectF(bounds);
+    return bounds;
   }
 
   @SuppressWarnings("unused")

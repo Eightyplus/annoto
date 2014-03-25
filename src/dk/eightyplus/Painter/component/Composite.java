@@ -16,12 +16,23 @@ public class Composite extends Component {
 
   protected List<Component> componentList;
 
+  private boolean hasComponents() {
+    return componentList != null;
+  }
+
   public void onDraw(Canvas canvas, Paint paint) {
-    if (visible && componentList != null) {
+    if (isVisible() && hasComponents()) {
+      canvas.save();
+
+      RectF bounds = getBounds();
+      canvas.scale(scale, scale, bounds.left, bounds.top);
+      canvas.translate(x, y);
       for (Component component : componentList) {
         component.onDraw(canvas, paint);
       }
+      canvas.restore();
     }
+
   }
 
   public void add(Component component) {
@@ -32,38 +43,49 @@ public class Composite extends Component {
   }
 
   public void remove(Component component) {
-    if (componentList != null) {
+    if (hasComponents()) {
       componentList.remove(component);
     }
   }
 
   public Component removeLast() {
-    if (componentList != null) {
+    if (hasComponents()) {
       return componentList.remove(componentList.size() - 1);
     }
     return null;
   }
 
   public Component getChild(int location) {
-    if (componentList != null) {
+    if (hasComponents()) {
       return componentList.get(location);
     }
     return null;
   }
-
+/*
   @Override
-  public void move(float dx, float dy) {
-    if (componentList != null) {
+  public void setScale(float scale) {
+    super.setScale(scale);
+    if (hasComponents()) {
       for (Component component : componentList) {
-        component.move(dx, dy); // TODO move ?
+        component.setScale(scale);
       }
     }
   }
 
   @Override
+  public void move(float dx, float dy) {
+    if (hasComponents()) {
+      for (Component component : componentList) {
+        component.move(dx, dy);
+      }
+    }
+  }
+  */
+
+  @Override
   public float centerDist(float x, float y) {
     float minimumDistance = Float.MAX_VALUE;
-    if (componentList != null) {
+    if (hasComponents()) {
       minimumDistance = calculateCenterDistance(x, y, getBounds());
       for (Component component : componentList) {
         float distance = component.centerDist(x, y);
@@ -79,7 +101,7 @@ public class Composite extends Component {
   @Override
   public RectF getBounds() {
     RectF bounds = new RectF(Float.MAX_VALUE, Float.MAX_VALUE, Float.MIN_VALUE, Float.MIN_VALUE);
-    if (componentList != null) {
+    if (hasComponents()) {
       for (Component component : componentList) {
         RectF componentBounds = component.getBounds();
 
@@ -100,6 +122,10 @@ public class Composite extends Component {
         }
 
       }
+
+      bounds.offset(x, y);
+      bounds.right += bounds.width() * (scale - 1);
+      bounds.bottom += bounds.height() * (scale - 1);
     }
     return bounds;
   }

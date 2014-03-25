@@ -64,6 +64,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   private MoveView moveView;
 
   private State state = State.DrawPath;
+  private ViewGroup visibleLayer;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -71,12 +72,13 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     setContentView(R.layout.main);
 
     layout = (ViewGroup) findViewById(R.id.main);
-    ViewGroup drawableArea = (ViewGroup) findViewById(R.id.drawable_area);
+    visibleLayer = (ViewGroup) findViewById(R.id.visible_layer);
     view = new DrawingView(getApplicationContext(), this);
+    visibleLayer.addView(view);
 
-    drawableArea.addView(view);
+    ViewGroup touchLayer = (ViewGroup) layout.findViewById(R.id.touch_layer);
     TouchView touchView = new TouchView(getApplicationContext());
-    drawableArea.addView(touchView);
+    touchLayer.addView(touchView);
 
     setupActionBar();
 
@@ -149,7 +151,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
             if (moveComponent != null) {
               moveComponent.setVisible(false);
               moveView = new MoveView(getApplicationContext(), moveComponent, FingerPaint.this);
-              layout.addView(moveView);
+              visibleLayer.addView(moveView);
               view.redraw();
               moveView.onTouchEvent(event);
             }
@@ -161,7 +163,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
           }
           return true;
         }
-        case WriteText:
+        case Text:
           if (event.getAction() == MotionEvent.ACTION_DOWN) {
             if (isEditorVisible()) {
               hideEditor();
@@ -272,7 +274,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       editButton.setOnClickListener(new ActionBarClickListener(actionBarButtons, State.DrawPath, this));
       moveButton.setOnClickListener(new ActionBarClickListener(actionBarButtons, State.Move, this));
       deleteButton.setOnClickListener(new ActionBarClickListener(actionBarButtons, State.Delete, this));
-      textButton.setOnClickListener(new ActionBarClickListener(actionBarButtons, State.WriteText, this));
+      textButton.setOnClickListener(new ActionBarClickListener(actionBarButtons, State.Text, this));
     }
   }
 
@@ -300,10 +302,10 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   }
 
   @Override
-  public void move(Component component, float dx, float dy) {
+  public void move(Component component, float dx, float dy, float scale) {
     component.setVisible(true);
-    view.move(component, dx, dy);
-    layout.removeView(moveView);
+    view.move(component, dx, dy, scale);
+    visibleLayer.removeView(moveView);
     moveView.destroy();
     moveView = null;
   }

@@ -48,6 +48,12 @@ public class CustomPath extends Path implements Serializable {
     super.quadTo(x1, y1, x2, y2);
   }
 
+  @Override
+  public void offset(float dx, float dy) {
+    actions.add(new ActionOffset(dx, dy));
+    super.offset(dx, dy);
+  }
+
   private void drawThisPath(){
     for(PathAction p : actions){
       switch (p.getType()) {
@@ -60,12 +66,15 @@ public class CustomPath extends Path implements Serializable {
         case QUAD_TO:
           super.quadTo(p.getX(), p.getY(), p.getX2(), p.getY2());
           break;
+        case OFFSET:
+          super.offset(p.getX(), p.getX());
+          break;
       }
     }
   }
 
   public static interface PathAction extends  Serializable{
-    public enum PathActionType {LINE_TO,MOVE_TO, QUAD_TO};
+    public enum PathActionType {LINE_TO, MOVE_TO, OFFSET, QUAD_TO};
     public PathActionType getType();
     public float getX();
     public float getY();
@@ -145,6 +154,19 @@ public class CustomPath extends Path implements Serializable {
     @Override
     public float getY2() {
       return y2;
+    }
+  }
+
+  public static class ActionOffset extends ActionLine {
+    //private static final long serialVersionUID = -7198142191254133295L;
+
+    public ActionOffset(float x, float y){
+      super(x, y);
+    }
+
+    @Override
+    public PathActionType getType() {
+      return PathActionType.OFFSET;
     }
   }
 }
