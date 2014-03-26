@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.util.Log;
 
 /**
  * Text class to give drawing capabilities
@@ -38,12 +39,14 @@ public class Text extends Component {
       paint.setTextSize(fontSize);
       paint.setAntiAlias(true);
 
-      canvas.save();
-      canvas.scale(scale, scale, x, y);
       String[] lines = text.split(NEW_LINE);
-      float height = getTextBounds().height() / lines.length;
+      Rect textBounds = getTextBounds();
+      float height = textBounds.height() / lines.length;
+
+      canvas.save();
+      canvas.scale(scale, scale, x + textBounds.left, y + textBounds.top);
       for (int i = 0; i < lines.length; i++) {
-        canvas.drawText(lines[i], x, y + height * (i + 1), paint);
+        canvas.drawText(lines[i], x, y + height * i, paint);
       }
 
       canvas.restore();
@@ -82,16 +85,21 @@ public class Text extends Component {
       }
     };
     Rect bounds = new Rect();
-    for (String line : text.split(NEW_LINE)) {
+
+    String[] lines = text.split(NEW_LINE);
+    textPaint.getTextBounds(lines[0], 0, lines[0].length(), bounds);
+    for (int i = 1; i < lines.length; i++) {
       Rect lineBounds = new Rect();
-      textPaint.getTextBounds(line, 0, line.length(), lineBounds);
+      textPaint.getTextBounds(lines[i], 0, lines[i].length(), lineBounds);
 
       if (bounds.right < lineBounds.right) {
         bounds.right = lineBounds.right;
       }
-      /*if (bounds.top > lineBounds.top) {
-        bounds.top = lineBounds.top;
-      }*/
+
+      if (bounds.left > lineBounds.left) {
+        bounds.left = lineBounds.left;
+      }
+
       bounds.bottom += Math.abs(lineBounds.bottom - lineBounds.top);
     }
     return bounds;
