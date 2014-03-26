@@ -92,8 +92,6 @@ public class MoveView extends View {
 
   @Override
   protected void onDraw(Canvas canvas) {
-    canvas.drawColor(0x66FF00FF);
-
     canvas.save();
     canvas.scale(scaleFactor, scaleFactor);
     canvas.translate( -xOffsetComponent, -yOffsetComponent);
@@ -142,13 +140,15 @@ public class MoveView extends View {
 
         if (points != event.getPointerCount()) {
           points = event.getPointerCount();
-          Log.d(TAG, "MotionEvent.ACTION_MOVE :" + points);
 
-          if (points == 1) {
-            _xDelta = X - layoutParams.leftMargin;
-            _yDelta = Y - layoutParams.topMargin;
-          } else {
-            oldDist = calculateDistance(event);
+          switch (points) {
+            case 2:
+              oldDist = calculateDistance(event) / scaleFactor;
+            case 1:
+              _xDelta = X - layoutParams.leftMargin;
+              _yDelta = Y - layoutParams.topMargin;
+            default:
+              break;
           }
         }
 
@@ -157,7 +157,13 @@ public class MoveView extends View {
 
         if (points > 1) {
           scaleFactor = calculateDistance(event) / oldDist;
-          scaleFactor = Math.max(0.1f, Math.min(scaleFactor, 5.0f));
+          float scaleTotal = scaleFactor * initialScale;
+          if (scaleTotal < 0.1f) {
+            scaleFactor = 0.1f / initialScale;
+          } else if (scaleTotal > 5.0f) {
+            scaleFactor = 5.0f / initialScale;
+          }
+
           layoutParams.width = (int) (width * scaleFactor);
           layoutParams.height = (int) (height * scaleFactor);
         }
