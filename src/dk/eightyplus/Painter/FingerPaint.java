@@ -20,7 +20,6 @@ import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -313,11 +312,8 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     if (resultCode == RESULT_OK) {
       switch (requestCode) {
         case SELECT_PICTURE:
-          Uri selectedImageUri = data.getData();
-          String selectedImagePath = Storage.getStorage(getApplicationContext()).getPath(selectedImageUri);
           try {
-            //Bitmap bitmap = Storage.getStorage(getApplicationContext()).loadFromPath(selectedImagePath);
-            Bitmap bitmap = BitmapFactory.decodeFile(selectedImagePath);
+            Bitmap bitmap = Storage.getStorage(getApplicationContext()).loadBitmapFromIntent(this, data, 1);
             view.add(new Picture(bitmap));
           } catch (Exception e) {
             Log.d(TAG, "Exception caught", e);

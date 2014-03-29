@@ -1,7 +1,11 @@
 package dk.eightyplus.Painter.utilities;
 
+import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.StreamCorruptedException;
@@ -98,13 +103,12 @@ public class Storage {
     return bitmap;
   }
 
-  public Bitmap loadFromPath(String path) throws IOException {
-    File file = new File(path);
-    Bitmap bitmap = null;
-    if (file.exists()) {
-      bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
-    }
-    return bitmap;
+  public Bitmap loadBitmapFromIntent(ContextWrapper context, Intent data, int sampleSize) throws IOException {
+    Uri contentURI = Uri.parse(data.getDataString());
+    InputStream inputStream = context.getContentResolver().openInputStream(contentURI);
+    BitmapFactory.Options options = new BitmapFactory.Options();
+    options.inSampleSize = sampleSize;
+    return BitmapFactory.decodeStream(inputStream, null, options);
   }
 
   public void saveList(List<? extends Object> list, String fileName) {
