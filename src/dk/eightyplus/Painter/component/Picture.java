@@ -22,6 +22,9 @@ public class Picture extends Component {
   private transient Bitmap bitmap;
 
   public Picture(Bitmap bitmap) {
+    if (bitmap == null) {
+      throw new NullPointerException("Bitmap cannot be null");
+    }
     this.bitmap = bitmap;
   }
 

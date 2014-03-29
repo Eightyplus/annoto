@@ -19,6 +19,8 @@ package dk.eightyplus.Painter;
 import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -33,10 +35,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Toast;
 import dk.eightyplus.Painter.action.ActionBarClickListener;
 import dk.eightyplus.Painter.action.State;
 import dk.eightyplus.Painter.action.Undo;
 import dk.eightyplus.Painter.component.Component;
+import dk.eightyplus.Painter.component.Picture;
 import dk.eightyplus.Painter.component.Text;
 import dk.eightyplus.Painter.dialog.ColorPickerDialog;
 import dk.eightyplus.Painter.fragment.EditorFragment;
@@ -66,6 +70,9 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   private State state = State.DrawPath;
   private ViewGroup visibleLayer;
   private int color = 0;
+
+  private static final int CAMERA_REQUEST = 1888;
+  private static final int SELECT_PICTURE = 57;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -301,6 +308,31 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     view.onSaveInstanceState(outState);
   }
 
+  @Override
+  protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (resultCode == RESULT_OK) {
+      switch (requestCode) {
+        case SELECT_PICTURE:
+          Uri selectedImageUri = data.getData();
+          String selectedImagePath = Storage.getStorage(getApplicationContext()).getPath(selectedImageUri);
+          try {
+            //Bitmap bitmap = Storage.getStorage(getApplicationContext()).loadFromPath(selectedImagePath);
+            Bitmap bitmap = BitmapFactory.decodeFile(selectedImagePath);
+            view.add(new Picture(bitmap));
+          } catch (Exception e) {
+            Log.d(TAG, "Exception caught", e);
+            Toast.makeText(getApplicationContext(), "Error loading image from gallery", Toast.LENGTH_LONG).show();
+          }
+          break;
+        case CAMERA_REQUEST:
+          Bitmap photo = (Bitmap) data.getExtras().get("data");
+          view.add(new Picture(photo));
+          break;
+      }
+      view.redraw();
+    }
+  }
+
   public void colorChanged(int color) {
     this.color = color;
     view.setColor(color);
@@ -372,6 +404,8 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     setupMoveMenuButton(menu);
     setupRedrawMenuButton(menu);
     setupShareMenuButton(menu);
+    setupCameraMenuButton(menu);
+    setupGalleryMenuButton(menu);
     setupSaveMenuButton(menu);
     setupLoadMenuButton(menu);
     setupColorMenuButton(menu);
@@ -452,6 +486,36 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
           } catch (IOException e) {
             Log.e(TAG, "IOException", e);
           }
+          return true;
+        }
+      });
+    }
+  }
+
+  private void setupCameraMenuButton(Menu menu) {
+    MenuItem menuCamera = menu.findItem(R.id.menu_camera);
+    if (menuCamera != null) {
+      menuCamera.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+          startActivityForResult(cameraIntent, CAMERA_REQUEST);
+          return true;
+        }
+      });
+    }
+  }
+
+  private void setupGalleryMenuButton(Menu menu) {
+    MenuItem menuGallery = menu.findItem(R.id.menu_gallery);
+    if (menuGallery != null) {
+      menuGallery.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          Intent intent = new Intent();
+          intent.setType("image/*");
+          intent.setAction(Intent.ACTION_GET_CONTENT);
+          startActivityForResult(Intent.createChooser(intent, "Select Picture"), SELECT_PICTURE);
           return true;
         }
       });

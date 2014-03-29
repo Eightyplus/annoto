@@ -1,8 +1,12 @@
 package dk.eightyplus.Painter.utilities;
 
 import android.content.Context;
+import android.content.CursorLoader;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.util.Log;
 
 import java.io.DataOutputStream;
@@ -82,7 +86,20 @@ public class Storage {
   }
 
   public Bitmap loadFromFile() throws IOException {
-    File file = getFilename("image.png");
+    return loadFromFile("image.png");
+  }
+
+  public Bitmap loadFromFile(String fileName) throws IOException {
+    File file = getFilename(fileName);
+    Bitmap bitmap = null;
+    if (file.exists()) {
+      bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
+    }
+    return bitmap;
+  }
+
+  public Bitmap loadFromPath(String path) throws IOException {
+    File file = new File(path);
     Bitmap bitmap = null;
     if (file.exists()) {
       bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
@@ -158,6 +175,23 @@ public class Storage {
     }
     return new File(applicationPath, File.separator + filename);
   }
+
+  public String getPath(Uri uri) {
+    if( uri == null ) {
+      // ERROR ?
+      return null;
+    }
+
+    String[] projection = { MediaStore.Images.Media.DATA };
+    CursorLoader loader = new CursorLoader(context, uri, projection, null, null, null);
+    Cursor cursor = loader.loadInBackground();
+    if (cursor.moveToFirst()) {
+      int columnIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
+      return cursor.getString(columnIndex);
+    }
+    return uri.getPath();
+  }
+
 
   public List<Integer> getDrawableResources() {
     List<Integer> list = new ArrayList<Integer>();
