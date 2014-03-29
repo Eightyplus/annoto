@@ -65,6 +65,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
 
   private State state = State.DrawPath;
   private ViewGroup visibleLayer;
+  private int color = 0;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -209,6 +210,9 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       EditorFragment editorFragment = (EditorFragment) fragment;
       Pair<Text, Undo> textChanges = editorFragment.getTextChanges();
       if (textChanges.first != null) {
+        if (color != 0) {
+          textChanges.first.setColor(color);
+        }
         view.add(textChanges.first);
         view.redraw();
         if (textChanges.second != null) {
@@ -298,6 +302,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   }
 
   public void colorChanged(int color) {
+    this.color = color;
     view.setColor(color);
   }
 
