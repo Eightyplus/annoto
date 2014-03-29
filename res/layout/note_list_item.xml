@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:background="@color/Gray"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+  <ImageView android:id="@+id/note_thumb"
+      android:src="@android:drawable/ic_menu_save"
+      android:layout_width="wrap_content"
+      android:layout_height="fill_parent"
+      android:layout_alignParentLeft="true"
+      android:contentDescription="" />
+  <View android:id="@+id/separator"
+      android:layout_width="1dp"
+      android:layout_height="fill_parent"
+      android:background="@color/light_grey"
+      android:layout_toRightOf="@id/note_thumb"
+      android:layout_marginBottom="1dp"
+      android:layout_marginTop="1dp"
+      android:layout_marginLeft="1dp"
+      android:layout_marginRight="1dp"/>
+  <TextView android:id="@+id/note_title"
+      android:layout_toRightOf="@id/separator"
+      android:text="Note title - 01.01.2014"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:textColor="@color/black" />
+
+  <ImageView
+      android:id="@+id/button_delete"
+      android:contentDescription=""
+      android:layout_alignParentRight="true"
+      android:src="@android:drawable/ic_menu_delete"
+      android:layout_width="wrap_content"
+      android:layout_height="fill_parent"
+      />
+  <ImageView
+      android:id="@+id/button_copy"
+      android:contentDescription=""
+      android:layout_toLeftOf="@id/button_delete"
+      android:src="@android:drawable/ic_menu_close_clear_cancel"
+      android:layout_width="wrap_content"
+      android:layout_height="fill_parent"
+      />
+
+
+</RelativeLayout>

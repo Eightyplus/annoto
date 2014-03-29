@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -81,11 +82,15 @@ public class Storage {
   }
 
   public File writeToFile(final Bitmap bitmap) throws IOException {
+    return writeToFile(bitmap, "image.png", 90);
+  }
+
+  public File writeToFile(final Bitmap bitmap, final String fileName, int quality) throws IOException {
     File file
-        = getFilename("image.png");
+        = getFilename(fileName);
     //  = File.createTempFile("image", ".png", context.getCacheDir());
     DataOutputStream out = new DataOutputStream(new FileOutputStream(file));
-    bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
+    bitmap.compress(Bitmap.CompressFormat.PNG, quality, out);
     out.close();
     return file;
   }
@@ -110,6 +115,23 @@ public class Storage {
     options.inSampleSize = sampleSize;
     return BitmapFactory.decodeStream(inputStream, null, options);
   }
+
+  public String[] getNotes() {
+    File root = getFilename(null);
+
+    return root.list(new FilenameFilter() {
+      @Override
+      public boolean accept(File dir, String filename) {
+        return filename.endsWith(".note");
+      }
+    });
+  }
+
+  public File getThumb2Notes(String fileName) {
+    String prefix = fileName.substring(0, fileName.lastIndexOf('.'));
+    return getFilename(String.format("%s.png", prefix));
+  }
+
 
   public void saveList(List<? extends Object> list, String fileName) {
     File file = getFilename(fileName);

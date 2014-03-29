@@ -21,4 +21,6 @@ public interface Callback {
   public void setStrokeWidth(int width);
 
   public void add(Undo undo);
+
+  public void load(String fileName);
 }
