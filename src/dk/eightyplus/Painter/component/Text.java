@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.util.Log;
 
 /**
  * Text class to give drawing capabilities
@@ -15,11 +14,11 @@ import android.util.Log;
 public class Text extends Component {
 
   private static final long serialVersionUID = 4256622835983660086L;
-  private final String NEW_LINE = "\n";
+  private static final transient String NEW_LINE = "\n";
 
   private String text;
   private int fontSize = 40;
-  private transient Typeface typeFace = Typeface.create("HelveticaNeue", Typeface.NORMAL);
+  private transient Typeface typeFace = Typeface.defaultFromStyle(Typeface.NORMAL); //Typeface.create("HelveticaNeue", Typeface.NORMAL);
 
   @SuppressWarnings("unused")
   public Text() {}
