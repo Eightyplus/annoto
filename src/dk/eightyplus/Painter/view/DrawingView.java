@@ -55,6 +55,7 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
   private int strokeWidth = 6;
 
   boolean variableWidth = true; // TODO make configurable
+  boolean redrawing = false;
 
   public DrawingView(final Context context, Callback callback) {
     super(context);
@@ -255,6 +256,10 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
   }
 
   public void redraw() {
+    if (redrawing) {
+      return;
+    }
+    redrawing = true;
     clear();
     getHandler().post(new Runnable() {
       @Override
@@ -263,6 +268,7 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
           component.onDraw(mCanvas, mPaint);
         }
 
+        redrawing = false;
         invalidate();
       }
     });
