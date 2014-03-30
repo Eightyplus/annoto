@@ -22,6 +22,9 @@ import java.util.Map;
  */
 public class NoteListAdapter extends ArrayAdapter<String> implements ThumbLoader.Notify {
 
+  @SuppressWarnings("unused")
+  private static final String TAG = NoteListAdapter.class.toString();
+
   private static final int initialThumbLoadSize = 3;
   Map<String, SoftReference<Drawable>> cachedImages = new HashMap<String, SoftReference<Drawable>>();
   Map<String, Boolean> loading = new HashMap<String, Boolean>();
