@@ -1,19 +1,3 @@
-/*
- * Copyright (C) 2007 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package dk.eightyplus.Painter;
 
 import android.app.ActionBar;
@@ -22,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
@@ -72,6 +57,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   private State state = State.DrawPath;
   private ViewGroup visibleLayer;
   private int color = 0;
+  private String cameraFileName;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -330,14 +316,19 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
           try {
             Bitmap bitmap = Storage.getStorage(getApplicationContext()).loadBitmapFromIntent(this, data, 1);
             view.add(new Picture(bitmap));
-          } catch (Exception e) {
+          } catch (IOException e) {
             Log.d(TAG, "Exception caught", e);
             Toast.makeText(getApplicationContext(), "Error loading image from gallery", Toast.LENGTH_LONG).show();
           }
           break;
         case Tags.CAMERA_REQUEST:
-          Bitmap photo = (Bitmap) data.getExtras().get("data");
-          view.add(new Picture(photo));
+          try {
+            Bitmap bitmap = Storage.getStorage(getApplicationContext()).loadFromFile(cameraFileName);
+            view.add(new Picture(bitmap));
+          } catch (IOException e) {
+            Log.d(TAG, "Exception caught", e);
+            Toast.makeText(getApplicationContext(), "Error loading image from camera", Toast.LENGTH_LONG).show();
+          }
           break;
       }
       view.redraw();
@@ -532,7 +523,12 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       menuCamera.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem item) {
-          Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+          SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+          String date = formatter.format(Calendar.getInstance().getTime());
+          cameraFileName = String.format("camera-%s.jpeg", date);
+          File cameraFile = Storage.getStorage(getApplicationContext()).getFilename(cameraFileName);
+          Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+          cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(cameraFile));
           startActivityForResult(cameraIntent, Tags.CAMERA_REQUEST);
           return true;
         }
