@@ -315,7 +315,9 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
         case Tags.SELECT_PICTURE:
           try {
             Bitmap bitmap = Storage.getStorage(getApplicationContext()).loadBitmapFromIntent(this, data, 1);
-            view.add(new Picture(bitmap));
+            Picture picture = new Picture(bitmap);
+            view.add(picture);
+            add(new Undo(picture, State.Add));
           } catch (IOException e) {
             Log.d(TAG, "Exception caught", e);
             Toast.makeText(getApplicationContext(), "Error loading image from gallery", Toast.LENGTH_LONG).show();
@@ -324,7 +326,9 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
         case Tags.CAMERA_REQUEST:
           try {
             Bitmap bitmap = Storage.getStorage(getApplicationContext()).loadFromFile(cameraFileName);
-            view.add(new Picture(bitmap));
+            Picture picture = new Picture(bitmap);
+            view.add(picture);
+            add(new Undo(picture, State.Add));
           } catch (IOException e) {
             Log.d(TAG, "Exception caught", e);
             Toast.makeText(getApplicationContext(), "Error loading image from camera", Toast.LENGTH_LONG).show();
@@ -372,6 +376,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   @Override
   public void load(String fileName) {
     try {
+      clearUndos();
       Storage.getStorage(getApplicationContext()).loadFromFile(view, fileName);
       removeNotesList();
       view.redraw();
@@ -406,8 +411,14 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     return false;
   }
 
+  private void clearUndos() {
+    undo.clear();
+    clearRedos();
+  }
 
-
+  private void clearRedos() {
+    redo.clear();
+  }
 
   @Override
   public boolean onCreateOptionsMenu(final Menu menu) {
