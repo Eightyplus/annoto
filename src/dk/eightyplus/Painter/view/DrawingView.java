@@ -23,13 +23,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  */
 public class DrawingView extends View implements ComponentList, SaveLoad {
 
-  private final ArrayList<Component> components = new ArrayList<Component>();
+  private final List<Component> components = new ArrayList<Component>();
 
   private final Callback callback;
   private Paint mPaint;
@@ -94,6 +95,7 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
   }
 
   public void save(final ObjectOutputStream outputStream) throws IOException {
+    final List<Component> components = new ArrayList<Component>(this.components);
     outputStream.writeInt(components.size());
 
     for (int i = 0; i < components.size(); i++) {
@@ -103,12 +105,16 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
   }
 
   public void load(final ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
-    components.clear();
+    List<Component> components = new ArrayList<Component>();
+
     int size = inputStream.readInt();
     for (int i = 0 ; i < size; i++) {
       Component component = (Component) inputStream.readObject();
       components.add(component);
     }
+
+    this.components.clear();
+    this.components.addAll(components);
   }
 
   @Override
