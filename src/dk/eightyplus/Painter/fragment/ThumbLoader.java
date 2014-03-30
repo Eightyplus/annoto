@@ -1,5 +1,6 @@
 package dk.eightyplus.Painter.fragment;
 
+import android.R;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -29,9 +30,11 @@ public class ThumbLoader extends AsyncTask<String, Void, Pair<String, Drawable>>
     String path = paths[0];
 
     final File file = Storage.getStorage(context).getThumb2Notes(path);
-    Drawable drawable = null;
+    Drawable drawable;
     if (file.exists()) {
       drawable = Drawable.createFromPath(file.getAbsolutePath());
+    } else {
+      drawable = context.getResources().getDrawable(R.drawable.ic_dialog_alert);
     }
 
     return new Pair<String, Drawable>(path, drawable);
