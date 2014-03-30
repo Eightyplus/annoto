@@ -22,9 +22,7 @@ import java.lang.ref.SoftReference;
  */
 public class NoteListFragment extends DialogFragment {
 
-
   private final SoftReference<Callback> callbackSoftReference;
-  private ListView listView;
   private Context context;
   private NoteListAdapter adapter;
 
@@ -37,6 +35,9 @@ public class NoteListFragment extends DialogFragment {
     View view = inflater.inflate(R.layout.note_list_layout, container, false);
 
     context = getActivity().getApplicationContext();
+    String[] list = Storage.getStorage(context).getNotes();
+    adapter = new NoteListAdapter(context, R.layout.note_list_item, list);
+
     view.findViewById(R.id.new_note).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
@@ -44,12 +45,12 @@ public class NoteListFragment extends DialogFragment {
       }
     });
 
-    listView = (ListView) view.findViewById(android.R.id.list);
+    ListView listView = (ListView) view.findViewById(android.R.id.list);
     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       @Override
       public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Toast.makeText(context, "Click ListItem Number " + position, Toast.LENGTH_SHORT).show();
         String item = adapter.getItem(position);
+        Toast.makeText(context, "Opening: " + item, Toast.LENGTH_SHORT).show();
 
         Callback callback = callbackSoftReference.get();
         if (callback != null) {
@@ -59,9 +60,6 @@ public class NoteListFragment extends DialogFragment {
       }
     });
 
-    String[] list = Storage.getStorage(context).getNotes();
-
-    adapter = new NoteListAdapter(context, R.layout.note_list_item, list);
     listView.setAdapter(adapter);
 
     return view;

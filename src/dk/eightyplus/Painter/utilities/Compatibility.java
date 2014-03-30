@@ -3,6 +3,7 @@ package dk.eightyplus.Painter.utilities;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Paint;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 import android.view.View;
@@ -20,6 +21,8 @@ public abstract class Compatibility {
 
     if (version >= Build.VERSION_CODES.HONEYCOMB) {
       INSTANCE = new APIVersion11();
+    } else if (version >= Build.VERSION_CODES.ECLAIR_MR1) {
+      INSTANCE = new APIVersion7();
     } else {
       INSTANCE = new UnsupportedVersion();
     }
@@ -69,14 +72,11 @@ public abstract class Compatibility {
 
   public abstract void setHardwareAccelerated(final View view, final Paint paint);
 
-  /* Implementations */
+  public abstract <Params, Progress, Result> void startTask(final AsyncTask<Params, Progress, Result> task,
+                                                            final Params... params);
 
   /**
    * Unsupported version.
-   *
-   * @author Henrik Kirk <mailto:hbk@visiolink.com/>
-   * @version 1.0
-   * @since 07-30-2012
    */
   private static class UnsupportedVersion extends Compatibility {
     private static final String UNSUPPORTED_ERROR = "This Android version isn't supported";
@@ -88,17 +88,31 @@ public abstract class Compatibility {
 
     @Override
     public void setHardwareAccelerated(View view, Paint paint) { }
+
+    @Override
+    public <Params, Progress, Result> void startTask(AsyncTask<Params, Progress, Result> task, Params... params) { }
+  }
+
+  /**
+   * API version 11 (Build.VERSION_CODES.ECLAIR_MR1).
+   */
+  private static class APIVersion7 extends UnsupportedVersion {
+    @Override
+    public <Params, Progress, Result> void startTask(AsyncTask<Params, Progress, Result> task, Params... params) {
+      task.execute(params);
+    }
   }
 
   /**
    * API version 11 (Build.VERSION_CODES.HONEYCOMB).
-   *
-   * @author Henrik Kirk <mailto:hbk@visiolink.com>
-   * @version 1.0
-   * @since Jul 30, 2012
    */
   @SuppressWarnings("deprecation")
   private static class APIVersion11 extends UnsupportedVersion {
+
+    @Override
+    public <Params, Progress, Result> void startTask(AsyncTask<Params, Progress, Result> task, Params... params) {
+      task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params);;
+    }
 
     @Override
     public boolean supportActionBar() {
