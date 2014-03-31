@@ -1,7 +1,6 @@
 package dk.eightyplus.Painter.utilities;
 
-import android.app.Activity;
-import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.CursorLoader;
@@ -106,6 +105,19 @@ public class Storage {
       bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
     }
     return bitmap;
+  }
+
+  public void addImageToGallery(final ContextWrapper context, final String filePath) {
+    // TODO check preference?
+    ContentValues values = new ContentValues();
+    values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
+    values.put(MediaStore.Images.Media.DATE_ADDED, System.currentTimeMillis());
+    values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+    //values.put(MediaStore.Images.Media.TITLE, title);
+    //values.put(MediaStore.Images.Media.DISPLAY_NAME, displayName);
+    //values.put(MediaStore.Images.Media.DESCRIPTION, description);
+    values.put(MediaStore.MediaColumns.DATA, filePath);
+    context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
   }
 
   public Bitmap loadBitmapFromIntent(ContextWrapper context, Intent data, int sampleSize) throws IOException {

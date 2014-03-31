@@ -325,7 +325,9 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
           break;
         case Tags.CAMERA_REQUEST:
           try {
+            // TODO add delete image function?
             Bitmap bitmap = Storage.getStorage(getApplicationContext()).loadFromFile(cameraFileName);
+            Storage.getStorage(getApplicationContext()).addImageToGallery(this, cameraFileName);
             Picture picture = new Picture(bitmap);
             view.add(picture);
             add(new Undo(picture, State.Add));
