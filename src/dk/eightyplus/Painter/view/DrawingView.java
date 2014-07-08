@@ -8,7 +8,6 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
 import dk.eightyplus.Painter.Callback;
@@ -143,7 +142,7 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
     polygon.setColor(getDrawingColor());
     currentStrokeModify = pressure;
     polygon.getPath().reset();
-    polygon.setStrokeWidth(getStrokeWidth(pressure).second);
+    polygon.setStrokeWidth(getStrokeWidth(pressure));
     polygon.getPath().moveTo(x, y);
     mX = x;
     mY = y;
@@ -153,14 +152,13 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
     float dx = Math.abs(x - mX);
     float dy = Math.abs(y - mY);
     if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-      Pair<Boolean, Float> currentStrokeWidth = getStrokeWidth(pressure);
-      polygon.setStrokeWidth(currentStrokeWidth.second);
+      polygon.setStrokeWidth(getStrokeWidth(pressure));
 
       float xEndPoint = (x + mX) / 2;
       float yEndPoint = (y + mY) / 2;
       polygon.getPath().quadTo(mX, mY, xEndPoint, yEndPoint);
 
-      if (currentStrokeWidth.first && variableWidth) {
+      if (variableWidth) {
         composite.add(polygon);
         polygon = new Polygon();
         polygon.getPath().moveTo(xEndPoint, yEndPoint);
@@ -331,19 +329,17 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
     return mBitmap;
   }
 
-  private Pair<Boolean, Float> getStrokeWidth(float eventPressure) {
-    boolean modified = false;
+  private float getStrokeWidth(float eventPressure) {
     if (variableWidth) {
       if( Math.abs(eventPressure - currentStrokeModify) > STROKE_DELTA ) {
-        modified = true;
-        if( eventPressure > currentStrokeModify) {
+        if(eventPressure > currentStrokeModify) {
           currentStrokeModify = Math.min(eventPressure, currentStrokeModify + STROKE_INCREMENT);
         } else {
           currentStrokeModify = Math.max(eventPressure, currentStrokeModify - STROKE_INCREMENT);
         }
       }
     }
-    return new Pair<Boolean, Float>(modified, strokeWidth * currentStrokeModify);
+    return strokeWidth * currentStrokeModify;
   }
 
   public void setStrokeWidth(int strokeWidth) {
