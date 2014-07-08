@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
 import dk.eightyplus.Painter.Callback;
@@ -29,6 +30,9 @@ import java.util.List;
  *
  */
 public class DrawingView extends View implements ComponentList, SaveLoad {
+
+  @SuppressWarnings("unused")
+  private static final String TAG = DrawingView.class.toString();
 
   private final List<Component> components = new ArrayList<Component>();
 
@@ -139,7 +143,7 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
     polygon.setColor(getDrawingColor());
     currentStrokeModify = pressure;
     polygon.getPath().reset();
-    polygon.setStrokeWidth(getStrokeWidth(pressure));
+    polygon.setStrokeWidth(getStrokeWidth(pressure).second);
     polygon.getPath().moveTo(x, y);
     mX = x;
     mY = y;
@@ -149,13 +153,14 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
     float dx = Math.abs(x - mX);
     float dy = Math.abs(y - mY);
     if (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) {
-      polygon.setStrokeWidth(getStrokeWidth(pressure));
+      Pair<Boolean, Float> currentStrokeWidth = getStrokeWidth(pressure);
+      polygon.setStrokeWidth(currentStrokeWidth.second);
 
       float xEndPoint = (x + mX) / 2;
       float yEndPoint = (y + mY) / 2;
       polygon.getPath().quadTo(mX, mY, xEndPoint, yEndPoint);
 
-      if (variableWidth) {
+      if (currentStrokeWidth.first && variableWidth) {
         composite.add(polygon);
         polygon = new Polygon();
         polygon.getPath().moveTo(xEndPoint, yEndPoint);
@@ -326,9 +331,11 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
     return mBitmap;
   }
 
-  private float getStrokeWidth(float eventPressure) {
+  private Pair<Boolean, Float> getStrokeWidth(float eventPressure) {
+    boolean modified = false;
     if (variableWidth) {
       if( Math.abs(eventPressure - currentStrokeModify) > STROKE_DELTA ) {
+        modified = true;
         if( eventPressure > currentStrokeModify) {
           currentStrokeModify = Math.min(eventPressure, currentStrokeModify + STROKE_INCREMENT);
         } else {
@@ -336,7 +343,7 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
         }
       }
     }
-    return strokeWidth * currentStrokeModify;
+    return new Pair<Boolean, Float>(modified, strokeWidth * currentStrokeModify);
   }
 
   public void setStrokeWidth(int strokeWidth) {
