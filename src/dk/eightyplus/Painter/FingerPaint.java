@@ -58,6 +58,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   private ViewGroup visibleLayer;
   private int color = 0;
   private String cameraFileName;
+  private String saveFileNamePrefix;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -378,6 +379,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   @Override
   public void load(String fileName) {
     try {
+      saveFileNamePrefix = fileName.substring(0, fileName.lastIndexOf("."));
       clearUndos();
       Storage.getStorage(getApplicationContext()).loadFromFile(view, fileName);
       removeNotesList();
@@ -441,16 +443,8 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     setupUndoMenuButton(menu);
     setupRedoMenuButton(menu);
     setupReplayMenuButton(menu);
-
-
-    MenuItem menuItem = menu.findItem(R.id.menu_list);
-    menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-      @Override
-      public boolean onMenuItemClick(MenuItem item) {
-        showNotesList();
-        return true;
-      }
-    });
+    setupNewMenuButton(menu);
+    setupMenuListButton(menu);
 
     return true;
   }
@@ -573,11 +567,15 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
         public boolean onMenuItemClick(MenuItem item) {
           try {
             //writeToFile(getApplicationContext(), view.getBitmap());
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-            String date = formatter.format(Calendar.getInstance().getTime());
+            if (saveFileNamePrefix == null) {
+              SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+              String date = formatter.format(Calendar.getInstance().getTime());
+              saveFileNamePrefix = String.format("file-%s", date);
+            }
 
-            Storage.getStorage(getApplicationContext()).writeToFile(view, String.format("file-%s.note", date));
-            Storage.getStorage(getApplicationContext()).writeToFile(view.getBitmap(), String.format("file-%s.png", date), 30);
+            Storage storage = Storage.getStorage(getApplicationContext());
+            storage.writeToFile(view, String.format("%s.note", saveFileNamePrefix));
+            storage.writeToFile(view.getBitmap(), String.format("%s.png", saveFileNamePrefix), 30);
           } catch (IOException e) {
             Log.e(TAG, "IOException", e);
           }
@@ -690,4 +688,31 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       });
     }
   }
+
+  private void setupNewMenuButton(Menu menu) {
+    MenuItem menuNew = menu.findItem(R.id.menu_new);
+    if (menuNew != null) {
+      menuNew.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+          clearUndos();
+          saveFileNamePrefix = null;
+          view.newDrawing();
+          return true;
+        }
+      });
+    }
+  }
+
+  private void setupMenuListButton(Menu menu) {
+    MenuItem menuItem = menu.findItem(R.id.menu_list);
+    menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+      @Override
+      public boolean onMenuItemClick(MenuItem item) {
+        showNotesList();
+        return true;
+      }
+    });
+  }
+
 }

@@ -194,6 +194,7 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
   }
 
   private void clear() {
+    mBitmap.recycle();
     int w = mBitmap.getWidth();
     int h = mBitmap.getHeight();
 
@@ -262,6 +263,12 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
 
   public void setColor(int color) {
     this.color = color;
+  }
+
+  public void newDrawing() {
+    clear();
+    components.clear();
+    invalidate();
   }
 
   public void redraw() {

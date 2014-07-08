@@ -40,6 +40,13 @@
       android:visible="true"
       android:enabled="true" />
 
+  <item android:id="@+id/menu_new"
+      android:title="New"
+      android:icon="@android:drawable/ic_menu_add"
+      android:showAsAction="ifRoom"
+      android:visible="true"
+      android:enabled="true" />
+
   <item android:id="@+id/menu_share"
       android:icon="@android:drawable/ic_menu_share"
       android:title="Share"
