@@ -8,26 +8,11 @@
     android:layout_height="wrap_content">
 
   <ImageView android:id="@+id/note_thumb"
-      android:src="@android:drawable/ic_menu_save"
+      android:src="@android:drawable/stat_notify_error"
       android:layout_width="wrap_content"
-      android:layout_height="fill_parent"
-      android:layout_alignParentLeft="true"
+      android:layout_height="match_parent"
+      android:layout_centerInParent="true"
       android:contentDescription="" />
-  <View android:id="@+id/separator"
-      android:layout_width="1dp"
-      android:layout_height="fill_parent"
-      android:background="@color/light_grey"
-      android:layout_toRightOf="@id/note_thumb"
-      android:layout_marginBottom="1dp"
-      android:layout_marginTop="1dp"
-      android:layout_marginLeft="1dp"
-      android:layout_marginRight="1dp"/>
-  <TextView android:id="@+id/note_title"
-      android:layout_toRightOf="@id/separator"
-      android:text="Note title - 01.01.2014"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:textColor="@color/black" />
 
   <ImageView
       android:id="@+id/button_delete"
@@ -45,6 +30,11 @@
       android:layout_width="wrap_content"
       android:layout_height="fill_parent"
       />
-
+  <TextView android:id="@+id/note_title"
+      android:layout_toLeftOf="@id/button_copy"
+      android:text="Note title - 01.01.2014"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:textColor="@color/black" />
 
 </RelativeLayout>

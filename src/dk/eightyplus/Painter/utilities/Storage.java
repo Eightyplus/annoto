@@ -64,6 +64,24 @@ public class Storage {
     out.close();
   }
 
+  public void deleteFile(String fileName) {
+    File file = getFilename(fileName);
+    if (file.exists()) {
+      file.delete();
+    }
+  }
+
+  public void deleteNoteAndThumb(String fileName) {
+    File file = getFilename(fileName);
+    if (file.exists()) {
+      file.delete();
+    }
+    File thumb = getThumb2Notes(fileName);
+    if (thumb.exists()) {
+      thumb.delete();
+    }
+  }
+
   public void loadFromFile(SaveLoad load, String fileName) throws IOException, ClassNotFoundException {
     loadFromFile(load, fileName, false);
   }

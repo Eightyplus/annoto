@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import dk.eightyplus.Painter.R;
 import dk.eightyplus.Painter.utilities.Compatibility;
@@ -26,14 +27,18 @@ public class NoteListAdapter extends ArrayAdapter<String> implements ThumbLoader
   private static final String TAG = NoteListAdapter.class.toString();
 
   private static final int initialThumbLoadSize = 3;
-  Map<String, SoftReference<Drawable>> cachedImages = new HashMap<String, SoftReference<Drawable>>();
-  Map<String, Boolean> loading = new HashMap<String, Boolean>();
+  private Map<String, SoftReference<Drawable>> cachedImages = new HashMap<String, SoftReference<Drawable>>();
+  private Map<String, Boolean> loading = new HashMap<String, Boolean>();
 
-  public NoteListAdapter(Context context, int resource, String[] objects) {
+  private ButtonOnClickListener buttonOnClickListener;
+
+  public NoteListAdapter(Context context, ListView listView, int resource, String[] objects) {
     super(context, resource, objects);
     for (int i = 0; i < initialThumbLoadSize; i++) {
       startImageLoad(objects[i]);
     }
+
+    buttonOnClickListener = new ButtonOnClickListener(listView);
   }
 
   @Override
@@ -48,13 +53,24 @@ public class NoteListAdapter extends ArrayAdapter<String> implements ThumbLoader
 
   @Override
   public View getView(int position, View convertView, ViewGroup parent) {
-    LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-    View rowView = inflater.inflate(R.layout.note_list_item, parent, false);
+    if (convertView == null) {
+      LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+      convertView = inflater.inflate(R.layout.note_list_item, parent, false);
+    }
+    View rowView = convertView;
 
     TextView textView = (TextView) rowView.findViewById(R.id.note_title);
     final ImageView imageView = (ImageView) rowView.findViewById(R.id.note_thumb);
     String item = getItem(position);
     textView.setText(item);
+
+    final View buttonDelete = rowView.findViewById(R.id.button_delete);
+    buttonDelete.setTag(R.id.button_delete);
+    buttonDelete.setOnClickListener(buttonOnClickListener);
+
+    final View buttonCopy = rowView.findViewById(R.id.button_copy);
+    buttonCopy.setTag(R.id.button_copy);
+    buttonCopy.setOnClickListener(buttonOnClickListener);
 
     String s = item;
 
@@ -75,6 +91,14 @@ public class NoteListAdapter extends ArrayAdapter<String> implements ThumbLoader
       }
     }
     return false;
+  }
+
+  public Drawable getImage(int position) {
+    String path = getItem(position);
+    if (cachedImages.containsKey(path)) {
+      return cachedImages.get(path).get();
+    }
+    return null;
   }
 
   private void startImageLoad(String s) {
@@ -102,4 +126,24 @@ public class NoteListAdapter extends ArrayAdapter<String> implements ThumbLoader
     setLoadingDone(path);
     notifyDataSetChanged();
   }
+
+  /**
+   * Small class to put on buttons inside list view item, passed click with id of button
+   */
+  private static class ButtonOnClickListener implements View.OnClickListener {
+    private final SoftReference<ListView> listViewSoftReference;
+
+    public ButtonOnClickListener(ListView listView) {
+      this.listViewSoftReference = new SoftReference<ListView>(listView);
+    }
+
+    @Override
+    public void onClick(View v) {
+      ListView listView = listViewSoftReference.get();
+      if (listView != null) {
+        int position = listView.getPositionForView((View) v.getParent());
+        listView.performItemClick(v, position, (Integer) v.getTag());
+      }
+    }
+  };
 }

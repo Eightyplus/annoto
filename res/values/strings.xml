@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Painter</string>
+  <string name="app_name">Painter</string>
+
+  <string name="delete_list_item">Delete item?</string>
+  <string name="delete">Delete</string>
+  <string name="cancel">Cancel</string>
+
+  <string formatted="false" name="delete_file">Delete `%s`</string>
 </resources>
