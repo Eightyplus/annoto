@@ -19,6 +19,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 import dk.eightyplus.Painter.action.ActionBarClickListener;
 import dk.eightyplus.Painter.action.State;
@@ -259,6 +260,16 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     }
   }
 
+  private void showSpinner(final boolean show) {
+    final ProgressBar pb = (ProgressBar) findViewById(R.id.progress);
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        pb.setVisibility( show ? View.VISIBLE : View.GONE);
+      }
+    });
+  }
+
   @Override
   public void textEditDone() {
 
@@ -377,18 +388,50 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   }
 
   @Override
-  public void load(String fileName) {
-    try {
-      saveFileNamePrefix = fileName.substring(0, fileName.lastIndexOf("."));
-      clearUndos();
-      Storage.getStorage(getApplicationContext()).loadFromFile(view, fileName);
-      removeNotesList();
-      view.redraw();
-    } catch (IOException e) {
+  public void load(final String fileName) {
 
-    } catch (ClassNotFoundException e) {
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        removeNotesList();
+        showSpinner(true);
+        try {
+          saveFileNamePrefix = fileName.substring(0, fileName.lastIndexOf("."));
+          clearUndos();
+          Storage.getStorage(getApplicationContext()).loadFromFile(view, fileName);
+          view.redraw();
+        } catch (IOException e) {
+          Log.e(TAG, "IOException", e);
+        } catch (ClassNotFoundException e) {
+          Log.e(TAG, "ClassNotFoundException", e);
+        }
+        showSpinner(false);
+      }
+    }).start();
+  }
 
-    }
+  private void save() {
+    new Thread(new Runnable() {
+      @Override
+      public void run() {
+        showSpinner(true);
+        try {
+          //writeToFile(getApplicationContext(), view.getBitmap());
+          if (saveFileNamePrefix == null) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            String date = formatter.format(Calendar.getInstance().getTime());
+            saveFileNamePrefix = String.format("file-%s", date);
+          }
+
+          Storage storage = Storage.getStorage(getApplicationContext());
+          storage.writeToFile(view, String.format("%s.note", saveFileNamePrefix));
+          storage.writeToFile(view.getBitmap(), String.format("%s.png", saveFileNamePrefix), 30);
+        } catch (IOException e) {
+          Log.e(TAG, "IOException", e);
+        }
+        showSpinner(false);
+      }
+    }).start();
   }
 
   public boolean undo() {
@@ -565,20 +608,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       menuSave.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem item) {
-          try {
-            //writeToFile(getApplicationContext(), view.getBitmap());
-            if (saveFileNamePrefix == null) {
-              SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-              String date = formatter.format(Calendar.getInstance().getTime());
-              saveFileNamePrefix = String.format("file-%s", date);
-            }
-
-            Storage storage = Storage.getStorage(getApplicationContext());
-            storage.writeToFile(view, String.format("%s.note", saveFileNamePrefix));
-            storage.writeToFile(view.getBitmap(), String.format("%s.png", saveFileNamePrefix), 30);
-          } catch (IOException e) {
-            Log.e(TAG, "IOException", e);
-          }
+          save();
           return true;
         }
       });
