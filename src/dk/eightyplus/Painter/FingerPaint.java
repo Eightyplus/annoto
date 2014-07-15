@@ -488,6 +488,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     setupReplayMenuButton(menu);
     setupNewMenuButton(menu);
     setupMenuListButton(menu);
+    setupMenuFeedbackButton(menu);
 
     return true;
   }
@@ -743,6 +744,19 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
         return true;
       }
     });
+  }
+
+  private void setupMenuFeedbackButton(Menu menu) {
+    MenuItem menuItem = menu.findItem(R.id.menu_feedback);
+    menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+      @Override
+      public boolean onMenuItemClick(MenuItem item) {
+        String url = getApplicationContext().getString(R.string.url_feedback);
+        WebPageActivity.startWebPageActivity(FingerPaint.this, url);
+        return true;
+      }
+    });
+
   }
 
 }
