@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
   <dimen name="progress_size">50dip</dimen>
+  <dimen name="ad_width">300dp</dimen>
+  <dimen name="ad_height">250dp</dimen>
 </resources>

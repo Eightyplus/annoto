@@ -35,6 +35,31 @@ public class NoteListFragment extends DialogFragment {
   }
 
   @Override
+  public void onResume() {
+    super.onResume();
+    if (adapter != null) {
+      adapter.onResume();
+    }
+  }
+
+  @Override
+  public void onPause() {
+    super.onPause();
+    if (adapter != null) {
+      adapter.onPause();
+    }
+  }
+
+
+  @Override
+  public void onDestroy() {
+    super.onDestroy();
+    if (adapter != null) {
+      adapter.onDestroy();
+    }
+  }
+
+  @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.note_list_layout, container, false);
 

@@ -9,7 +9,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.google.android.gms.ads.AdView;
 import dk.eightyplus.Painter.R;
+import dk.eightyplus.Painter.utilities.Ad;
 import dk.eightyplus.Painter.utilities.Compatibility;
 
 import java.lang.ref.SoftReference;
@@ -32,12 +34,15 @@ public class NoteListAdapter extends ArrayAdapter<String> implements ThumbLoader
 
   private ButtonOnClickListener buttonOnClickListener;
 
+  private final Ad ad;
+
   public NoteListAdapter(Context context, ListView listView, int resource, String[] objects) {
     super(context, resource, objects);
     for (int i = 0; i < initialThumbLoadSize; i++) {
       startImageLoad(objects[i]);
     }
 
+    ad = new Ad();
     buttonOnClickListener = new ButtonOnClickListener(listView);
   }
 
@@ -47,13 +52,27 @@ public class NoteListAdapter extends ArrayAdapter<String> implements ThumbLoader
   }
 
   @Override
+  public int getCount() {
+    int count = super.getCount();
+    return ad.mapCount(count);
+  }
+
+  private int getMappedPosition(int position) {
+    return ad.mapPosition(position);
+  }
+
+  @Override
   public boolean hasStableIds() {
     return true;
   }
 
   @Override
   public View getView(int position, View convertView, ViewGroup parent) {
-    if (convertView == null) {
+    if (ad.inject(position)) {
+      return ad.injectView(getContext(), position);
+    }
+
+    if (convertView == null || convertView instanceof AdView) {
       LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
       convertView = inflater.inflate(R.layout.note_list_item, parent, false);
     }
@@ -61,7 +80,7 @@ public class NoteListAdapter extends ArrayAdapter<String> implements ThumbLoader
 
     TextView textView = (TextView) rowView.findViewById(R.id.note_title);
     final ImageView imageView = (ImageView) rowView.findViewById(R.id.note_thumb);
-    String item = getItem(position);
+    String item = getItem(getMappedPosition(position));
     textView.setText(item);
 
     final View buttonDelete = rowView.findViewById(R.id.button_delete);
@@ -82,6 +101,18 @@ public class NoteListAdapter extends ArrayAdapter<String> implements ThumbLoader
     return rowView;
   }
 
+  public void onPause() {
+    ad.onPause();
+  }
+
+  public void onResume() {
+    ad.onResume();
+  }
+
+  public void onDestroy() {
+    ad.onDestroy();
+  }
+
   private boolean setImage(ImageView imageView, String path) {
     if (cachedImages.containsKey(path)) {
       Drawable drawable = cachedImages.get(path).get();
@@ -94,7 +125,7 @@ public class NoteListAdapter extends ArrayAdapter<String> implements ThumbLoader
   }
 
   public Drawable getImage(int position) {
-    String path = getItem(position);
+    String path = getItem(getMappedPosition(position));
     if (cachedImages.containsKey(path)) {
       return cachedImages.get(path).get();
     }
