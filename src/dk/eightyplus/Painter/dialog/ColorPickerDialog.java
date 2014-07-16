@@ -25,6 +25,11 @@ import android.view.View;
 
 public class ColorPickerDialog extends Dialog {
 
+    private static final float PI = 3.1415926f;
+    private static final int CENTER_RADIUS = 64;
+    private static final int CENTER_X = 32 + 2 * CENTER_RADIUS;
+    private static final int CENTER_Y = 32 + 2 * CENTER_RADIUS;
+
     public interface OnColorChangedListener {
         void colorChanged(int color);
     }
@@ -33,6 +38,7 @@ public class ColorPickerDialog extends Dialog {
     private int mInitialColor;
 
     private static class ColorPickerView extends View {
+        private final RectF rect;
         private Paint mPaint;
         private Paint mCenterPaint;
         private final int[] mColors;
@@ -50,11 +56,14 @@ public class ColorPickerDialog extends Dialog {
             mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             mPaint.setShader(s);
             mPaint.setStyle(Paint.Style.STROKE);
-            mPaint.setStrokeWidth(32);
+            mPaint.setStrokeWidth(CENTER_RADIUS);
 
             mCenterPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             mCenterPaint.setColor(color);
             mCenterPaint.setStrokeWidth(5);
+
+            float r = CENTER_X - mPaint.getStrokeWidth()*0.5f;
+            rect = new RectF(-r, -r, r, r);
         }
 
         private boolean mTrackingCenter;
@@ -62,11 +71,9 @@ public class ColorPickerDialog extends Dialog {
 
         @Override
         protected void onDraw(Canvas canvas) {
-            float r = CENTER_X - mPaint.getStrokeWidth()*0.5f;
 
             canvas.translate(CENTER_X, CENTER_X);
-
-            canvas.drawOval(new RectF(-r, -r, r, r), mPaint);
+            canvas.drawOval(rect, mPaint);
             canvas.drawCircle(0, 0, CENTER_RADIUS, mCenterPaint);
 
             if (mTrackingCenter) {
@@ -91,10 +98,6 @@ public class ColorPickerDialog extends Dialog {
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             setMeasuredDimension(CENTER_X*2, CENTER_Y*2);
         }
-
-        private static final int CENTER_X = 100;
-        private static final int CENTER_Y = 100;
-        private static final int CENTER_RADIUS = 32;
 
         private int floatToByte(float x) {
             int n = Math.round(x);
@@ -160,8 +163,6 @@ public class ColorPickerDialog extends Dialog {
             return Color.argb(Color.alpha(color), pinToByte(ir),
                               pinToByte(ig), pinToByte(ib));
         }
-
-        private static final float PI = 3.1415926f;
 
         @Override
         public boolean onTouchEvent(MotionEvent event) {
