@@ -2,25 +2,44 @@ package dk.eightyplus.Painter.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
 import dk.eightyplus.Painter.Callback;
+import dk.eightyplus.Painter.Keys;
 import dk.eightyplus.Painter.R;
 
 /**
- * 
+ * Fragment for width slider
  */
 public class SliderFragment extends DialogFragment {
 
   private Callback callback;
-  private final int width;
+  private int width;
+
+  @SuppressWarnings("unused")
+  public SliderFragment() { }
 
   public SliderFragment(final Callback callback, int width) {
     this.callback = callback;
     this.width = width;
+  }
+
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    if (savedInstanceState != null) {
+      width = savedInstanceState.getInt(Keys.WIDTH);
+    }
+
+    callback = (Callback) getActivity();
+  }
+
+  @Override
+  public void onSaveInstanceState(Bundle outState) {
+    super.onSaveInstanceState(outState);
+    outState.putInt(Keys.WIDTH, width);
   }
 
   @Override
