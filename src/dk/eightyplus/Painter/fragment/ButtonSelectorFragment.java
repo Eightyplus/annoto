@@ -9,6 +9,7 @@ import dk.eightyplus.Painter.Callback;
 import dk.eightyplus.Painter.Keys;
 import dk.eightyplus.Painter.R;
 import dk.eightyplus.Painter.action.State;
+import dk.eightyplus.Painter.view.ClickMoveView;
 
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
@@ -91,8 +92,11 @@ public class ButtonSelectorFragment extends DialogFragment {
       button.setOnClickListener(new ToggleButtonClickListener(callback, buttons, (String) button.getTag()));
     }
 
-    final View buttonFold = view.findViewById(R.id.button_fold);
-    final View buttonUnfold = view.findViewById(R.id.button_unfold);
+    final ClickMoveView buttonFold = (ClickMoveView) view.findViewById(R.id.button_fold);
+    final ClickMoveView buttonUnfold = (ClickMoveView) view.findViewById(R.id.button_unfold);
+    buttonFold.setParent(view);
+    buttonUnfold.setParent(view);
+
     buttonUnfold.setOnClickListener(new View.OnClickListener() {
 
       @Override
