@@ -28,6 +28,7 @@ import dk.eightyplus.Painter.component.Component;
 import dk.eightyplus.Painter.component.Picture;
 import dk.eightyplus.Painter.component.Text;
 import dk.eightyplus.Painter.dialog.ColorPickerDialog;
+import dk.eightyplus.Painter.fragment.ButtonSelectorFragment;
 import dk.eightyplus.Painter.fragment.EditorFragment;
 import dk.eightyplus.Painter.fragment.NoteListFragment;
 import dk.eightyplus.Painter.fragment.SliderFragment;
@@ -77,6 +78,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
 
     setupActionBar();
 
+    showButtonSelector();
     /*
     boolean show = savedInstanceState == null || !savedInstanceState.getBoolean("TESTCODE", false);
     if (show) {
@@ -260,6 +262,33 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       transaction.commit();
     }
   }
+
+  private void showButtonSelector() {
+    Fragment fragment = getSupportFragmentManager().findFragmentByTag(Tags.FRAGMENT_SLIDER);
+    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+    if (fragment == null) {
+      int[] icons = new int[]{
+          android.R.drawable.ic_menu_edit,
+          android.R.drawable.ic_menu_more,
+          android.R.drawable.ic_menu_delete,
+          android.R.drawable.ic_menu_sort_alphabetically,
+      };
+
+      String[] tags = new String[] {
+          State.DrawPath.name(),
+          State.Move.name(),
+          State.Delete.name(),
+          State.Text.name(),
+      };
+
+      ButtonSelectorFragment buttonSelectorFragment = new ButtonSelectorFragment(icons, tags);
+      transaction.replace(R.id.button_selector, buttonSelectorFragment, Tags.FRAGMENT_SELECTOR);
+    } else {
+      transaction.remove(fragment);
+    }
+    transaction.commit();
+  }
+
 
   private void showSpinner(final boolean show) {
     final ProgressBar pb = (ProgressBar) findViewById(R.id.progress);

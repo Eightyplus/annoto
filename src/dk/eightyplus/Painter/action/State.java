@@ -8,6 +8,11 @@ public enum State {
   Delete,
   DrawPath,
   Move,
-  Text
+  Text;
+
+
+  public static State state(String state) {
+    return State.valueOf(state);
+  }
 }
 

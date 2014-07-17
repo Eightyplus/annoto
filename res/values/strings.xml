@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+  <string name="empty" />
+
   <string name="delete_list_item">Delete item?</string>
   <string name="delete">Delete</string>
   <string name="cancel">Cancel</string>
