@@ -236,6 +236,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     transaction.commit();
   }
 
+  @SuppressWarnings("unused")
   private void hideWidthSlider() {
     Fragment fragment = getSupportFragmentManager().findFragmentByTag(Tags.FRAGMENT_SLIDER);
     if (fragment != null) {
@@ -247,7 +248,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
 
   private void showNotesList() {
     FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-    NoteListFragment noteListFragment = new NoteListFragment(this);
+    NoteListFragment noteListFragment = new NoteListFragment();
     noteListFragment.show(transaction, Tags.FRAGMENT_LIST);
   }
 
@@ -305,7 +306,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   protected void onPause() {
     super.onPause();
     hideEditor();
-    hideWidthSlider();
+    //hideWidthSlider();
   }
 
   @Override

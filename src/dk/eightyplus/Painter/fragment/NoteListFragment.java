@@ -26,12 +26,14 @@ import java.lang.ref.SoftReference;
  */
 public class NoteListFragment extends DialogFragment {
 
-  private final SoftReference<Callback> callbackSoftReference;
+  private SoftReference<Callback> callbackSoftReference;
   private Context context;
   private NoteListAdapter adapter;
 
-  public NoteListFragment(Callback callback) {
-    this.callbackSoftReference = new SoftReference<Callback>(callback);
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    this.callbackSoftReference = new SoftReference<Callback>((Callback) getActivity());
   }
 
   @Override
