@@ -23,4 +23,6 @@ public interface Callback {
   public void add(Undo undo);
 
   public void load(String fileName);
+
+  public void colorChanged(int color);
 }

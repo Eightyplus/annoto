@@ -29,6 +29,7 @@ import dk.eightyplus.Painter.component.Picture;
 import dk.eightyplus.Painter.component.Text;
 import dk.eightyplus.Painter.dialog.ColorPickerDialog;
 import dk.eightyplus.Painter.fragment.ButtonSelectorFragment;
+import dk.eightyplus.Painter.fragment.ColorPaletteFragment;
 import dk.eightyplus.Painter.fragment.EditorFragment;
 import dk.eightyplus.Painter.fragment.NoteListFragment;
 import dk.eightyplus.Painter.fragment.SliderFragment;
@@ -246,6 +247,18 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       transaction.remove(fragment);
       transaction.commit();
     }
+  }
+
+  private void showColorPalette() {
+    Fragment fragment = getSupportFragmentManager().findFragmentByTag(Tags.FRAGMENT_COLOR);
+    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+    if (fragment == null) {
+      ColorPaletteFragment sliderFragment = new ColorPaletteFragment();
+      transaction.replace(R.id.configuration_top, sliderFragment, Tags.FRAGMENT_COLOR);
+    } else {
+      transaction.remove(fragment);
+    }
+    transaction.commit();
   }
 
   private void showNotesList() {
@@ -678,7 +691,8 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       menuColor.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem item) {
-          new ColorPickerDialog(FingerPaint.this, FingerPaint.this, view.getColor()).show();
+          //new ColorPickerDialog(FingerPaint.this, FingerPaint.this, view.getColor()).show();
+          showColorPalette();
           return true;
         }
       });
