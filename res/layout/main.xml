@@ -25,8 +25,7 @@
   <FrameLayout
       android:id="@+id/button_selector"
       android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_margin="10dp" />
+      android:layout_height="wrap_content" />
 
   <ProgressBar android:id="@+id/progress"
       android:layout_width="@dimen/progress_size"

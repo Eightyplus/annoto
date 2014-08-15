@@ -324,6 +324,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       getActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
       getActionBar().setCustomView(R.layout.action_bar_layout);
 
+      /*
       final View actionBar = getActionBar().getCustomView().findViewById(R.id.action_bar_toggle_group);
       final View editButton = actionBar.findViewById(R.id.action_bar_edit);
       final View moveButton = actionBar.findViewById(R.id.action_bar_move);
@@ -341,6 +342,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       moveButton.setOnClickListener(new ActionBarClickListener(actionBarButtons, State.Move, this));
       deleteButton.setOnClickListener(new ActionBarClickListener(actionBarButtons, State.Delete, this));
       textButton.setOnClickListener(new ActionBarClickListener(actionBarButtons, State.Text, this));
+      */
     }
   }
 

@@ -4,6 +4,8 @@
   <item type="id" name="menu_path" />
   <item type="id" name="menu_move" />
   <item type="id" name="menu_delete" />
+  <item type="id" name="menu_redraw" />
+  <item type="id" name="menu_load" />
 
 
 </resources>

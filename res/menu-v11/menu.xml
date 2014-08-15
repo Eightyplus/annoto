@@ -3,45 +3,52 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
   <!--item android:id="@+id/menu_path"
-        android:title="Path"
+        android:title="@string/path"
         android:icon="@android:drawable/ic_menu_edit"
         android:showAsAction="always"
         android:visible="true"
         android:enabled="true" /-->
   <item android:id="@+id/menu_width"
-      android:title="Width"
+      android:title="@string/width"
       android:icon="@drawable/line"
       android:showAsAction="always"
       android:visible="true"
       android:enabled="true" />
   <!--item android:id="@+id/menu_move"
-        android:title="Move"
+        android:title="@string/move"
       android:icon="@android:drawable/ic_menu_set_as"
         android:showAsAction="always"
         android:visible="true"
         android:enabled="true" /-->
   <item android:id="@+id/menu_color"
-      android:title="Color"
+      android:title="@string/color"
       android:icon="@drawable/rainbow"
       android:showAsAction="always"
       android:visible="true"
       android:enabled="true" />
   <!--item android:id="@+id/menu_delete"
         android:icon="@android:drawable/ic_menu_delete"
-        android:title="Delete"
+        android:title="@string/delete"
         android:showAsAction="always"
         android:visible="true"
         android:enabled="true" /-->
 
   <item android:id="@+id/menu_undo"
-      android:title="Undo"
+      android:title="@string/undo"
       android:icon="@android:drawable/ic_menu_revert"
       android:showAsAction="always"
       android:visible="true"
       android:enabled="true" />
 
+  <item android:id="@+id/menu_redo"
+      android:title="@string/redo"
+      android:icon="@drawable/menu_redo"
+      android:showAsAction="always"
+      android:visible="true"
+      android:enabled="true" />
+
   <item android:id="@+id/menu_new"
-      android:title="New"
+      android:title="@string/new_drawing"
       android:icon="@android:drawable/ic_menu_add"
       android:showAsAction="ifRoom"
       android:visible="true"
@@ -49,30 +56,34 @@
 
   <item android:id="@+id/menu_share"
       android:icon="@android:drawable/ic_menu_share"
-      android:title="Share"
-      android:showAsAction="ifRoom"
+      android:title="@string/share"
+      android:showAsAction="always"
       android:visible="true"
       android:enabled="true" />
-  <item android:id="@+id/menu_gallery"
-      android:icon="@android:drawable/ic_menu_gallery"
-      android:title="Gallery"
-      android:showAsAction="ifRoom"
-      android:visible="true"
-      android:enabled="true" />
-  <item android:id="@+id/menu_camera"
-      android:icon="@android:drawable/ic_menu_camera"
-      android:title="Camera"
-      android:showAsAction="ifRoom"
-      android:visible="true"
-      android:enabled="true" />
+
   <item android:id="@+id/menu_save"
       android:icon="@android:drawable/ic_menu_save"
-      android:title="Save"
+      android:title="@string/save"
       android:showAsAction="ifRoom"
       android:visible="true"
       android:enabled="true" />
-  <item android:id="@+id/menu_load"
-      android:title="Load"
+
+  <item android:id="@+id/menu_gallery"
+      android:icon="@android:drawable/ic_menu_gallery"
+      android:title="@string/gallery"
+      android:showAsAction="ifRoom"
+      android:visible="true"
+      android:enabled="true" />
+
+  <item android:id="@+id/menu_camera"
+      android:icon="@android:drawable/ic_menu_camera"
+      android:title="@string/camera"
+      android:showAsAction="ifRoom"
+      android:visible="true"
+      android:enabled="true" />
+
+  <!--item android:id="@+id/menu_load"
+      android:title="@string/Load"
       android:showAsAction="ifRoom"
       android:visible="true"
       android:enabled="true" />
@@ -80,28 +91,22 @@
       android:title="Randomize colors"
       android:showAsAction="never"
       android:visible="true"
-      android:enabled="true" />
-
-  <item android:id="@+id/menu_redo"
-      android:title="Redo"
-      android:showAsAction="never"
-      android:visible="true"
-      android:enabled="true" />
+      android:enabled="true" /-->
 
   <item android:id="@+id/menu_replay"
-      android:title="Demo"
+      android:title="@string/demo"
       android:showAsAction="never"
       android:visible="true"
       android:enabled="true" />
 
   <item android:id="@+id/menu_list"
-      android:title="List"
+      android:title="@string/load"
       android:showAsAction="never"
       android:visible="true"
       android:enabled="true" />
 
   <item android:id="@+id/menu_feedback"
-      android:title="Feedback"
+      android:title="@string/feedback"
       android:showAsAction="never"
       android:visible="true"
       android:enabled="true" />
@@ -109,7 +114,7 @@
   <group android:id="@+id/hide_all_maybe"
       android:visible="false">
     <item android:id="@+id/menu_blur"
-        android:title="Blur"
+        android:title="@string/blur"
         android:icon="@drawable/ic_launcher"
         android:showAsAction="always"
         android:visible="false"
