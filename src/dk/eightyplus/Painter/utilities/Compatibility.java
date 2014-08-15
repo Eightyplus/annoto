@@ -9,7 +9,7 @@ import android.util.Log;
 import android.view.View;
 
 /**
- *
+ * Compatibility implementation to support a wider selection of android version
  */
 public abstract class Compatibility {
   private static final String TAG = Compatibility.class.toString();
@@ -19,7 +19,9 @@ public abstract class Compatibility {
   static {
     int version = getApiVersion();
 
-    if (version >= Build.VERSION_CODES.HONEYCOMB) {
+    if (version >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+      INSTANCE = new APIVersion15();
+    } else if (version >= Build.VERSION_CODES.HONEYCOMB) {
       INSTANCE = new APIVersion11();
     } else if (version >= Build.VERSION_CODES.ECLAIR_MR1) {
       INSTANCE = new APIVersion7();
@@ -46,6 +48,7 @@ public abstract class Compatibility {
    * @param context context
    * @return version code the app was built with
    */
+  @SuppressWarnings("unused")
   public static int getVersionCode(final Context context) {
     int versionCode = 0;
     try {
@@ -75,10 +78,13 @@ public abstract class Compatibility {
   public abstract <Params, Progress, Result> void startTask(final AsyncTask<Params, Progress, Result> task,
                                                             final Params... params);
 
+  public abstract boolean callOnClick(final View view, final View.OnClickListener onClickListener);
+
   /**
    * Unsupported version.
    */
   private static class UnsupportedVersion extends Compatibility {
+    @SuppressWarnings("unused")
     private static final String UNSUPPORTED_ERROR = "This Android version isn't supported";
 
     @Override
@@ -91,6 +97,11 @@ public abstract class Compatibility {
 
     @Override
     public <Params, Progress, Result> void startTask(AsyncTask<Params, Progress, Result> task, Params... params) { }
+
+    @Override
+    public boolean callOnClick(final View view, final View.OnClickListener onClickListener) {
+      return false;
+    }
   }
 
   /**
@@ -107,7 +118,7 @@ public abstract class Compatibility {
    * API version 11 (Build.VERSION_CODES.HONEYCOMB).
    */
   @SuppressWarnings("deprecation")
-  private static class APIVersion11 extends UnsupportedVersion {
+  private static class APIVersion11 extends APIVersion7 {
 
     @Override
     public <Params, Progress, Result> void startTask(AsyncTask<Params, Progress, Result> task, Params... params) {
@@ -124,8 +135,27 @@ public abstract class Compatibility {
       view.setLayerType(View.LAYER_TYPE_HARDWARE, paint);
     }
 
-
+    @Override
+    public boolean callOnClick(final View view, final View.OnClickListener onClickListener) {
+      if (onClickListener != null) {
+        onClickListener.onClick(view);
+      } else if (view != null) {
+        return view.performClick();
+      }
+      return true;
+    }
   }
 
 
+  /**
+   * API version 15 (Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1).
+   */
+  @SuppressWarnings("deprecation")
+  private static class APIVersion15 extends APIVersion11 {
+
+    @Override
+    public boolean callOnClick(final View view, final View.OnClickListener onClickListener) {
+      return view != null && view.callOnClick();
+    }
+  }
 }

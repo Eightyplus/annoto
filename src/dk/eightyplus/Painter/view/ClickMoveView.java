@@ -5,6 +5,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
+import dk.eightyplus.Painter.utilities.Compatibility;
 
 import java.lang.ref.SoftReference;
 
@@ -25,6 +26,8 @@ public class ClickMoveView extends View {
   private int _yDelta;
   private long touchDownTime;
 
+  private OnClickListener onClickListener;
+
   @SuppressWarnings("unused")
   public ClickMoveView(Context context) {
     super(context);
@@ -38,6 +41,12 @@ public class ClickMoveView extends View {
   @SuppressWarnings("unused")
   public ClickMoveView(Context context, AttributeSet attrs, int defStyle) {
     super(context, attrs, defStyle);
+  }
+
+  @Override
+  public void setOnClickListener(final OnClickListener l) {
+    super.setOnClickListener(l);
+    onClickListener = l;
   }
 
   public void setParent(View parent) {
@@ -61,7 +70,7 @@ public class ClickMoveView extends View {
         case MotionEvent.ACTION_UP:
           long touchUpTime = System.currentTimeMillis();
           if (touchUpTime - touchDownTime < 100) {
-            callOnClick();
+            Compatibility.get().callOnClick(this, onClickListener);
           }
           break;
         case MotionEvent.ACTION_MOVE:
