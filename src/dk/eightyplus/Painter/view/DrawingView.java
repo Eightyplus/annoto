@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 import android.view.MotionEvent;
 import android.view.View;
 import dk.eightyplus.Painter.Callback;
+import dk.eightyplus.Painter.Tags;
 import dk.eightyplus.Painter.action.State;
 import dk.eightyplus.Painter.action.Undo;
 import dk.eightyplus.Painter.component.Component;
@@ -32,6 +33,7 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
 
   @SuppressWarnings("unused")
   private static final String TAG = DrawingView.class.toString();
+  private static final String COMPONENT = "COMPONTENT_";
 
   private final List<Component> components = new ArrayList<Component>();
 
@@ -85,7 +87,7 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
     components.clear();
     int i = 0;
     Component component;
-    while ((component = (Component) savedInstanceState.get("COMPONTENT_" + i++)) != null) {
+    while ((component = (Component) savedInstanceState.get(COMPONENT + i++)) != null) {
       components.add(component);
     }
   }
@@ -93,7 +95,7 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
   public void onSaveInstanceState(Bundle bundle) {
     for (int i = 0; i < components.size(); i++) {
       Component component = components.get(i);
-      bundle.putSerializable("COMPONTENT_" + i, component);
+      bundle.putSerializable(COMPONENT + i, component);
     }
   }
 
@@ -361,12 +363,12 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
   private void saveStrokeWidth(int strokeWidth) {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     SharedPreferences.Editor editor = preferences.edit();
-    editor.putInt("STROKE_WIDTH", strokeWidth);
+    editor.putInt(Tags.STROKE_WIDTH, strokeWidth);
     editor.commit();
   }
 
   private void getSavedStrokeWidth() {
     SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-    strokeWidth = preferences.getInt("STROKE_WIDTH", strokeWidth);
+    strokeWidth = preferences.getInt(Tags.STROKE_WIDTH, strokeWidth);
   }
 }

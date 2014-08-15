@@ -12,4 +12,6 @@ public interface Tags {
   public static final String FRAGMENT_LIST = "FRAGMENT_LIST";
   public static final int CAMERA_REQUEST = 1888;
   public static final int SELECT_PICTURE = 57;
+
+  public static final String STROKE_WIDTH = "STROKE_WIDTH";
 }

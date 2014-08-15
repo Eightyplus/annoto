@@ -376,8 +376,8 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
             view.add(picture);
             add(new Undo(picture, State.Add));
           } catch (IOException e) {
-            Log.d(TAG, "Exception caught", e);
-            Toast.makeText(getApplicationContext(), "Error loading image from gallery", Toast.LENGTH_LONG).show();
+            Log.d(TAG, getString(R.string.log_error_exception), e);
+            Toast.makeText(getApplicationContext(), getString(R.string.error_loading_image), Toast.LENGTH_LONG).show();
           }
           break;
         case Tags.CAMERA_REQUEST:
@@ -389,8 +389,8 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
             view.add(picture);
             add(new Undo(picture, State.Add));
           } catch (IOException e) {
-            Log.d(TAG, "Exception caught", e);
-            Toast.makeText(getApplicationContext(), "Error loading image from camera", Toast.LENGTH_LONG).show();
+            Log.d(TAG, getApplicationContext().getString(R.string.log_error_exception), e);
+            Toast.makeText(getApplicationContext(), getString(R.string.error_taking_photo), Toast.LENGTH_LONG).show();
           }
           break;
       }
@@ -446,9 +446,9 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
           Storage.getStorage(getApplicationContext()).loadFromFile(view, fileName);
           view.redraw();
         } catch (IOException e) {
-          Log.e(TAG, "IOException", e);
+          Log.e(TAG, getString(R.string.log_error_exception), e);
         } catch (ClassNotFoundException e) {
-          Log.e(TAG, "ClassNotFoundException", e);
+          Log.e(TAG, getString(R.string.log_error_exception), e);
         }
         showSpinner(false);
       }
@@ -472,7 +472,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
           storage.writeToFile(view, String.format("%s.note", saveFileNamePrefix));
           storage.writeToFile(view.getBitmap(), String.format("%s.png", saveFileNamePrefix), 30);
         } catch (IOException e) {
-          Log.e(TAG, "IOException", e);
+          Log.e(TAG, getString(R.string.log_error_exception), e);
         }
         showSpinner(false);
       }
@@ -600,12 +600,12 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
             File file = Storage.getStorage(getApplicationContext()).writeToFile(view.getBitmap());
             final Intent sharingIntent = new Intent(Intent.ACTION_SEND);
             sharingIntent.setType("image/png");
-            sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Subject");
-            sharingIntent.putExtra(Intent.EXTRA_TEXT, "Some test");
+            sharingIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_subject));
+            sharingIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text));
             sharingIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-            startActivity(Intent.createChooser(sharingIntent, "Share image using"));
+            startActivity(Intent.createChooser(sharingIntent, getString(R.string.share_information)));
           } catch (IOException e) {
-            Log.e(TAG, "IOException", e);
+            Log.e(TAG, getApplicationContext().getString(R.string.log_error_exception), e);
           }
           return true;
         }
@@ -641,7 +641,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
           Intent intent = new Intent();
           intent.setType("image/*");
           intent.setAction(Intent.ACTION_GET_CONTENT);
-          startActivityForResult(Intent.createChooser(intent, "Select Picture"), Tags.SELECT_PICTURE);
+          startActivityForResult(Intent.createChooser(intent, getString(R.string.select_picture)), Tags.SELECT_PICTURE);
           return true;
         }
       });
@@ -677,9 +677,9 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
               }
             });
           } catch (IOException e) {
-            Log.e(TAG, "IOException", e);
+            Log.e(TAG, getString(R.string.log_error_exception), e);
           } catch (ClassNotFoundException e) {
-            Log.e(TAG, "ClassNotFoundException", e);
+            Log.e(TAG, getString(R.string.log_error_exception), e);
           }
           return true;
         }
@@ -756,9 +756,9 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
               }
             });
           } catch (IOException e) {
-            Log.e(TAG, "IOException", e);
+            Log.e(TAG, getString(R.string.log_error_exception), e);
           } catch (ClassNotFoundException e) {
-            Log.e(TAG, "ClassNotFoundException", e);
+            Log.e(TAG, getString(R.string.log_error_exception), e);
           }
           return true;
         }
