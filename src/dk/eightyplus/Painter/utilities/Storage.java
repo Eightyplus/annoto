@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
+import dk.eightyplus.Painter.R;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -175,7 +176,7 @@ public class Storage {
       }
       out.flush();
     } catch (IOException e) {
-      Log.d(TAG, "Exception ", e);
+      Log.d(TAG, context.getString(R.string.log_error_exception), e);
     } finally {
       if (out != null) {
         try {
@@ -203,19 +204,19 @@ public class Storage {
 
       }
     } catch (FileNotFoundException e) {
-      Log.d(TAG, "Exception ", e);
+      Log.d(TAG, context.getString(R.string.log_error_exception), e);
     } catch (StreamCorruptedException e) {
-      Log.d(TAG, "Exception ", e);
+      Log.d(TAG, context.getString(R.string.log_error_exception), e);
     } catch (IOException e) {
-      Log.d(TAG, "Exception ", e);
+      Log.d(TAG, context.getString(R.string.log_error_exception), e);
     } catch (ClassNotFoundException e) {
-      Log.d(TAG, "Exception ", e);
+      Log.d(TAG, context.getString(R.string.log_error_exception), e);
     } finally {
       if (in != null) {
         try {
           in.close();
         } catch (IOException e) {
-          Log.d(TAG, "Exception ", e);
+          Log.d(TAG, context.getString(R.string.log_error_exception), e);
         }
       }
     }
