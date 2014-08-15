@@ -1,0 +1,6 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+  <item>
+    <rotate android:fromDegrees="180.0" android:toDegrees="180.0"
+        android:pivotX="50%" android:pivotY="50%" android:drawable="@android:drawable/ic_menu_revert" />
+  </item>
+</selector>
