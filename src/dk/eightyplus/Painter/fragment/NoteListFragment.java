@@ -70,12 +70,15 @@ public class NoteListFragment extends DialogFragment {
     String[] list = Storage.getStorage(context).getNotes();
     adapter = new NoteListAdapter(context, listView, R.layout.note_list_item, list);
 
-    view.findViewById(R.id.new_note).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        Toast.makeText(context, "Add new", Toast.LENGTH_SHORT).show();
-      }
-    });
+    View newNoteButton = view.findViewById(R.id.new_note);
+    if (newNoteButton != null) {
+      newNoteButton.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          Toast.makeText(context, "Add new", Toast.LENGTH_SHORT).show();
+        }
+      });
+    }
 
     listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
       @Override

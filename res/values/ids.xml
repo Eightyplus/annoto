@@ -7,5 +7,6 @@
   <item type="id" name="menu_redraw" />
   <item type="id" name="menu_load" />
 
+  <item type="id" name="new_note" />
 
 </resources>
