@@ -3,4 +3,7 @@
   <dimen name="progress_size">50dip</dimen>
   <dimen name="ad_width">300dp</dimen>
   <dimen name="ad_height">250dp</dimen>
+  <dimen name="unfold_button_size">40dp</dimen>
+  <dimen name="unfold_button_margin">5dp</dimen>
+  <dimen name="button_icon_padding">20dp</dimen>
 </resources>

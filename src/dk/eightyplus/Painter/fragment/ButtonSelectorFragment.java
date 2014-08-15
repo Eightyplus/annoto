@@ -86,6 +86,10 @@ public class ButtonSelectorFragment extends DialogFragment {
       button.setTag(tag);
       buttons.add(button);
       dynamicButtons.addView(buttonsView);
+
+      if (i == 0) {
+        button.setSelected(true);
+      }
     }
 
     for (View button : buttons) {
