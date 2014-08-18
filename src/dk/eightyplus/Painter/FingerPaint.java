@@ -492,7 +492,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
         try {
           //writeToFile(getApplicationContext(), view.getBitmap());
           if (saveFileNamePrefix == null) {
-            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            SimpleDateFormat formatter = new SimpleDateFormat(getString(R.string.date_format));
             String date = formatter.format(Calendar.getInstance().getTime());
             saveFileNamePrefix = String.format("file-%s", date);
           }
