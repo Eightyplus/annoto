@@ -3,7 +3,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
   <item android:id="@+id/menu_path"
-      android:title="@string/path"
+      android:title="@string/draw"
       android:icon="@android:drawable/ic_menu_edit"
       android:showAsAction="always"
       android:visible="true"
@@ -93,14 +93,15 @@
       android:visible="true"
       android:enabled="true" /-->
 
-  <item android:id="@+id/menu_replay"
-      android:title="@string/demo"
-      android:showAsAction="never"
+  <item android:id="@+id/menu_list"
+      android:title="@string/archive"
+      android:icon="@drawable/ic_menu_archive"
+      android:showAsAction="ifRoom"
       android:visible="true"
       android:enabled="true" />
 
-  <item android:id="@+id/menu_list"
-      android:title="@string/archive"
+  <item android:id="@+id/menu_replay"
+      android:title="@string/demo"
       android:showAsAction="never"
       android:visible="true"
       android:enabled="true" />

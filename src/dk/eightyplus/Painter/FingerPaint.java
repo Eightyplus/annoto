@@ -279,9 +279,9 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     if (fragment == null) {
       int[] icons = new int[]{
           android.R.drawable.ic_menu_edit,
-          android.R.drawable.ic_menu_more,
+          R.drawable.ic_menu_copy,
           android.R.drawable.ic_menu_delete,
-          android.R.drawable.ic_menu_sort_alphabetically,
+          R.drawable.ic_action_keyboard,
       };
 
       String[] tags = new String[] {

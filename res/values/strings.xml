@@ -8,7 +8,7 @@
 
   <string formatted="false" name="delete_file">Delete `%s`</string>
   <string name="color_button">Color button</string>
-  <string name="path">Path</string>
+  <string name="draw">Draw</string>
   <string name="width">Width</string>
   <string name="move">Move</string>
   <string name="color">Color</string>
