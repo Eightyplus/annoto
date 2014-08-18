@@ -380,20 +380,21 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
           try {
             final Bitmap bitmap = storage.loadBitmapFromIntent(this, data, 1);
             int fileIndex = data.getDataString().lastIndexOf("/");
-            final String name = getString(R.string.gallery_file_format, data.getDataString().substring(fileIndex + 1));
+            String uriFileName = data.getDataString().substring(fileIndex + 1);
+            final String galleryFileName = determineGalleryFileName(storage, uriFileName);
 
             new Thread(new Runnable() {
               @Override
               public void run() {
                 try {
-                  storage.writeToFile(bitmap, name, 90);
+                  storage.writeToFile(bitmap, galleryFileName, 90);
                 } catch (IOException e) {
                   Log.d(TAG, getString(R.string.log_error_exception), e);
                 }
               }
             }).start();
 
-            Picture picture = new Picture(context, bitmap, name);
+            Picture picture = new Picture(context, bitmap, galleryFileName);
             view.add(picture);
             add(new Undo(picture, State.Add));
           } catch (IOException e) {
@@ -411,6 +412,19 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       }
       view.redraw();
     }
+  }
+
+  private String determineGalleryFileName(Storage storage, String filename) {
+    String name;
+    int count = 1;
+    while (true) {
+      name = getString(R.string.gallery_file_format, count, filename);
+      if (!storage.getFilename(name).exists()) {
+        break;
+      }
+      count++;
+    }
+    return name;
   }
 
   public void colorChanged(int color) {
