@@ -3,7 +3,12 @@ package dk.eightyplus.Painter.utilities;
 import android.content.Context;
 import android.util.Log;
 import dk.eightyplus.Painter.R;
-import dk.eightyplus.Painter.component.*;
+import dk.eightyplus.Painter.component.Component;
+import dk.eightyplus.Painter.component.ComponentType;
+import dk.eightyplus.Painter.component.Composite;
+import dk.eightyplus.Painter.component.Picture;
+import dk.eightyplus.Painter.component.Polygon;
+import dk.eightyplus.Painter.component.Text;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -88,9 +93,7 @@ public class NoteStorage {
           break;
         case PictureType:
           try {
-            Picture picture = Picture.fromJson(context, comp);
-            picture.initialise();
-            component = picture;
+            component = Picture.fromJson(context, comp).initialise();
           } catch (IOException e) {
             Log.d(TAG, context.getString(R.string.log_error_exception), e);
             continue;

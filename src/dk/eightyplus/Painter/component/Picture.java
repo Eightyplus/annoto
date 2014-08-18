@@ -87,8 +87,12 @@ public class Picture extends Component {
    * Initialises picture when loaded from storage
    * @throws IOException
    */
-  public void initialise() throws IOException {
+  public Picture initialise() throws IOException {
     bitmap = Storage.getStorage(context).loadFromFile(filename);
+    if (bitmap == null) {
+      throw new IOException(context.getString(R.string.log_error_file_missing));
+    }
+    return this;
   }
 
   @Override

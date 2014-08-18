@@ -258,10 +258,12 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
     this.color = color;
   }
 
-  public void reinitialise(boolean delete) {
+  public void reinitialise(boolean delete, boolean invalidate) {
     clear();
     delete(delete);
-    invalidate();
+    if (invalidate) {
+        invalidate();
+    }
   }
 
   public void delete(boolean delete) {
