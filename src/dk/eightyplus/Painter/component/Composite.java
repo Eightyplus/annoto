@@ -138,8 +138,10 @@ public class Composite extends Component {
   @Override
   public boolean delete() {
     boolean result = super.delete();
-    for (Component component : componentList) {
-      result &= component.delete();
+    if (hasComponents()) {
+      for (Component component : componentList) {
+        result &= component.delete();
+      }
     }
     return result;
   }
