@@ -1,16 +1,17 @@
 package dk.eightyplus.Painter.component;
 
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
+import dk.eightyplus.Painter.utilities.FileId;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Polygon class to be used drawing polygon objects: paths, lines, etc.
  */
 public class Polygon extends Component {
-  private static final long serialVersionUID = -1111222344567787467L;
 
   private CustomPath path = new CustomPath();
 
@@ -75,5 +76,24 @@ public class Polygon extends Component {
     bounds.right += bounds.width() * (scale - 1);
     bounds.bottom += bounds.height() * (scale - 1);
     return bounds;
+  }
+
+  @Override
+  public ComponentType getType() {
+    return ComponentType.PolygonType;
+  }
+
+  public static Polygon fromJson(JSONObject object) throws JSONException {
+    Polygon polygon = new Polygon();
+    polygon.fromJsonPrimary(object);
+    polygon.path.fromJson(object.getJSONObject(FileId.PATH));
+    return polygon;
+  }
+
+  @Override
+  public JSONObject toJson() throws JSONException {
+    JSONObject object = super.toJson();
+    object.put(FileId.PATH, path.toJson());
+    return object;
   }
 }

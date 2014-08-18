@@ -7,14 +7,14 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import dk.eightyplus.Painter.utilities.FileId;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Text class to give drawing capabilities
  */
 public class Text extends Component {
-
-  private static final long serialVersionUID = 4256622835983660086L;
-  private static final transient String NEW_LINE = "\n";
 
   private String text;
   private int fontSize = 40;
@@ -22,6 +22,8 @@ public class Text extends Component {
 
   @SuppressWarnings("unused")
   public Text() {}
+
+  @SuppressWarnings("unused")
   public Text(String text) {
     this.text = text;
   }
@@ -38,7 +40,7 @@ public class Text extends Component {
       paint.setTextSize(fontSize);
       paint.setAntiAlias(true);
 
-      String[] lines = text.split(NEW_LINE);
+      String[] lines = text.split(FileId.NEW_LINE);
       Rect textBounds = getTextBounds();
       float height = textBounds.height() / lines.length;
 
@@ -85,7 +87,7 @@ public class Text extends Component {
     };
     Rect bounds = new Rect();
 
-    String[] lines = text.split(NEW_LINE);
+    String[] lines = text.split(FileId.NEW_LINE);
     textPaint.getTextBounds(lines[0], 0, lines[0].length(), bounds);
     for (int i = 1; i < lines.length; i++) {
       Rect lineBounds = new Rect();
@@ -121,5 +123,26 @@ public class Text extends Component {
     final Canvas canvas = new Canvas(bmp);
     canvas.drawText(text, 0, bounds.height(), textPaint);
     return bmp;
+  }
+
+  @Override
+  public ComponentType getType() {
+    return ComponentType.TextType;
+  }
+
+  public static Text fromJson(JSONObject object) throws JSONException {
+    Text text = new Text();
+    text.fromJsonPrimary(object);
+    text.text = object.getString(FileId.TEXT);
+    text.fontSize = object.getInt(FileId.FONT_SIZE);
+    return text;
+  }
+
+  @Override
+  public JSONObject toJson() throws JSONException {
+    JSONObject object = super.toJson();
+    object.put(FileId.TEXT, text);
+    object.put(FileId.FONT_SIZE, fontSize);
+    return object;
   }
 }

@@ -116,4 +116,10 @@ public class Undo {
     }
     return false;
   }
+
+  public void cleanup() {
+    if (undoAction == State.Delete) {
+      component.delete();
+    }
+  }
 }

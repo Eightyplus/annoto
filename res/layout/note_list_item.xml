@@ -13,7 +13,7 @@
       android:layout_width="wrap_content"
       android:layout_height="match_parent"
       android:layout_centerInParent="true"
-      />
+      android:contentDescription="@string/thumbnail" />
 
   <ImageView
       android:id="@+id/button_delete"
@@ -21,17 +21,17 @@
       android:src="@android:drawable/ic_menu_delete"
       android:layout_width="wrap_content"
       android:layout_height="fill_parent"
-      />
-  <ImageView
+      android:contentDescription="@string/delete" />
+  <!--ImageView
       android:id="@+id/button_copy"
       android:layout_toLeftOf="@id/button_delete"
-      android:src="@android:drawable/ic_menu_close_clear_cancel"
+      android:src="@android:drawable/ic_menu_"
       android:layout_width="wrap_content"
       android:layout_height="fill_parent"
-      />
+      /-->
   <TextView
       android:id="@+id/note_title"
-      android:layout_toLeftOf="@id/button_copy"
+      android:layout_toLeftOf="@id/button_delete"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:textColor="@color/black"

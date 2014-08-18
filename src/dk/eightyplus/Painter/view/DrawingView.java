@@ -18,11 +18,12 @@ import dk.eightyplus.Painter.component.Component;
 import dk.eightyplus.Painter.component.Composite;
 import dk.eightyplus.Painter.component.Polygon;
 import dk.eightyplus.Painter.utilities.Compatibility;
+import dk.eightyplus.Painter.utilities.NoteStorage;
 import dk.eightyplus.Painter.utilities.SaveLoad;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -99,24 +100,14 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
     }
   }
 
-  public void save(final ObjectOutputStream outputStream) throws IOException {
+  public void save(Context context, final DataOutputStream outputStream) throws IOException {
     final List<Component> components = new ArrayList<Component>(this.components);
-    outputStream.writeInt(components.size());
-
-    for (int i = 0; i < components.size(); i++) {
-      Component component = components.get(i);
-      outputStream.writeObject(component);
-    }
+    NoteStorage.save(context, components, outputStream);
   }
 
-  public void load(final ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
+  public void load(final Context context, final DataInputStream inputStream) throws IOException, ClassNotFoundException {
     List<Component> components = new ArrayList<Component>();
-
-    int size = inputStream.readInt();
-    for (int i = 0 ; i < size; i++) {
-      Component component = (Component) inputStream.readObject();
-      components.add(component);
-    }
+    NoteStorage.load(context, components, inputStream);
 
     this.components.clear();
     this.components.addAll(components);
@@ -267,10 +258,19 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
     this.color = color;
   }
 
-  public void newDrawing() {
+  public void reinitialise(boolean delete) {
     clear();
-    components.clear();
+    delete(delete);
     invalidate();
+  }
+
+  public void delete(boolean delete) {
+    if (delete) {
+      for (Component component : components) {
+        component.delete();
+      }
+    }
+    components.clear();
   }
 
   public void redraw() {

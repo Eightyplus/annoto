@@ -1,29 +1,38 @@
 package dk.eightyplus.Painter.component;
 
+import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import dk.eightyplus.Painter.R;
+import dk.eightyplus.Painter.utilities.FileId;
+import dk.eightyplus.Painter.utilities.Storage;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
 /**
  * Picture component in the Composite pattern
  */
 @SuppressWarnings("unused")
 public class Picture extends Component {
-  private static final long serialVersionUID = 9170000361129876541L;
 
   private transient Bitmap bitmap;
+  private final String filename;
+  private final transient Context context;
 
-  public Picture(Bitmap bitmap) {
+  private Picture(final Context context, final String filename) {
+    this.context = context;
+    this.filename = filename;
+  }
+
+  public Picture(final Context context, final Bitmap bitmap, final String filename) {
+    this(context, filename);
     if (bitmap == null) {
-      throw new NullPointerException("Bitmap cannot be null");
+      throw new NullPointerException(context.getString(R.string.log_error_bitmap_null));
     }
     this.bitmap = bitmap;
   }
@@ -57,22 +66,35 @@ public class Picture extends Component {
     return new RectF(x, y, x + bitmap.getWidth() * scale, y + bitmap.getHeight() * scale);
   }
 
-  private void writeObject(ObjectOutputStream objectOutputStream) throws IOException {
-    objectOutputStream.defaultWriteObject();
-    if(bitmap != null){
-      ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-      boolean success = bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteStream);
-      if(success){
-        objectOutputStream.writeObject(byteStream.toByteArray());
-      }
-    }
+  @Override
+  public boolean delete() {
+    super.delete();
+    return Storage.getStorage(context).deleteFile(filename);
   }
 
-  private void readObject(ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException{
-    objectInputStream.defaultReadObject();
-    byte[] image = (byte[]) objectInputStream.readObject();
-    if(image != null && image.length > 0){
-      bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
-    }
+  @Override
+  public ComponentType getType() {
+    return ComponentType.PictureType;
+  }
+
+  public static Picture fromJson(final Context context, JSONObject object) throws JSONException {
+    Picture picture = new Picture(context, object.getString(FileId.FILE_NAME));
+    picture.fromJsonPrimary(object);
+    return picture;
+  }
+
+  /**
+   * Initialises picture when loaded from storage
+   * @throws IOException
+   */
+  public void initialise() throws IOException {
+    bitmap = Storage.getStorage(context).loadFromFile(filename);
+  }
+
+  @Override
+  public JSONObject toJson() throws JSONException {
+    JSONObject object = super.toJson();
+    object.put(FileId.FILE_NAME, filename);
+    return object;
   }
 }

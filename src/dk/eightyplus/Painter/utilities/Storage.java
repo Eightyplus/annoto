@@ -12,7 +12,9 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 import dk.eightyplus.Painter.R;
+import org.json.JSONException;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,6 +29,8 @@ import java.io.StreamCorruptedException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * User: fries
@@ -59,22 +63,27 @@ public class Storage {
 
   public void writeToFile(SaveLoad save, String fileName) throws IOException {
     File file = getFilename(fileName);
-    ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
-    save.save(out);
-    out.flush();
-    out.close();
+
+    GZIPOutputStream outputStream = new GZIPOutputStream(new FileOutputStream(file));
+    DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+    save.save(context, dataOutputStream);
+    outputStream.flush();
+    dataOutputStream.close();
+    outputStream.close();
   }
 
-  public void deleteFile(String fileName) {
+  public boolean deleteFile(String fileName) {
     File file = getFilename(fileName);
     if (file.exists()) {
-      file.delete();
+      return file.delete();
     }
+    return false;
   }
 
   public void deleteNoteAndThumb(String fileName) {
     File file = getFilename(fileName);
     if (file.exists()) {
+      deleteFromFile(file);
       file.delete();
     }
     File thumb = getThumb2Notes(fileName);
@@ -88,15 +97,30 @@ public class Storage {
   }
 
   public void loadFromFile(SaveLoad load, String fileName, boolean isAsset) throws IOException, ClassNotFoundException {
-    ObjectInputStream in;
+    GZIPInputStream inputStream;
     if (isAsset) {
-      in = new ObjectInputStream(context.getAssets().open(fileName));
+      inputStream = new GZIPInputStream(context.getAssets().open(fileName));
     } else {
       File file = getFilename(fileName);
-      in = new ObjectInputStream(new FileInputStream(file));
+      inputStream = new GZIPInputStream(new FileInputStream(file));
     }
-    load.load(in);
-    in.close();
+    DataInputStream dataInputStream = new DataInputStream(inputStream);
+    load.load(context, dataInputStream);
+    dataInputStream.close();
+    inputStream.close();
+  }
+
+  private void deleteFromFile(File file) {
+    try {
+      GZIPInputStream inputStream = new GZIPInputStream(new FileInputStream(file));
+      DataInputStream dataInputStream = new DataInputStream(inputStream);
+
+      NoteStorage.fromJsonDelete(context, dataInputStream);
+    } catch (IOException e) {
+
+    } catch (JSONException e) {
+
+    }
   }
 
   public File writeToFile(final Bitmap bitmap) throws IOException {

@@ -1,8 +1,12 @@
 package dk.eightyplus.Painter.component;
 
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import dk.eightyplus.Painter.utilities.NoteStorage;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +16,6 @@ import java.util.List;
  */
 @SuppressWarnings("unused")
 public class Composite extends Component {
-  private static final long serialVersionUID = 1224616367662001461L;
 
   protected List<Component> componentList;
 
@@ -128,5 +131,35 @@ public class Composite extends Component {
       bounds.bottom += bounds.height() * (scale - 1);
     }
     return bounds;
+  }
+
+  @Override
+  public boolean delete() {
+    boolean result = super.delete();
+    for (Component component : componentList) {
+      result &= component.delete();
+    }
+    return result;
+  }
+
+  @Override
+  public ComponentType getType() {
+    return ComponentType.CompositeType;
+  }
+
+  public static Composite fromJson(final Context context, JSONObject object) throws JSONException {
+    Composite composite = new Composite();
+    composite.fromJsonPrimary(object);
+    composite.componentList = new ArrayList<Component>();
+    NoteStorage.fromJson(context, object, composite.componentList);
+
+    return composite;
+  }
+
+  @Override
+  public JSONObject toJson() throws JSONException {
+    JSONObject object = super.toJson();
+    NoteStorage.toJson(object, componentList);
+    return object;
   }
 }

@@ -21,7 +21,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-import dk.eightyplus.Painter.action.ActionBarClickListener;
 import dk.eightyplus.Painter.action.State;
 import dk.eightyplus.Painter.action.Undo;
 import dk.eightyplus.Painter.component.Component;
@@ -41,17 +40,15 @@ import dk.eightyplus.Painter.view.MoveView;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Stack;
 
 public class FingerPaint extends FragmentActivity implements ColorPickerDialog.OnColorChangedListener, Callback {
 
   private static final String TAG = FingerPaint.class.toString();
 
-  private final Stack<Undo> undo = new Stack<Undo>();
-  private final Stack<Undo> redo = new Stack<Undo>();
+  private final Stack<Undo> undoes = new Stack<Undo>();
+  private final Stack<Undo> redoes = new Stack<Undo>();
 
   private ViewGroup layout;
   private DrawingView view;
@@ -354,6 +351,14 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   }
 
   @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    cleanup(false);
+
+    // TODO else to cleanup ?
+  }
+
+  @Override
   protected void onRestoreInstanceState(Bundle savedInstanceState) {
     super.onRestoreInstanceState(savedInstanceState);
     view.onRestoreInstanceState(savedInstanceState);
@@ -368,29 +373,44 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   @Override
   protected void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (resultCode == RESULT_OK) {
+      final Context context = getApplicationContext();
+      final Storage storage = Storage.getStorage(context);
       switch (requestCode) {
         case Tags.SELECT_PICTURE:
           try {
-            Bitmap bitmap = Storage.getStorage(getApplicationContext()).loadBitmapFromIntent(this, data, 1);
-            Picture picture = new Picture(bitmap);
+            final Bitmap bitmap = storage.loadBitmapFromIntent(this, data, 1);
+            int fileIndex = data.getDataString().lastIndexOf("/");
+            final String name = getString(R.string.gallery_file_format, data.getDataString().substring(fileIndex + 1));
+
+            new Thread(new Runnable() {
+              @Override
+              public void run() {
+                try {
+                  storage.writeToFile(bitmap, name, 90);
+                } catch (IOException e) {
+                  Log.d(TAG, getString(R.string.log_error_exception), e);
+                }
+              }
+            }).start();
+
+            Picture picture = new Picture(context, bitmap, name);
             view.add(picture);
             add(new Undo(picture, State.Add));
           } catch (IOException e) {
             Log.d(TAG, getString(R.string.log_error_exception), e);
-            Toast.makeText(getApplicationContext(), getString(R.string.error_loading_image), Toast.LENGTH_LONG).show();
+            Toast.makeText(context, getString(R.string.error_loading_image), Toast.LENGTH_LONG).show();
           }
           break;
         case Tags.CAMERA_REQUEST:
           try {
-            // TODO add delete image function?
-            Bitmap bitmap = Storage.getStorage(getApplicationContext()).loadFromFile(cameraFileName);
-            Storage.getStorage(getApplicationContext()).addImageToGallery(this, cameraFileName);
-            Picture picture = new Picture(bitmap);
+            Bitmap bitmap = storage.loadFromFile(cameraFileName);
+            // TODO storage.addImageToGallery(this, cameraFileName);
+            Picture picture = new Picture(context, bitmap, cameraFileName);
             view.add(picture);
             add(new Undo(picture, State.Add));
           } catch (IOException e) {
-            Log.d(TAG, getApplicationContext().getString(R.string.log_error_exception), e);
-            Toast.makeText(getApplicationContext(), getString(R.string.error_taking_photo), Toast.LENGTH_LONG).show();
+            Log.d(TAG, context.getString(R.string.log_error_exception), e);
+            Toast.makeText(context, getString(R.string.error_taking_photo), Toast.LENGTH_LONG).show();
           }
           break;
       }
@@ -429,7 +449,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
 
   @Override
   public void add(Undo undo) {
-    this.undo.add(undo);
+    this.undoes.add(undo);
   }
 
   @Override
@@ -441,8 +461,8 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
         removeNotesList();
         showSpinner(true);
         try {
+          cleanup(true);
           saveFileNamePrefix = fileName.substring(0, fileName.lastIndexOf("."));
-          clearUndos();
           Storage.getStorage(getApplicationContext()).loadFromFile(view, fileName);
           view.redraw();
         } catch (IOException e) {
@@ -479,11 +499,22 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     }).start();
   }
 
+  private void cleanup(boolean reinitialise) {
+    boolean delete = saveFileNamePrefix == null;
+    clearUndos(delete);
+    saveFileNamePrefix = null;
+    if (reinitialise) {
+      view.reinitialise(delete);
+    } else {
+      view.delete(delete);
+    }
+  }
+
   public boolean undo() {
-    if (undo.size() > 0) {
-      Undo undo = this.undo.pop();
+    if (undoes.size() > 0) {
+      Undo undo = this.undoes.pop();
       if (undo.undo(view)) {
-        redo.add(undo);
+        redoes.add(undo);
         view.redraw();
         return true;
       }
@@ -492,10 +523,10 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   }
 
   public boolean redo() {
-    if (redo.size() > 0) {
-      Undo redo = this.redo.pop();
+    if (redoes.size() > 0) {
+      Undo redo = this.redoes.pop();
       if (redo.redo(view)) {
-        undo.add(redo);
+        undoes.add(redo);
         view.redraw();
         return true;
       }
@@ -503,13 +534,25 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     return false;
   }
 
-  private void clearUndos() {
-    undo.clear();
-    clearRedos();
+  private void clearUndos(boolean delete) {
+    if (delete) {
+      deleteReUnDos(undoes);
+    }
+    undoes.clear();
+    clearRedos(delete);
   }
 
-  private void clearRedos() {
-    redo.clear();
+  private void clearRedos(boolean delete) {
+    if (delete) {
+      deleteReUnDos(redoes);
+    }
+    redoes.clear();
+  }
+
+  private void deleteReUnDos(Stack<Undo> reUnDos) {
+    for (Undo reUnDo : reUnDos) {
+      reUnDo.cleanup();
+    }
   }
 
   @Override
@@ -599,7 +642,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
           try {
             File file = Storage.getStorage(getApplicationContext()).writeToFile(view.getBitmap());
             final Intent sharingIntent = new Intent(Intent.ACTION_SEND);
-            sharingIntent.setType("image/png");
+            sharingIntent.setType(getString(R.string.image_format));
             sharingIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_subject));
             sharingIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text));
             sharingIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
@@ -619,9 +662,9 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       menuCamera.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem item) {
-          SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+          SimpleDateFormat formatter = new SimpleDateFormat(getString(R.string.date_format));
           String date = formatter.format(Calendar.getInstance().getTime());
-          cameraFileName = String.format("camera-%s.jpeg", date);
+          cameraFileName = getString(R.string.camera_file_format, date);
           File cameraFile = Storage.getStorage(getApplicationContext()).getFilename(cameraFileName);
           Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
           cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(cameraFile));
@@ -639,7 +682,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
         @Override
         public boolean onMenuItemClick(MenuItem item) {
           Intent intent = new Intent();
-          intent.setType("image/*");
+          intent.setType(getString(R.string.image_format_wildcard));
           intent.setAction(Intent.ACTION_GET_CONTENT);
           startActivityForResult(Intent.createChooser(intent, getString(R.string.select_picture)), Tags.SELECT_PICTURE);
           return true;
@@ -661,6 +704,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     }
   }
 
+  // TODO delete
   private void setupLoadMenuButton(Menu menu) {
     MenuItem menuLoad = menu.findItem(R.id.menu_load);
     if (menuLoad != null) {
@@ -772,9 +816,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       menuNew.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem item) {
-          clearUndos();
-          saveFileNamePrefix = null;
-          view.newDrawing();
+          cleanup(true);
           return true;
         }
       });

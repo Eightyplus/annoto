@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Painter</string>
+  <string name="app_name">Painter?</string>
+
+  <string formatted="false" name="date_format">yyyy-MM-dd HH:mm:ss</string>
+  <string formatted="false" name="camera_file_format">camera-%s.jpeg</string>
+  <string formatted="false" name="image_format">image/png</string>
+  <string formatted="false" name="image_format_wildcard">image/*</string>
+  <string formatted="false" name="gallery_file_format">gallery-%s.png</string>
 
   <integer name="google_play_services_version">4452000</integer>
   <string formatted="false" name="ad_unit_id">ca-app-pub-8628907757579324/6667117893</string>
