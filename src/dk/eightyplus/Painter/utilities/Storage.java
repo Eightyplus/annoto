@@ -141,7 +141,7 @@ public class Storage {
     return loadFromFile("image.png");
   }
 
-  public Bitmap loadFromFile(String fileName) throws IOException {
+  public Bitmap loadFromFile(String fileName) {
     File file = getFilename(fileName);
     Bitmap bitmap = null;
     if (file.exists()) {
