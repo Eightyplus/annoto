@@ -2,7 +2,7 @@
 <resources>
   <string name="app_name">Painter?</string>
 
-  <string formatted="false" name="date_format">yyyy-MM-dd HH:mm:ss</string>
+  <string formatted="false" name="date_format">yyyy-MM-dd_HH-mm-ss</string>
   <string formatted="false" name="camera_file_format">camera-%s.jpeg</string>
   <string formatted="false" name="image_format">image/png</string>
   <string formatted="false" name="image_format_wildcard">image/*</string>
