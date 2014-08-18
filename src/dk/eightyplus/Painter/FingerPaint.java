@@ -353,7 +353,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   @Override
   protected void onDestroy() {
     super.onDestroy();
-    cleanup(false);
+    cleanup(false, false);
 
     // TODO else to cleanup ?
   }
@@ -402,16 +402,11 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
           }
           break;
         case Tags.CAMERA_REQUEST:
-          try {
-            Bitmap bitmap = storage.loadFromFile(cameraFileName);
-            // TODO storage.addImageToGallery(this, cameraFileName);
-            Picture picture = new Picture(context, bitmap, cameraFileName);
-            view.add(picture);
-            add(new Undo(picture, State.Add));
-          } catch (IOException e) {
-            Log.d(TAG, context.getString(R.string.log_error_exception), e);
-            Toast.makeText(context, getString(R.string.error_taking_photo), Toast.LENGTH_LONG).show();
-          }
+          Bitmap bitmap = storage.loadFromFile(cameraFileName);
+          // TODO storage.addImageToGallery(this, cameraFileName);
+          Picture picture = new Picture(context, bitmap, cameraFileName);
+          view.add(picture);
+          add(new Undo(picture, State.Add));
           break;
       }
       view.redraw();
@@ -461,7 +456,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
         removeNotesList();
         showSpinner(true);
         try {
-          cleanup(true);
+          cleanup(true, false);
           saveFileNamePrefix = fileName.substring(0, fileName.lastIndexOf("."));
           Storage.getStorage(getApplicationContext()).loadFromFile(view, fileName);
           view.redraw();
@@ -499,12 +494,12 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     }).start();
   }
 
-  private void cleanup(boolean reinitialise) {
+  private void cleanup(boolean reinitialise, boolean invalidate) {
     boolean delete = saveFileNamePrefix == null;
     clearUndos(delete);
     saveFileNamePrefix = null;
     if (reinitialise) {
-      view.reinitialise(delete);
+      view.reinitialise(delete, invalidate);
     } else {
       view.delete(delete);
     }
@@ -816,7 +811,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       menuNew.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem item) {
-          cleanup(true);
+          cleanup(true, true);
           return true;
         }
       });
