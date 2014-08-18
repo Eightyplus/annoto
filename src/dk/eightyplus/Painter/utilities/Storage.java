@@ -14,6 +14,7 @@ import android.util.Log;
 import dk.eightyplus.Painter.R;
 import org.json.JSONException;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.StreamCorruptedException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -255,6 +257,44 @@ public class Storage {
       return new File(applicationPath,  File.separator);
     }
     return new File(applicationPath, File.separator + filename);
+  }
+
+  public static void writeData(final Context context, byte[] data, final OutputStream out) throws IOException {
+    final int buffer = 8192;
+    try {
+      int offset = 0;
+      while (true) {
+        int length = data.length - offset;
+
+        if (length <= 0) {
+          break;
+        } else if (length > buffer) {
+          length = buffer;
+        }
+
+        out.write(data, offset, length);
+        offset += length;
+      }
+    } catch (final IOException e) {
+      Log.d(TAG, context.getString(R.string.log_error_exception), e);
+      throw e;
+    }
+  }
+
+  public static String readData(final InputStream in) throws IOException {
+    if (in == null) {
+      return null;
+    }
+    try {
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      int byteValue;
+      while ((byteValue = in.read()) != -1) {
+        baos.write(byteValue);
+      }
+      return new String(baos.toByteArray());
+    } finally {
+      in.close();
+    }
   }
 
   public String getPath(Uri uri) {

@@ -38,7 +38,7 @@ public class NoteStorage {
     try {
       JSONObject object = new JSONObject();
       toJson(object, components);
-      dataOutputStream.writeUTF(object.toString());
+      Storage.writeData(context, object.toString().getBytes(), dataOutputStream);
       result = true;
     } catch (JSONException e) {
       Log.d(TAG, context.getString(R.string.log_error_exception), e);
@@ -60,7 +60,7 @@ public class NoteStorage {
 
     boolean result = false;
     try {
-      JSONObject object = new JSONObject(dataInputStream.readUTF());
+      JSONObject object = new JSONObject(Storage.readData(dataInputStream));
       fromJson(context, object, components);
       result = true;
     } catch (JSONException e) {
