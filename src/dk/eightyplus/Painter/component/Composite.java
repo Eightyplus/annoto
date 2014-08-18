@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.renderscript.Script;
+import dk.eightyplus.Painter.utilities.FileId;
 import dk.eightyplus.Painter.utilities.NoteStorage;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -150,8 +152,12 @@ public class Composite extends Component {
   public static Composite fromJson(final Context context, JSONObject object) throws JSONException {
     Composite composite = new Composite();
     composite.fromJsonPrimary(object);
-    composite.componentList = new ArrayList<Component>();
-    NoteStorage.fromJson(context, object, composite.componentList);
+
+    int size = object.getInt(FileId.SIZE);
+    if (size > 0) {
+      composite.componentList = new ArrayList<Component>();
+      NoteStorage.fromJson(context, object, composite.componentList);
+    }
 
     return composite;
   }
@@ -159,7 +165,12 @@ public class Composite extends Component {
   @Override
   public JSONObject toJson() throws JSONException {
     JSONObject object = super.toJson();
-    NoteStorage.toJson(object, componentList);
+
+    int size = componentList != null ? componentList.size() : 0;
+    object.put(FileId.SIZE, size);
+    if (size > 0) {
+      NoteStorage.toJson(object, componentList);
+    }
     return object;
   }
 }
