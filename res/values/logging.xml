@@ -3,5 +3,6 @@
 
   <string name="log_error_exception">Exception</string>
   <string name="log_error_bitmap_null">Bitmap cannot be null</string>
+  <string name="log_error_file_missing">File does not exist</string>
 
 </resources>
