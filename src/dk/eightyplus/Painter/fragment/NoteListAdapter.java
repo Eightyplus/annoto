@@ -38,7 +38,7 @@ public class NoteListAdapter extends ArrayAdapter<String> implements ThumbLoader
 
   public NoteListAdapter(Context context, ListView listView, int resource, String[] objects) {
     super(context, resource, objects);
-    for (int i = 0; i < initialThumbLoadSize; i++) {
+    for (int i = 0; i < initialThumbLoadSize && i < objects.length; i++) {
       startImageLoad(objects[i]);
     }
 
@@ -48,7 +48,8 @@ public class NoteListAdapter extends ArrayAdapter<String> implements ThumbLoader
 
   @Override
   public String getItem(int position) {
-    return super.getItem(position);
+    int mapped = getMappedPosition(position);
+    return super.getItem(mapped);
   }
 
   @Override
@@ -80,22 +81,16 @@ public class NoteListAdapter extends ArrayAdapter<String> implements ThumbLoader
 
     TextView textView = (TextView) rowView.findViewById(R.id.note_title);
     final ImageView imageView = (ImageView) rowView.findViewById(R.id.note_thumb);
-    String item = getItem(getMappedPosition(position));
+    String item = getItem(position);
     textView.setText(item);
 
     final View buttonDelete = rowView.findViewById(R.id.button_delete);
     buttonDelete.setTag(R.id.button_delete);
     buttonDelete.setOnClickListener(buttonOnClickListener);
 
-    final View buttonCopy = rowView.findViewById(R.id.button_copy);
-    buttonCopy.setTag(R.id.button_copy);
-    buttonCopy.setOnClickListener(buttonOnClickListener);
-
-    String s = item;
-
-    if (!setImage(imageView, s)) {
+    if (!setImage(imageView, item)) {
       imageView.setImageResource(android.R.drawable.stat_notify_error);
-      startImageLoad(s);
+      startImageLoad(item);
     }
 
     return rowView;
