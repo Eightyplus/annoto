@@ -179,7 +179,7 @@ public class Storage {
     return root.list(new FilenameFilter() {
       @Override
       public boolean accept(File dir, String filename) {
-        return filename.endsWith(".note");
+        return filename.endsWith(context.getString(R.string.note_file_format, context.getString(R.string.empty)));
       }
     });
   }

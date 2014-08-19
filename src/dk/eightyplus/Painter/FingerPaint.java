@@ -498,7 +498,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
           }
 
           Storage storage = Storage.getStorage(getApplicationContext());
-          storage.writeToFile(view, String.format("%s.note", saveFileNamePrefix));
+          storage.writeToFile(view, getString(R.string.note_file_format, saveFileNamePrefix));
           storage.writeToFile(view.getBitmap(), String.format("%s.png", saveFileNamePrefix), 30);
         } catch (IOException e) {
           Log.e(TAG, getString(R.string.log_error_exception), e);
