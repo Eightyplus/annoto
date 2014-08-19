@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.renderscript.Script;
 import dk.eightyplus.Painter.utilities.FileId;
 import dk.eightyplus.Painter.utilities.NoteStorage;
 import org.json.JSONException;
