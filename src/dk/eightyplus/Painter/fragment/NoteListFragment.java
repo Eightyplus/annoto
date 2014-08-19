@@ -29,6 +29,7 @@ public class NoteListFragment extends DialogFragment {
   private SoftReference<Callback> callbackSoftReference;
   private Context context;
   private NoteListAdapter adapter;
+  private ListView listView;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -68,9 +69,8 @@ public class NoteListFragment extends DialogFragment {
     getDialog().setTitle(R.string.archive);
 
     context = getActivity().getApplicationContext();
-    ListView listView = (ListView) view.findViewById(android.R.id.list);
-    String[] list = Storage.getStorage(context).getNotes();
-    adapter = new NoteListAdapter(context, listView, R.layout.note_list_item, list);
+    listView = (ListView) view.findViewById(android.R.id.list);
+    adapter = createAdapter(listView);
 
     View newNoteButton = view.findViewById(R.id.new_note);
     if (newNoteButton != null) {
@@ -105,7 +105,7 @@ public class NoteListFragment extends DialogFragment {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                   Storage.getStorage(context).deleteNoteAndThumb(fileName);
-                  NoteListFragment.this.dismiss();
+                  NoteListFragment.this.updateAdapter();
                 }
               })
               .setNegativeButton(R.string.cancel, null);
@@ -124,5 +124,19 @@ public class NoteListFragment extends DialogFragment {
     listView.setAdapter(adapter);
 
     return view;
+  }
+
+  private NoteListAdapter createAdapter(ListView listView) {
+    return new NoteListAdapter(context, listView, R.layout.note_list_item, getArchiveList());
+  }
+
+  private String[] getArchiveList() {
+    return Storage.getStorage(context).getNotes();
+  }
+
+  private void updateAdapter() {
+    adapter = createAdapter(listView);
+    listView.setAdapter(adapter);
+    adapter.notifyDataSetChanged();
   }
 }
