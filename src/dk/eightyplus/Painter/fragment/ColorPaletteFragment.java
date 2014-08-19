@@ -12,7 +12,6 @@ import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 import dk.eightyplus.Painter.Callback;
 import dk.eightyplus.Painter.Keys;
 import dk.eightyplus.Painter.R;
@@ -143,6 +142,8 @@ public class ColorPaletteFragment extends DialogFragment {
     }
   }
 
+  /*
+  test code
   private void clearSavedColors(SharedPreferences preferences) {
     SharedPreferences.Editor editor = preferences.edit();
     editor.remove(Keys.COLOR_LAST);
@@ -151,7 +152,7 @@ public class ColorPaletteFragment extends DialogFragment {
       editor.remove(Keys.COLOR + i);
     }
     editor.commit();
-  }
+  }*/
 
   private static class ButtonColorClickListener implements View.OnClickListener {
 
