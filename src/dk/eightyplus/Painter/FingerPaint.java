@@ -353,9 +353,8 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
   @Override
   protected void onDestroy() {
     super.onDestroy();
-    cleanup(false, false);
-
-    // TODO else to cleanup ?
+    // TODO cleanup
+    //cleanup(false, false);
   }
 
   @Override
