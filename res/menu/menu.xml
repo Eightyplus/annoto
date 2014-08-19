@@ -100,11 +100,11 @@
       android:visible="true"
       android:enabled="true" />
 
-  <item android:id="@+id/menu_replay"
+  <!--item android:id="@+id/menu_replay"
       android:title="@string/demo"
       android:showAsAction="never"
       android:visible="true"
-      android:enabled="true" />
+      android:enabled="true" /-->
 
   <item android:id="@+id/menu_feedback"
       android:title="@string/feedback"
