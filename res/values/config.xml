@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="app_name">Painter?</string>
+  <string name="app_name">Annoto</string>
 
   <string formatted="false" name="date_format">yyyy-MM-dd_HH-mm-ss</string>
   <string formatted="false" name="camera_file_format">camera-%s.jpeg</string>
