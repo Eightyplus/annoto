@@ -250,8 +250,8 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
     Fragment fragment = getSupportFragmentManager().findFragmentByTag(Tags.FRAGMENT_COLOR);
     FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
     if (fragment == null) {
-      ColorPaletteFragment sliderFragment = new ColorPaletteFragment();
-      transaction.replace(R.id.configuration_top, sliderFragment, Tags.FRAGMENT_COLOR);
+      ColorPaletteFragment colorPaletteFragment = new ColorPaletteFragment();
+      transaction.replace(R.id.configuration_top, colorPaletteFragment, Tags.FRAGMENT_COLOR);
     } else {
       transaction.remove(fragment);
     }
