@@ -112,13 +112,4 @@
       android:visible="true"
       android:enabled="true" />
 
-  <group android:id="@+id/hide_all_maybe"
-      android:visible="false">
-    <item android:id="@+id/menu_blur"
-        android:title="@string/blur"
-        android:icon="@drawable/ic_launcher"
-        android:showAsAction="always"
-        android:visible="false"
-        android:enabled="false" />
-  </group>
 </menu>
