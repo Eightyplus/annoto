@@ -51,7 +51,7 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
   private Paint   mBitmapPaint;
 
   private int drawingColor = 0xFF000000;
-  private int color = 0;
+  private int color = 0xFF000000;
 
   private float mX, mY;
   private static final float TOUCH_TOLERANCE = 4;
