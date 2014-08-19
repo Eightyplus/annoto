@@ -10,5 +10,5 @@
 
   <integer name="google_play_services_version">4452000</integer>
   <string formatted="false" name="ad_unit_id">ca-app-pub-8628907757579324/6667117893</string>
-  <string formatted="false" name="url_feedback">https://docs.google.com/forms/d/1MmxgoeCHX4DIwoT92cyZUOvBswhFLjGmkYLJntJDclI/viewform?usp=send_form</string>
+  <string formatted="false" name="url_feedback">https://docs.google.com/forms/d/1pDPnAONWNvJFOUZqdqB8zdtiwivcxNA-KlH1sLg6gZo/viewform?usp=send_form</string>
 </resources>
