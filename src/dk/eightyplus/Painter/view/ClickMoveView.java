@@ -77,6 +77,13 @@ public class ClickMoveView extends View {
           FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams) parent.getLayoutParams();
           layoutParams.leftMargin = x - _xDelta;
           layoutParams.topMargin = y - _yDelta;
+          if (layoutParams.leftMargin < 0) {
+            layoutParams.leftMargin = 0;
+          }
+          if (layoutParams.topMargin < 0) {
+            layoutParams.topMargin = 0;
+          }
+
           parent.setLayoutParams(layoutParams);
         default:
           break;
