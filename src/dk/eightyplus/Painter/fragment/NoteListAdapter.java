@@ -9,9 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.google.android.gms.ads.AdView;
 import dk.eightyplus.Painter.R;
-import dk.eightyplus.Painter.utilities.Ad;
 import dk.eightyplus.Painter.utilities.Compatibility;
 
 import java.lang.ref.SoftReference;
@@ -34,32 +32,13 @@ public class NoteListAdapter extends ArrayAdapter<String> implements ThumbLoader
 
   private ButtonOnClickListener buttonOnClickListener;
 
-  private final Ad ad;
-
   public NoteListAdapter(Context context, ListView listView, int resource, String[] objects) {
     super(context, resource, objects);
     for (int i = 0; i < initialThumbLoadSize && i < objects.length; i++) {
       startImageLoad(objects[i]);
     }
 
-    ad = new Ad();
     buttonOnClickListener = new ButtonOnClickListener(listView);
-  }
-
-  @Override
-  public String getItem(int position) {
-    int mapped = getMappedPosition(position);
-    return super.getItem(mapped);
-  }
-
-  @Override
-  public int getCount() {
-    int count = super.getCount();
-    return ad.mapCount(count);
-  }
-
-  private int getMappedPosition(int position) {
-    return ad.mapPosition(position);
   }
 
   @Override
@@ -69,11 +48,7 @@ public class NoteListAdapter extends ArrayAdapter<String> implements ThumbLoader
 
   @Override
   public View getView(int position, View convertView, ViewGroup parent) {
-    if (ad.inject(position)) {
-      return ad.injectView(getContext(), position);
-    }
-
-    if (convertView == null || convertView instanceof AdView) {
+    if (convertView == null) {
       LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
       convertView = inflater.inflate(R.layout.note_list_item, parent, false);
     }
@@ -96,17 +71,11 @@ public class NoteListAdapter extends ArrayAdapter<String> implements ThumbLoader
     return rowView;
   }
 
-  public void onPause() {
-    ad.onPause();
-  }
+  public void onPause() { }
 
-  public void onResume() {
-    ad.onResume();
-  }
+  public void onResume() { }
 
-  public void onDestroy() {
-    ad.onDestroy();
-  }
+  public void onDestroy() { }
 
   private boolean setImage(ImageView imageView, String path) {
     if (cachedImages.containsKey(path)) {
@@ -120,7 +89,7 @@ public class NoteListAdapter extends ArrayAdapter<String> implements ThumbLoader
   }
 
   public Drawable getImage(int position) {
-    String path = getItem(getMappedPosition(position));
+    String path = getItem(position);
     if (cachedImages.containsKey(path)) {
       return cachedImages.get(path).get();
     }

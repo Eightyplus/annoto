@@ -1,5 +1,6 @@
 package dk.eightyplus.Painter.utilities;
 
+/*
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +21,7 @@ import java.util.Map;
  * Time: 11.36
  */
 public class Ad {
-
+/**
   private static final int MAPPING = 3;
 
   private Map<Integer, SoftReference<AdView>> adViews = new HashMap<Integer, SoftReference<AdView>>();
@@ -29,7 +30,7 @@ public class Ad {
    * @param context the context
    * @param position the position in list
    * @return view to be injected into list
-   */
+   * /
   public View injectView(final Context context, int position) {
 
     SoftReference<AdView> adViewSoftReference = adViews.get(position);
@@ -64,7 +65,7 @@ public class Ad {
    * Map count if ads are present
    * @param count the count
    * @return mapped count
-   */
+   * /
   public int mapCount(int count) {
     if ( hasAds() ) {
       count += count / MAPPING;
@@ -76,7 +77,7 @@ public class Ad {
    * Map position without ads
    * @param position the position
    * @return mapped position
-   */
+   * /
   public int mapPosition(int position) {
     if ( hasAds() ) {
       position -= position / MAPPING;
@@ -87,14 +88,14 @@ public class Ad {
   /**
    * @param position position
    * @return true if ad should be injected
-   */
+   * /
   public boolean inject(int position) {
     return hasAds() && position % MAPPING == 0;
   }
 
   /**
    * @return true if app has ads
-   */
+   * /
   public boolean hasAds() {
     return true;
   }
@@ -127,4 +128,5 @@ public class Ad {
 
     adViews.clear();
   }
+*/
 }
