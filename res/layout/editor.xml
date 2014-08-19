@@ -5,7 +5,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-  <dk.eightyplus.Painter.view.EditTextCustom
+  <dk.eightyplus.annoto.view.EditTextCustom
       android:id="@+id/edit"
       android:background="@drawable/rectangle_rounded_white"
       android:layout_height="match_parent"

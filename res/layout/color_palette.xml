@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<dk.eightyplus.Painter.view.MovableLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<dk.eightyplus.annoto.view.MovableLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_centerHorizontal="true"
@@ -12,7 +12,7 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:orientation="horizontal">
-    <!--dk.eightyplus.Painter.dialog.ColorPickerView
+    <!--dk.eightyplus.annotodialog.ColorPickerView
         android:id="@+id/color_picker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -47,4 +47,4 @@
       android:layout_width="wrap_content"
       android:layout_height="wrap_content" />
 
-</dk.eightyplus.Painter.view.MovableLinearLayout>
+</dk.eightyplus.annoto.view.MovableLinearLayout>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<dk.eightyplus.Painter.view.MovableLinearLayout
+<dk.eightyplus.annoto.view.MovableLinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/root"
     android:orientation="vertical"
@@ -9,7 +9,7 @@
     android:layout_height="wrap_content"
     android:background="@drawable/rectangle_rounded_white_no_padding">
 
-  <dk.eightyplus.Painter.view.ClickMoveView
+  <dk.eightyplus.annoto.view.ClickMoveView
       android:id="@+id/button_unfold"
       android:visibility="visible"
       android:background="@drawable/arrow_down"
@@ -18,7 +18,7 @@
       android:layout_margin="@dimen/unfold_button_margin"
       />
 
-  <dk.eightyplus.Painter.view.ClickMoveView
+  <dk.eightyplus.annoto.view.ClickMoveView
       android:id="@+id/button_fold"
       android:visibility="gone"
       android:background="@drawable/arrow_up"
@@ -36,4 +36,4 @@
       android:layout_height="wrap_content"
       />
 
-</dk.eightyplus.Painter.view.MovableLinearLayout>
+</dk.eightyplus.annoto.view.MovableLinearLayout>
