@@ -43,9 +43,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Stack;
 
-public class FingerPaint extends FragmentActivity implements ColorPickerDialog.OnColorChangedListener, Callback {
+public class MainActivity extends FragmentActivity implements ColorPickerDialog.OnColorChangedListener, Callback {
 
-  private static final String TAG = FingerPaint.class.toString();
+  private static final String TAG = MainActivity.class.toString();
 
   private final Stack<Undo> undoes = new Stack<Undo>();
   private final Stack<Undo> redoes = new Stack<Undo>();
@@ -145,7 +145,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
 
             if (moveComponent != null) {
               moveComponent.setVisible(false);
-              moveView = new MoveView(getApplicationContext(), moveComponent, FingerPaint.this);
+              moveView = new MoveView(getApplicationContext(), moveComponent, MainActivity.this);
               visibleLayer.addView(moveView);
               view.redraw();
               moveView.onTouchEvent(event);
@@ -188,7 +188,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
 
     FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
     if (fragment == null) {
-      EditorFragment editorFragment = new EditorFragment(FingerPaint.this, component, x, y);
+      EditorFragment editorFragment = new EditorFragment(MainActivity.this, component, x, y);
       transaction.replace(R.id.configuration_top, editorFragment, Tags.FRAGMENT_EDITOR);
     } else {
       transaction.remove(fragment);
@@ -745,7 +745,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       menuColor.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem item) {
-          //new ColorPickerDialog(FingerPaint.this, FingerPaint.this, view.getColor()).show();
+          //new ColorPickerDialog(MainActivity.this, MainActivity.this, view.getColor()).show();
           showColorPalette();
           return true;
         }
@@ -848,7 +848,7 @@ public class FingerPaint extends FragmentActivity implements ColorPickerDialog.O
       @Override
       public boolean onMenuItemClick(MenuItem item) {
         String url = getApplicationContext().getString(R.string.url_feedback);
-        WebPageActivity.startWebPageActivity(FingerPaint.this, url);
+        WebPageActivity.startWebPageActivity(MainActivity.this, url);
         return true;
       }
     });
