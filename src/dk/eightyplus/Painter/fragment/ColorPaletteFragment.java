@@ -7,6 +7,9 @@ import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -26,6 +29,7 @@ import java.lang.ref.SoftReference;
 public class ColorPaletteFragment extends DialogFragment {
 
   private SoftReference<Callback> callbackSoftReference;
+  private LinearLayout linearLayoutDynamic;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -34,7 +38,7 @@ public class ColorPaletteFragment extends DialogFragment {
   }
 
   @Override
-  public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+  public View onCreateView(final LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     View view = inflater.inflate(R.layout.color_palette, container, false);
 
     Callback callback = callbackSoftReference.get();
@@ -43,7 +47,7 @@ public class ColorPaletteFragment extends DialogFragment {
     LinearLayout blackWhite = (LinearLayout) view.findViewById(R.id.color_static1);
     LinearLayout grayScale = (LinearLayout) view.findViewById(R.id.color_static2);
     LinearLayout rainbow = (LinearLayout) view.findViewById(R.id.color_rainbow);
-    LinearLayout linearLayoutDynamic = (LinearLayout) view.findViewById(R.id.color_dynamic);
+    linearLayoutDynamic = (LinearLayout) view.findViewById(R.id.color_dynamic);
 
     int[] bwColors = new int[]{R.color.black, R.color.white};
     for (int color : bwColors) {
@@ -57,16 +61,8 @@ public class ColorPaletteFragment extends DialogFragment {
     }
     ImageButton randomButton = (ImageButton) inflater.inflate(R.layout.color_button, blackWhite, false);
     randomButton.setBackgroundResource(android.R.drawable.ic_menu_help);
+    randomButton.setOnClickListener(new ButtonColorClickListener(callback, 0));
     blackWhite.addView(randomButton);
-    randomButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        Callback callback = callbackSoftReference.get();
-        if (callback != null) {
-          callback.colorChanged(0);
-        }
-      }
-    });
 
     int[] grayColors = new int[]{R.color.dark_grey, R.color.gray, R.color.light_grey};
     for (int color : grayColors) {
@@ -80,6 +76,8 @@ public class ColorPaletteFragment extends DialogFragment {
     }
 
     ColorPickerView colorPickerView = new ColorPickerView(inflater.getContext(), new ColorPickerDialog.OnColorChangedListener() {
+      private int lastColor = 0;
+
       @Override
       public void colorChanged(int color) {
         Callback callback = callbackSoftReference.get();
@@ -87,18 +85,25 @@ public class ColorPaletteFragment extends DialogFragment {
           callback.colorChanged(color);
         }
 
-        final SharedPreferences preferences = getActivity().getSharedPreferences(Keys.PREFERENCES, Context.MODE_PRIVATE);
-        int lastColorSlot = preferences.getInt(Keys.COLOR_LAST, -1);
+        if (lastColor != color) {
+          lastColor = color;
 
-        lastColorSlot++;
-        if (lastColorSlot > 5) {
-          lastColorSlot = 0;
+          final SharedPreferences preferences = getActivity().getSharedPreferences(Keys.PREFERENCES, Context.MODE_PRIVATE);
+          int lastColorSlot = preferences.getInt(Keys.COLOR_LAST, -1);
+
+          lastColorSlot++;
+          if (lastColorSlot > 5) {
+            lastColorSlot = 0;
+          }
+
+          SharedPreferences.Editor edit = preferences.edit();
+          edit.putInt(Keys.COLOR + lastColorSlot, color);
+          edit.putInt(Keys.COLOR_LAST, lastColorSlot);
+          edit.commit();
+
+          updatePickedColors(inflater, callback);
+          linearLayoutDynamic.invalidate();
         }
-
-        SharedPreferences.Editor edit = preferences.edit();
-        edit.putInt(Keys.COLOR + lastColorSlot, color);
-        edit.putInt(Keys.COLOR_LAST, lastColorSlot);
-        edit.commit();
       }
     }, 0);
     linearLayoutTop.addView(colorPickerView);
@@ -114,6 +119,13 @@ public class ColorPaletteFragment extends DialogFragment {
       button.setOnClickListener(new ButtonColorClickListener(callback, hexColor));
     }
 
+    updatePickedColors(inflater, callback);
+
+    return view;
+  }
+
+  private void updatePickedColors(LayoutInflater inflater, Callback callback) {
+    linearLayoutDynamic.removeAllViews();
     final SharedPreferences preferences = getActivity().getSharedPreferences(Keys.PREFERENCES, Context.MODE_PRIVATE);
     //clearSavedColors(preferences);
     int lastColorSlot = preferences.getInt(Keys.COLOR_LAST, -1);
@@ -129,8 +141,6 @@ public class ColorPaletteFragment extends DialogFragment {
         button.setOnClickListener(new ButtonColorClickListener(callback, hexColor));
       }
     }
-
-    return view;
   }
 
   private void clearSavedColors(SharedPreferences preferences) {
@@ -147,6 +157,7 @@ public class ColorPaletteFragment extends DialogFragment {
 
     private SoftReference<Callback> callbackSoftReference;
     private int color;
+    private Animation animation;
 
     public ButtonColorClickListener(Callback callback, int color) {
       this.callbackSoftReference = new SoftReference<Callback>(callback);
@@ -159,6 +170,16 @@ public class ColorPaletteFragment extends DialogFragment {
       if (callback != null) {
         callback.colorChanged(color);
       }
+      v.startAnimation(getAnimation());
+    }
+
+    private Animation getAnimation() {
+      if (animation == null) {
+        animation = new AlphaAnimation(1, 0);
+        animation.setDuration(50);
+        animation.setInterpolator(new LinearInterpolator());
+      }
+      return animation;
     }
   }
 
