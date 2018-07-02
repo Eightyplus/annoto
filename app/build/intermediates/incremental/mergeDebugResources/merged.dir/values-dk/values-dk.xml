@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="archive">Arkiv</string>
+    <string name="blur">Slør</string>
+    <string name="camera">Kamera</string>
+    <string name="cancel">Annuller</string>
+    <string name="color">Farve</string>
+    <string name="color_button">Farve knap</string>
+    <string name="delete">Slet</string>
+    <string formatted="false" name="delete_file">Slet `%s`</string>
+    <string name="delete_list_item">Slet element?</string>
+    <string name="demo">Demo</string>
+    <string name="draw">Tegne</string>
+    <string name="error_loading_image">Der opstod en fejl ved indlæsning fra billedegalleriet</string>
+    <string name="error_taking_photo">Der opstod en fejl ved optagelse med kameraet</string>
+    <string name="feedback">Feedback</string>
+    <string name="gallery">Billedegalleri</string>
+    <string name="move">Flyt</string>
+    <string name="new_drawing">Ny</string>
+    <string name="redo">Udfør alligevel</string>
+    <string name="save">Gem</string>
+    <string name="select_picture">Vælg billede</string>
+    <string name="share">Del</string>
+    <string name="share_information">Del via</string>
+    <string name="share_subject">Emne</string>
+    <string name="share_text">Dette er min tegning</string>
+    <string name="thumbnail">Miniature billede</string>
+    <string name="undo">Fortryd</string>
+    <string name="width">Tykkelse</string>
+</resources>

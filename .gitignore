@@ -1,7 +1,0 @@
-.DS_Store
-gen
-*.properties
-*.iml
-*.apk
-*.keystore
-build.xml
