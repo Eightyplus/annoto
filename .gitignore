@@ -3,4 +3,5 @@ gen
 *.properties
 *.iml
 *.apk
+*.keystore
 build.xml
