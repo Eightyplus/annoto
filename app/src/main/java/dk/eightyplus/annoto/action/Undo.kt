@@ -98,9 +98,11 @@ class Undo(private val component: Component, private var text: String?, private 
 
 
     private fun changeText(): Boolean {
-        if (component is Text) {
+        val txt = text
+
+        if (component is Text && txt != null) {
             val tmp = component.text
-            component.text = text
+            component.text = txt
             text = tmp
             return true
         }
