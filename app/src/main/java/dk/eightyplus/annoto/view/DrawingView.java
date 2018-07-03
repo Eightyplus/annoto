@@ -229,6 +229,10 @@ public class DrawingView extends View implements ComponentList, SaveLoad {
     components.remove(component);
   }
 
+  public int getNumComponents() {
+    return this.components.size();
+  }
+
   public Component findComponent(float x, float y) {
     Component moveComponent = null;
     float minimumDistance = Float.MAX_VALUE;
