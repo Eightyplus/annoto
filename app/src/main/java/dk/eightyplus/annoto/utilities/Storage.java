@@ -47,7 +47,7 @@ public class Storage {
   protected Context context;
 
   private Storage(final Context context) {
-    this.context = context.getApplicationContext();
+    this.context = context;
   }
 
   public static Storage getStorage(final Context context) {
@@ -101,7 +101,7 @@ public class Storage {
   public void loadFromFile(SaveLoad load, String fileName, boolean isAsset) throws IOException, ClassNotFoundException {
     GZIPInputStream inputStream;
     if (isAsset) {
-      inputStream = new GZIPInputStream(context.getAssets().open(fileName));
+      inputStream = new GZIPInputStream(context.getResources().getAssets().open(fileName));
     } else {
       File file = getFilename(fileName);
       inputStream = new GZIPInputStream(new FileInputStream(file));
