@@ -15,6 +15,7 @@ import java.io.InputStream;
 import dk.eightyplus.annoto.action.State;
 import dk.eightyplus.annoto.action.Undo;
 import dk.eightyplus.annoto.component.Component;
+import dk.eightyplus.annoto.utilities.Storage;
 import dk.eightyplus.annoto.view.DrawingView;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -25,61 +26,81 @@ import static org.junit.Assert.fail;
 @RunWith(AndroidJUnit4.class)
 public class ReadWriteTest {
 
+    private Callback callback = new Callback() {
+
+        @Override
+        public void textEditDone() {
+
+        }
+
+        @Override
+        public void move(Component component, float dx, float dy, float scale) {
+
+        }
+
+        @Override
+        public State getState() {
+            return null;
+        }
+
+        @Override
+        public void setState(State state) {
+
+        }
+
+        @Override
+        public void setStrokeWidth(int width) {
+
+        }
+
+        @Override
+        public void add(Undo undo) {
+
+        }
+
+        @Override
+        public void load(String fileName) {
+
+        }
+
+        @Override
+        public void colorChanged(int color) {
+
+        }
+    };
+
     @Test
     public void readJsonFile() {
 
         String note = "file-2018-07-03_09-25-38.note";
 
-        Callback callback = new Callback() {
-
-            @Override
-            public void textEditDone() {
-
-            }
-
-            @Override
-            public void move(Component component, float dx, float dy, float scale) {
-
-            }
-
-            @Override
-            public State getState() {
-                return null;
-            }
-
-            @Override
-            public void setState(State state) {
-
-            }
-
-            @Override
-            public void setStrokeWidth(int width) {
-
-            }
-
-            @Override
-            public void add(Undo undo) {
-
-            }
-
-            @Override
-            public void load(String fileName) {
-
-            }
-
-            @Override
-            public void colorChanged(int color) {
-
-            }
-        };
-
         try {
-            InputStream inputStream = this.getClass().getClassLoader().getResource(note).openStream();
+            InputStream inputStream = InstrumentationRegistry.getContext().getResources().getAssets().open(note);
+            //InputStream inputStream = this.getClass().getClassLoader().getResource(note).openStream();
             DrawingView drawingView = new DrawingView(InstrumentationRegistry.getContext(), callback);
             drawingView.load(InstrumentationRegistry.getContext(), new DataInputStream(inputStream));
 
             assertThat("Read components should match size specified in file", drawingView.getNumComponents(), equalTo(14));
 
+        } catch (IOException e) {
+            Log.e("ERROR", "IOException", e);
+            fail("IOException should not be thrown");
+        } catch (ClassNotFoundException e) {
+            Log.e("ERROR", "ClassNotFoundException", e);
+            e.printStackTrace();
+            fail("ClassNotFoundException should not be thrown");
+        }
+
+    }
+
+    @Test
+    public void readGzippedJsonFile() {
+        String note = "file-2018-07-03_09-22-01.note";
+
+        try {
+            DrawingView drawingView = new DrawingView(InstrumentationRegistry.getContext(), callback);
+            Storage.getStorage(InstrumentationRegistry.getContext()).loadFromFile(drawingView, note, true);
+            assertThat("Read components should match size specified in file", drawingView.getNumComponents(), equalTo(5));
         } catch (IOException e) {
             Log.e("ERROR", "IOException", e);
             fail("IOException should not be thrown");
