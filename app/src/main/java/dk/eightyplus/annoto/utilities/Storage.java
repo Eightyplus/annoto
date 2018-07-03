@@ -66,8 +66,7 @@ public class Storage {
   public void writeToFile(SaveLoad save, String fileName) throws IOException {
     File file = getFilename(fileName);
 
-    //GZIPOutputStream outputStream = new GZIPOutputStream(new FileOutputStream(file));
-    FileOutputStream outputStream = new FileOutputStream(file);
+    GZIPOutputStream outputStream = new GZIPOutputStream(new FileOutputStream(file));
     DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
     save.save(context, dataOutputStream);
     outputStream.flush();
@@ -100,12 +99,12 @@ public class Storage {
   }
 
   public void loadFromFile(SaveLoad load, String fileName, boolean isAsset) throws IOException, ClassNotFoundException {
-    InputStream inputStream;
+    GZIPInputStream inputStream;
     if (isAsset) {
-      inputStream = context.getAssets().open(fileName);
+      inputStream = new GZIPInputStream(context.getAssets().open(fileName));
     } else {
       File file = getFilename(fileName);
-      inputStream = new FileInputStream(file);
+      inputStream = new GZIPInputStream(new FileInputStream(file));
     }
     DataInputStream dataInputStream = new DataInputStream(inputStream);
     load.load(context, dataInputStream);
