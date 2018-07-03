@@ -55,6 +55,10 @@ class DrawingView(context: Context, private val callback: Callback) : View(conte
     private var mY: Float = 0.toFloat()
     private var currentStrokeModify = 1.0f
     var strokeWidth = 6
+        set(value) {
+            field = value
+            saveStrokeWidth(value)
+        }
 
     private var variableWidth = true
     private var redrawing = false
@@ -325,15 +329,6 @@ class DrawingView(context: Context, private val callback: Callback) : View(conte
             }
         }
         return strokeWidth * currentStrokeModify
-    }
-
-    fun setStrokeWidth(strokeWidth: Int) {
-        this.strokeWidth = strokeWidth
-        saveStrokeWidth(strokeWidth)
-    }
-
-    fun getStrokeWidth(): Int {
-        return strokeWidth
     }
 
     private fun saveStrokeWidth(strokeWidth: Int) {
