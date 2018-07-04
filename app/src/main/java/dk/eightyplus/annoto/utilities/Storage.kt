@@ -164,7 +164,7 @@ class Storage private constructor(
 
         @Synchronized
         private fun createStorage(context: Context): Storage {
-            val storage = Storage(context.applicationContext)
+            val storage = Storage(context.applicationContext ?: context)
             storageReference = SoftReference(storage)
             return storage
         }
