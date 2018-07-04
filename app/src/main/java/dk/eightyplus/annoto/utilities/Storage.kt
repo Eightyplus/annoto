@@ -1,36 +1,16 @@
 package dk.eightyplus.annoto.utilities
 
-import android.content.ContentValues
 import android.content.Context
 import android.content.ContextWrapper
-import android.content.CursorLoader
 import android.content.Intent
-import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.provider.MediaStore
 import android.util.Log
 import dk.eightyplus.annoto.R
 import org.json.JSONException
-
-import java.io.ByteArrayOutputStream
-import java.io.DataInputStream
-import java.io.DataOutputStream
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.io.FilenameFilter
-import java.io.IOException
-import java.io.InputStream
-import java.io.ObjectInputStream
-import java.io.ObjectOutputStream
-import java.io.OutputStream
-import java.io.StreamCorruptedException
+import java.io.*
 import java.lang.ref.SoftReference
-import java.lang.reflect.Field
-import java.util.ArrayList
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 
@@ -39,15 +19,15 @@ import java.util.zip.GZIPOutputStream
  * Date: 18/03/14
  * Time: 16.49
  */
-class Storage private constructor(
-        /** The application context.  */
-        protected var context: Context) {
+class Storage private constructor(context: Context) {
+
+    private var context: Context = context.applicationContext ?: context
 
     val notes: Array<String>
         get() {
-            val root = getFilename(null)
-
-            return root.list { dir, filename -> filename.endsWith(context.getString(R.string.note_file_format, context.getString(R.string.empty))) }
+            return getFilename(null).list { _, filename ->
+                filename.endsWith(context.getString(R.string.note_file_format, context.getString(R.string.empty)))
+            }
         }
 
     @Throws(IOException::class)
@@ -84,12 +64,10 @@ class Storage private constructor(
     @Throws(IOException::class, ClassNotFoundException::class)
     @JvmOverloads
     fun loadFromFile(load: SaveLoad, fileName: String, isAsset: Boolean = false) {
-        val inputStream: GZIPInputStream
-        if (isAsset) {
-            inputStream = GZIPInputStream(context.resources.assets.open(fileName))
+        val inputStream = if (isAsset) {
+            GZIPInputStream(context.resources.assets.open(fileName))
         } else {
-            val file = getFilename(fileName)
-            inputStream = GZIPInputStream(FileInputStream(file))
+            GZIPInputStream(FileInputStream(getFilename(fileName)))
         }
         val dataInputStream = DataInputStream(inputStream)
         load.load(context, dataInputStream)
@@ -125,11 +103,9 @@ class Storage private constructor(
     @JvmOverloads
     fun loadFromFile(fileName: String = "image.png"): Bitmap? {
         val file = getFilename(fileName)
-        var bitmap: Bitmap? = null
-        if (file.exists()) {
-            bitmap = BitmapFactory.decodeFile(file.absolutePath)
-        }
-        return bitmap
+        return if (file.exists()) {
+            BitmapFactory.decodeFile(file.absolutePath)
+        } else null
     }
 
     @Throws(IOException::class)
@@ -146,11 +122,9 @@ class Storage private constructor(
         return getFilename(String.format("%s.png", prefix))
     }
 
-    fun getFilename(filename: String?): File {
+    fun getFilename(filename: String? = ""): File {
         val applicationPath = context.getExternalFilesDir(null)
-        return if (filename == null) {
-            File(applicationPath, File.separator)
-        } else File(applicationPath, File.separator + filename)
+        return File(applicationPath, File.separator + filename)
     }
 
     companion object {
@@ -164,7 +138,7 @@ class Storage private constructor(
 
         @Synchronized
         private fun createStorage(context: Context): Storage {
-            val storage = Storage(context.applicationContext ?: context)
+            val storage = Storage(context)
             storageReference = SoftReference(storage)
             return storage
         }
@@ -195,15 +169,14 @@ class Storage private constructor(
 
         @Throws(IOException::class)
         fun readData(inputStream: InputStream?): String? {
-            if (inputStream == null) {
-                return null
-            }
-            try {
+            inputStream ?: return null
+
+            inputStream.use { iStream ->
                 val baos = ByteArrayOutputStream()
                 var read = true
 
                 while (read) {
-                    val byteValue = inputStream.read()
+                    val byteValue = iStream.read()
                     read = byteValue != -1
                     if (read) {
                         baos.write(byteValue)
@@ -211,8 +184,6 @@ class Storage private constructor(
                 }
 
                 return String(baos.toByteArray())
-            } finally {
-                inputStream.close()
             }
         }
     }
