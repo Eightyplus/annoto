@@ -124,7 +124,7 @@ class Storage private constructor(context: Context) {
 
     fun getFilename(filename: String? = ""): File {
         val applicationPath = context.getExternalFilesDir(null)
-        return File(applicationPath, File.separator + filename)
+        return File(applicationPath, File.separator + (filename ?: ""))
     }
 
     companion object {
