@@ -4,19 +4,13 @@ import android.app.ActionBar
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentActivity
-import android.support.v4.app.FragmentTransaction
 import android.support.v4.content.ContextCompat
 import android.util.Log
-import android.util.Pair
 import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -29,21 +23,14 @@ import dk.eightyplus.annoto.component.Component
 import dk.eightyplus.annoto.component.Picture
 import dk.eightyplus.annoto.component.Text
 import dk.eightyplus.annoto.dialog.ColorPickerDialog
-import dk.eightyplus.annoto.fragment.ButtonSelectorFragment
-import dk.eightyplus.annoto.fragment.ColorPaletteFragment
-import dk.eightyplus.annoto.fragment.EditorFragment
-import dk.eightyplus.annoto.fragment.NoteListFragment
-import dk.eightyplus.annoto.fragment.SliderFragment
+import dk.eightyplus.annoto.fragment.*
 import dk.eightyplus.annoto.utilities.Compatibility
 import dk.eightyplus.annoto.utilities.Storage
 import dk.eightyplus.annoto.view.DrawingView
 import dk.eightyplus.annoto.view.MoveView
-
-import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Stack
+import java.util.*
 
 class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListener, Callback {
 
@@ -51,11 +38,11 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
     private val redoes = Stack<Undo>()
 
     private var layout: ViewGroup? = null
-    private var view: DrawingView? = null
+    private lateinit var view: DrawingView
     private var moveView: MoveView? = null
 
     override var state = State.DrawPath
-    private var visibleLayer: ViewGroup? = null
+    private lateinit var visibleLayer: ViewGroup
     private var color = 0
     private var cameraFileName: String? = null
     private var saveFileNamePrefix: String? = null
@@ -71,7 +58,7 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
         layout = findViewById<View>(R.id.main) as ViewGroup
         visibleLayer = findViewById<View>(R.id.visible_layer) as ViewGroup
         view = DrawingView(applicationContext, this)
-        visibleLayer!!.addView(view)
+        visibleLayer.addView(view)
 
         val touchLayer = layout!!.findViewById<View>(R.id.touch_layer) as ViewGroup
         val touchView = TouchView(applicationContext)
@@ -80,7 +67,6 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
         setupActionBar()
 
         showButtonSelector()
-
     }
 
     /**
@@ -93,35 +79,39 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
             when (state) {
                 State.Delete -> {
                     if (event.action == MotionEvent.ACTION_MOVE) {
-                        val x = event.x
-                        val y = event.y
-                        val deleteComponent = view!!.findComponent(x, y)
+                        val deleteComponent = view.findComponent(event.x, event.y)
 
                         if (deleteComponent != null) {
-                            view!!.remove(deleteComponent)
+                            view.remove(deleteComponent)
                             add(Undo(deleteComponent, State.Delete))
-                            view!!.redraw()
+                            view.redraw()
                         }
                     }
                     return true
                 }
                 State.Move -> {
+                    var moveView = moveView
+
                     if (moveView == null && event.action == MotionEvent.ACTION_DOWN) {
-                        val x = event.x
-                        val y = event.y
-                        val moveComponent = view!!.findComponent(x, y)
+                        val moveComponent = view.findComponent(event.x, event.y)
 
                         if (moveComponent != null) {
                             moveComponent.isVisible = false
                             moveView = MoveView(applicationContext, moveComponent, this@MainActivity)
-                            visibleLayer!!.addView(moveView)
-                            view!!.redraw()
-                            moveView!!.onTouchEvent(event)
+                            this@MainActivity.moveView = moveView
+                            visibleLayer.addView(moveView)
+                            view.redraw()
                         }
-                    } else if (moveView != null && (event.action == MotionEvent.ACTION_DOWN ||
-                                    event.action == MotionEvent.ACTION_MOVE ||
-                                    event.action == MotionEvent.ACTION_UP)) {
-                        moveView!!.onTouchEvent(event)
+                    }
+
+                    if (moveView != null) {
+                        when (event.action) {
+                            MotionEvent.ACTION_DOWN,
+                            MotionEvent.ACTION_MOVE,
+                            MotionEvent.ACTION_UP ->
+                                moveView.onTouchEvent(event)
+                            else -> {}
+                        }
                     }
                     return true
                 }
@@ -130,17 +120,14 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
                         if (isEditorVisible) {
                             hideEditor()
                         } else {
-                            val x = event.x
-                            val y = event.y
-                            val editComponent = view!!.findComponent(x, y)
-
+                            val editComponent = view.findComponent(event.x, event.y)
                             showEditor(editComponent, event.x, event.y)
                         }
                     }
                     return true
                 }
-                State.DrawPath -> return view!!.onTouchEvent(event)
-                else -> return view!!.onTouchEvent(event)
+                State.DrawPath -> return view.onTouchEvent(event)
+                else -> return view.onTouchEvent(event)
             }
         }
     }
@@ -169,8 +156,8 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
                 if (color != 0) {
                     textChanges.first.color = color
                 }
-                view!!.add(textChanges.first)
-                view!!.redraw()
+                view.add(textChanges.first)
+                view.redraw()
                 if (textChanges.second != null) {
                     add(textChanges.second)
                 }
@@ -190,21 +177,12 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
         val fragment = supportFragmentManager.findFragmentByTag(Tags.FRAGMENT_SLIDER)
         val transaction = supportFragmentManager.beginTransaction()
         if (fragment == null) {
-            val sliderFragment = SliderFragment(this, view!!.strokeWidth)
+            val sliderFragment = SliderFragment(this, view.strokeWidth)
             transaction.replace(R.id.configuration_top, sliderFragment, Tags.FRAGMENT_SLIDER)
         } else {
             transaction.remove(fragment)
         }
         transaction.commit()
-    }
-
-    private fun hideWidthSlider() {
-        val fragment = supportFragmentManager.findFragmentByTag(Tags.FRAGMENT_SLIDER)
-        if (fragment != null) {
-            val transaction = supportFragmentManager.beginTransaction()
-            transaction.remove(fragment)
-            transaction.commit()
-        }
     }
 
     private fun showColorPalette() {
@@ -275,12 +253,12 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
-        view!!.onRestoreInstanceState(savedInstanceState)
+        view.onRestoreInstanceState(savedInstanceState)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        view!!.onSaveInstanceState(outState)
+        view.onSaveInstanceState(outState)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
@@ -303,7 +281,7 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
                     }).start()
 
                     val picture = Picture(context, bitmap, galleryFileName)
-                    view!!.add(picture)
+                    view.add(picture)
                     add(Undo(picture, State.Add))
                 } catch (e: IOException) {
                     Log.d(TAG, getString(R.string.log_error_exception), e)
@@ -314,17 +292,16 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
                     val cameraFileName = cameraFileName
                     if (cameraFileName != null) {
                         val bitmap = storage.loadFromFile(cameraFileName)
-                        // TODO storage.addImageToGallery(this, cameraFileName);
                         if (bitmap != null) {
                             val picture = Picture(context, bitmap, cameraFileName)
-                            view!!.add(picture)
+                            view.add(picture)
                             add(Undo(picture, State.Add))
                         }
                     }
 
                 }
             }
-            view!!.redraw()
+            view.redraw()
         }
     }
 
@@ -343,7 +320,7 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
 
     override fun colorChanged(color: Int) {
         this.color = color
-        view!!.color = color
+        view.color = color
     }
 
     override fun hexColorForResourceId(color: Int): Int {
@@ -352,13 +329,13 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
 
     override fun move(component: Component, dx: Float, dy: Float, scale: Float) {
         component.isVisible = true
-        view!!.move(component, dx, dy, scale)
-        visibleLayer!!.removeView(moveView)
+        view.move(component, dx, dy, scale)
+        visibleLayer.removeView(moveView)
         moveView = null
     }
 
     override fun setStrokeWidth(width: Int) {
-        view!!.strokeWidth = width
+        view.strokeWidth = width
     }
 
     override fun add(undo: Undo) {
@@ -373,8 +350,8 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
             try {
                 cleanup(true, false)
                 saveFileNamePrefix = fileName.substring(0, fileName.lastIndexOf("."))
-                Storage.getStorage(applicationContext).loadFromFile(view!!, fileName)
-                view!!.redraw()
+                Storage.getStorage(applicationContext).loadFromFile(view, fileName)
+                view.redraw()
             } catch (e: IOException) {
                 Log.e(TAG, getString(R.string.log_error_exception), e)
             } catch (e: ClassNotFoundException) {
@@ -391,14 +368,14 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
             try {
                 //writeToFile(getApplicationContext(), view.getBitmap());
                 if (saveFileNamePrefix == null) {
-                    val formatter = SimpleDateFormat(getString(R.string.date_format))
+                    val formatter = SimpleDateFormat(getString(R.string.date_format), Locale.getDefault())
                     val date = formatter.format(Calendar.getInstance().time)
                     saveFileNamePrefix = String.format("file-%s", date)
                 }
 
                 val storage = Storage.getStorage(applicationContext)
-                storage.writeToFile(view!!, getString(R.string.note_file_format, saveFileNamePrefix))
-                storage.writeToFile(view!!.bitmap, String.format("%s.png", saveFileNamePrefix), 30)
+                storage.writeToFile(view, getString(R.string.note_file_format, saveFileNamePrefix))
+                storage.writeToFile(view.bitmap, String.format("%s.png", saveFileNamePrefix), 30)
             } catch (e: IOException) {
                 Log.e(TAG, getString(R.string.log_error_exception), e)
             }
@@ -412,18 +389,18 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
         clearUndos(delete)
         saveFileNamePrefix = null
         if (reinitialise) {
-            view!!.reinitialise(delete, invalidate)
+            view.reinitialise(delete, invalidate)
         } else {
-            view!!.delete(delete)
+            view.delete(delete)
         }
     }
 
     fun undo(): Boolean {
         if (undoes.size > 0) {
             val undo = this.undoes.pop()
-            if (undo.undo(view!!)) {
+            if (undo.undo(view)) {
                 redoes.add(undo)
-                view!!.redraw()
+                view.redraw()
                 return true
             }
         }
@@ -433,9 +410,9 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
     fun redo(): Boolean {
         if (redoes.size > 0) {
             val redo = this.redoes.pop()
-            if (redo.redo(view!!)) {
+            if (redo.redo(view)) {
                 undoes.add(redo)
-                view!!.redraw()
+                view.redraw()
                 return true
             }
         }
@@ -475,7 +452,6 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
         setupCameraMenuButton(menu)
         setupGalleryMenuButton(menu)
         setupSaveMenuButton(menu)
-        setupLoadMenuButton(menu)
         setupColorMenuButton(menu)
         setupDeleteMenuButton(menu)
         setupUndoMenuButton(menu)
@@ -515,7 +491,7 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
     private fun setupRedrawMenuButton(menu: Menu) {
         val menuRedraw = menu.findItem(R.id.menu_redraw)
         menuRedraw?.setOnMenuItemClickListener {
-            view!!.redraw(50, true)
+            view.redraw(50, true)
             true
         }
     }
@@ -524,7 +500,7 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
         val menuShare = menu.findItem(R.id.menu_share)
         menuShare?.setOnMenuItemClickListener {
             try {
-                val file = Storage.getStorage(applicationContext).writeToFile(view!!.bitmap)
+                val file = Storage.getStorage(applicationContext).writeToFile(view.bitmap)
                 val sharingIntent = Intent(Intent.ACTION_SEND)
                 sharingIntent.type = getString(R.string.image_format)
                 sharingIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_subject))
@@ -542,7 +518,7 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
     private fun setupCameraMenuButton(menu: Menu) {
         val menuCamera = menu.findItem(R.id.menu_camera)
         menuCamera?.setOnMenuItemClickListener {
-            val formatter = SimpleDateFormat(getString(R.string.date_format))
+            val formatter = SimpleDateFormat(getString(R.string.date_format), Locale.getDefault())
             val date = formatter.format(Calendar.getInstance().time)
             cameraFileName = getString(R.string.camera_file_format, date)
             val cameraFile = Storage.getStorage(applicationContext).getFilename(cameraFileName)
@@ -568,24 +544,6 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
         val menuSave = menu.findItem(R.id.menu_save)
         menuSave?.setOnMenuItemClickListener {
             save()
-            true
-        }
-    }
-
-    // TODO delete
-    private fun setupLoadMenuButton(menu: Menu) {
-        val menuLoad = menu.findItem(R.id.menu_load)
-        menuLoad?.setOnMenuItemClickListener {
-            try {
-                //writeToFile(getApplicationContext(), view.getBitmap());
-                Storage.getStorage(applicationContext).loadFromFile(view!!, "file.note")
-                runOnUiThread { view!!.redraw() }
-            } catch (e: IOException) {
-                Log.e(TAG, getString(R.string.log_error_exception), e)
-            } catch (e: ClassNotFoundException) {
-                Log.e(TAG, getString(R.string.log_error_exception), e)
-            }
-
             true
         }
     }
@@ -627,8 +585,8 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
         val menuReplay = menu.findItem(R.id.menu_replay)
         menuReplay?.setOnMenuItemClickListener {
             try {
-                Storage.getStorage(applicationContext).loadFromFile(view!!, "file.note", true)
-                runOnUiThread { view!!.redraw(100, false) }
+                Storage.getStorage(applicationContext).loadFromFile(view, "file.note", true)
+                runOnUiThread { view.redraw(100, false) }
             } catch (e: IOException) {
                 Log.e(TAG, getString(R.string.log_error_exception), e)
             } catch (e: ClassNotFoundException) {
