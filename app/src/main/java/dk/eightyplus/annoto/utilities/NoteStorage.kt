@@ -30,20 +30,16 @@ object NoteStorage {
      * @param dataOutputStream output stream to write to
      * @return success
      */
-    fun save(context: Context, components: List<Component>, dataOutputStream: DataOutputStream): Boolean {
-        var result = false
+    fun save(context: Context, components: List<Component>, dataOutputStream: DataOutputStream) {
         try {
             val jsonObject = JSONObject()
             toJson(jsonObject, components)
             Storage.writeData(context, jsonObject.toString().toByteArray(), dataOutputStream)
-            result = true
         } catch (e: JSONException) {
             Log.d(TAG, context.getString(R.string.log_error_exception), e)
         } catch (e: IOException) {
             Log.d(TAG, context.getString(R.string.log_error_exception), e)
         }
-
-        return result
     }
 
     /**
@@ -53,20 +49,15 @@ object NoteStorage {
      * @param dataInputStream input stream to read from
      * @return success
      */
-    fun load(context: Context, components: MutableList<Component>, dataInputStream: DataInputStream): Boolean {
-
-        var result = false
+    fun load(context: Context, components: MutableList<Component>, dataInputStream: DataInputStream) {
         try {
             val jsonObject = JSONObject(Storage.readData(dataInputStream))
             fromJson(context, jsonObject, components)
-            result = true
         } catch (e: JSONException) {
             Log.d(TAG, context.getString(R.string.log_error_exception), e)
         } catch (e: IOException) {
             Log.d(TAG, context.getString(R.string.log_error_exception), e)
         }
-
-        return result
     }
 
     /**
