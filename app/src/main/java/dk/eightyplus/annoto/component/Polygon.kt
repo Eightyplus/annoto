@@ -17,12 +17,12 @@ class Polygon() : Component() {
 
     override val bounds: RectF
         get() {
-            val bounds = RectF()
-            path.computeBounds(bounds, false)
-            bounds.offset(x, y)
-            bounds.right += bounds.width() * (scale - 1)
-            bounds.bottom += bounds.height() * (scale - 1)
-            return bounds
+            return RectF().apply {
+                path.computeBounds(this, false)
+                offset(x, y)
+                right += width() * (scale - 1)
+                bottom += height() * (scale - 1)
+            }
         }
 
     override val type: ComponentType
@@ -34,15 +34,19 @@ class Polygon() : Component() {
 
     override fun onDraw(canvas: Canvas, paint: Paint) {
         if (isVisible) {
-            paint.color = color
-            paint.style = Paint.Style.STROKE
-            paint.strokeWidth = width
+            with(paint) {
+                color = this@Polygon.color
+                style = Paint.Style.STROKE
+                strokeWidth = width
+            }
 
-            canvas.save()
-            canvas.scale(scale, scale, bounds.left, bounds.top)
-            canvas.translate(x, y)
-            canvas.drawPath(path, paint)
-            canvas.restore()
+            with(canvas) {
+                save()
+                scale(scale, scale, bounds.left, bounds.top)
+                translate(x, y)
+                drawPath(path, paint)
+                restore()
+            }
         }
     }
 
@@ -52,19 +56,19 @@ class Polygon() : Component() {
 
     @Throws(JSONException::class)
     override fun toJson(): JSONObject {
-        val jsonObject = super.toJson()
-        jsonObject.put(FileId.PATH, path.toJson())
-        return jsonObject
+        return super.toJson().apply {
+            put(FileId.PATH, path.toJson())
+        }
     }
 
     companion object {
 
         @Throws(JSONException::class)
         fun fromJson(jsonObject: JSONObject): Polygon {
-            val polygon = Polygon()
-            polygon.fromJsonPrimary(jsonObject)
-            polygon.path.fromJson(jsonObject.getJSONObject(FileId.PATH))
-            return polygon
+            return Polygon().apply {
+                fromJsonPrimary(jsonObject)
+                path.fromJson(jsonObject.getJSONObject(FileId.PATH))
+            }
         }
     }
 }

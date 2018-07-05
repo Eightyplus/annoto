@@ -59,15 +59,16 @@ class Composite : Component() {
 
     override fun onDraw(canvas: Canvas, paint: Paint) {
         if (isVisible && hasComponents()) {
-            canvas.save()
-
-            val bounds = bounds
-            canvas.scale(scale, scale, bounds.left, bounds.top)
-            canvas.translate(x, y)
-            for (component in componentList) {
-                component.onDraw(canvas, paint)
+            with(canvas) {
+                save()
+                val bounds = bounds
+                scale(scale, scale, bounds.left, bounds.top)
+                translate(x, y)
+                for (component in componentList) {
+                    component.onDraw(this, paint)
+                }
+                restore()
             }
-            canvas.restore()
         }
 
     }
@@ -119,21 +120,21 @@ class Composite : Component() {
 
     @Throws(JSONException::class)
     override fun toJson(): JSONObject {
-        val jsonObject = super.toJson()
-
-        jsonObject.put(FileId.SIZE, componentList.size)
-        if (componentList.size > 0) {
-            NoteStorage.toJson(jsonObject, componentList)
+        return super.toJson().apply {
+            put(FileId.SIZE, componentList.size)
+            if (componentList.size > 0) {
+                NoteStorage.toJson(this, componentList)
+            }
         }
-        return jsonObject
     }
 
     companion object {
 
         @Throws(JSONException::class)
         fun fromJson(context: Context, jsonObject: JSONObject): Composite {
-            val composite = Composite()
-            composite.fromJsonPrimary(jsonObject)
+            val composite = Composite().apply {
+                fromJsonPrimary(jsonObject)
+            }
 
             val size = jsonObject.getInt(FileId.SIZE)
             if (size > 0) {

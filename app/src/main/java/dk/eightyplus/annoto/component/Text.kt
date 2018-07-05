@@ -22,22 +22,20 @@ class Text(var text: String = "") : Component() {
 
     override val bounds: RectF
         get() {
-            val bounds = textBounds
-            bounds.offset(this.x.toInt(), this.y.toInt())
-            bounds.right += (bounds.width() * (scale - 1)).toInt()
-            bounds.bottom += (bounds.height() * (scale - 1)).toInt()
-            return RectF(bounds)
+            return RectF(textBounds.apply {
+                offset(x.toInt(), y.toInt())
+                right += (width() * (scale - 1)).toInt()
+                bottom += (height() * (scale - 1)).toInt()
+            })
         }
 
     private val textBounds: Rect
         get() {
-            val textPaint = object : Paint() {
-                init {
-                    textAlign = Paint.Align.LEFT
-                    typeface = typeFace
-                    textSize = fontSize.toFloat()
-                    isAntiAlias = true
-                }
+            val textPaint = Paint().apply {
+                textAlign = Paint.Align.LEFT
+                typeface = typeFace
+                textSize = fontSize.toFloat()
+                isAntiAlias = true
             }
             val bounds = Rect()
 
@@ -65,26 +63,28 @@ class Text(var text: String = "") : Component() {
 
     override fun onDraw(canvas: Canvas, paint: Paint) {
         if (isVisible) {
-            paint.color = color
-            paint.strokeWidth = 1.0f
-
-            paint.textAlign = Paint.Align.LEFT
-            //paint.setTypeface(typeFace);
-            paint.style = Paint.Style.FILL
-            paint.textSize = fontSize.toFloat()
-            paint.isAntiAlias = true
+            with(paint) {
+                color = this@Text.color
+                strokeWidth = 1.0f
+                textAlign = Paint.Align.LEFT
+                //setTypeface(typeFace);
+                style = Paint.Style.FILL
+                textSize = fontSize.toFloat()
+                isAntiAlias = true
+            }
 
             val lines = text.split(FileId.NEW_LINE.toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
             val textBounds = textBounds
             val height = (textBounds.height() / lines.size).toFloat()
 
-            canvas.save()
-            canvas.scale(scale, scale, x + textBounds.left, y + textBounds.top)
-            for (i in lines.indices) {
-                canvas.drawText(lines[i], x, y + height * i, paint)
+            with(canvas) {
+                save()
+                scale(scale, scale, x + textBounds.left, y + textBounds.top)
+                for (i in lines.indices) {
+                    drawText(lines[i], x, y + height * i, paint)
+                }
+                restore()
             }
-
-            canvas.restore()
         }
     }
 
@@ -93,40 +93,37 @@ class Text(var text: String = "") : Component() {
     }
 
     private fun createImageFromText(text: String, bounds: Rect, fontSize: Float): Bitmap {
-        val textPaint = object : Paint() {
-            init {
-                color = -0xff0100
-                textAlign = Paint.Align.LEFT
-                typeface = typeFace
-                textSize = fontSize
-                isAntiAlias = true
-            }
+        val textPaint = Paint().apply {
+            color = -0xff0100
+            textAlign = Paint.Align.LEFT
+            typeface = typeFace
+            textSize = fontSize
+            isAntiAlias = true
         }
 
         //use ALPHA_8 (instead of ARGB_8888) to get text mask
-        val bmp = Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bmp)
-        canvas.drawText(text, 0f, bounds.height().toFloat(), textPaint)
-        return bmp
+        return Bitmap.createBitmap(bounds.width(), bounds.height(), Bitmap.Config.ARGB_8888).apply {
+            Canvas(this).drawText(text, 0f, bounds.height().toFloat(), textPaint)
+        }
     }
 
     @Throws(JSONException::class)
     override fun toJson(): JSONObject {
-        val jsonObject = super.toJson()
-        jsonObject.put(FileId.TEXT, text)
-        jsonObject.put(FileId.FONT_SIZE, fontSize)
-        return jsonObject
+        return super.toJson().apply {
+            put(FileId.TEXT, text)
+            put(FileId.FONT_SIZE, fontSize)
+        }
     }
 
     companion object {
 
         @Throws(JSONException::class)
         fun fromJson(jsonObject: JSONObject): Text {
-            val text = Text()
-            text.fromJsonPrimary(jsonObject)
-            text.text = jsonObject.getString(FileId.TEXT)
-            text.fontSize = jsonObject.getInt(FileId.FONT_SIZE)
-            return text
+            return Text().apply {
+                fromJsonPrimary(jsonObject)
+                text = jsonObject.getString(FileId.TEXT)
+                fontSize = jsonObject.getInt(FileId.FONT_SIZE)
+            }
         }
     }
 }
