@@ -118,16 +118,13 @@ class Composite : Component() {
 
         @Throws(JSONException::class)
         fun fromJson(context: Context, jsonObject: JSONObject): Composite {
-            val composite = Composite().apply {
+            return Composite().apply {
                 fromJsonPrimary(jsonObject)
+                val size = jsonObject.getInt(FileId.SIZE)
+                if (size > 0) {
+                    NoteStorage.fromJson(context, jsonObject, this.components)
+                }
             }
-
-            val size = jsonObject.getInt(FileId.SIZE)
-            if (size > 0) {
-                NoteStorage.fromJson(context, jsonObject, composite.components)
-            }
-
-            return composite
         }
     }
 }
