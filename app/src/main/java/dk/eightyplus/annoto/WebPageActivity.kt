@@ -19,8 +19,9 @@ class WebPageActivity : Activity() {
 
         setContentView(R.layout.web_page_layout)
 
-        val url = intent?.getStringExtra(Keys.LINK) ?: return
-        (findViewById<View>(R.id.web_view) as WebView).loadUrl(url)
+        intent?.getStringExtra(Keys.LINK).let {
+            (findViewById<View>(R.id.web_view) as WebView).loadUrl(it)
+        }
     }
 
     companion object {
