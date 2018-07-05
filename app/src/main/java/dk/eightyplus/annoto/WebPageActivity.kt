@@ -31,9 +31,9 @@ class WebPageActivity : Activity() {
         }
 
         private fun createIntent(activity: Activity, url: String): Intent {
-            val webPageIntent = Intent(activity, WebPageActivity::class.java)
-            webPageIntent.putExtra(Keys.LINK, url)
-            return webPageIntent
+            return Intent(activity, WebPageActivity::class.java).run {
+                putExtra(Keys.LINK, url)
+            }
         }
     }
 }
