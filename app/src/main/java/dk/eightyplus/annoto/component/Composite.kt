@@ -9,20 +9,18 @@ import dk.eightyplus.annoto.utilities.NoteStorage
 import org.json.JSONException
 import org.json.JSONObject
 
-import java.util.ArrayList
-
 /**
  * Composite class to server as drawing interface/component collection for the Composite pattern
  */
 class Composite : Component() {
 
-    protected var componentList = mutableListOf<Component>()
+    protected var components = mutableListOf<Component>()
 
     override val bounds: RectF
         get() {
             val bounds = RectF(java.lang.Float.MAX_VALUE, java.lang.Float.MAX_VALUE, java.lang.Float.MIN_VALUE, java.lang.Float.MIN_VALUE)
             if (hasComponents()) {
-                for (component in componentList) {
+                for (component in components) {
                     val componentBounds = component.bounds
 
                     if (componentBounds.left < bounds.left) {
@@ -54,7 +52,7 @@ class Composite : Component() {
         get() = ComponentType.CompositeType
 
     private fun hasComponents(): Boolean {
-        return componentList.size > 0
+        return components.size > 0
     }
 
     override fun onDraw(canvas: Canvas, paint: Paint) {
@@ -64,7 +62,7 @@ class Composite : Component() {
                 val bounds = bounds
                 scale(scale, scale, bounds.left, bounds.top)
                 translate(x, y)
-                for (component in componentList) {
+                for (component in components) {
                     component.onDraw(this, paint)
                 }
                 restore()
@@ -74,44 +72,44 @@ class Composite : Component() {
     }
 
     fun add(component: Component) {
-        componentList.add(component)
+        components.add(component)
     }
 
     fun remove(component: Component) {
-        componentList.remove(component)
+        components.remove(component)
     }
 
     fun removeLast(): Component? {
         return if (hasComponents()) {
-            componentList.removeAt(componentList.size - 1)
+            components.removeAt(components.size - 1)
         } else null
     }
 
     fun getChild(location: Int): Component? {
-        return if (location < componentList.size) {
-            componentList[location]
+        return if (location < components.size) {
+            components[location]
         } else null
     }
 
     override fun centerDist(x: Float, y: Float): Float {
         return if (hasComponents()) {
             val centerDistance = calculateCenterDistance(x, y, bounds)
-            componentList.map { it.centerDist(x, y) }.fold(centerDistance) { min, dist ->
+            components.map { it.centerDist(x, y) }.fold(centerDistance) { min, dist ->
                 if (dist < min) dist else min
             }
         } else Float.MAX_VALUE
     }
 
     override fun delete(): Boolean {
-        return super.delete() && componentList.map { it.delete() }.reduce {  result, del -> result && del }
+        return super.delete() && components.map { it.delete() }.reduce { result, del -> result && del }
     }
 
     @Throws(JSONException::class)
     override fun toJson(): JSONObject {
         return super.toJson().apply {
-            put(FileId.SIZE, componentList.size)
-            if (componentList.size > 0) {
-                NoteStorage.toJson(this, componentList)
+            put(FileId.SIZE, components.size)
+            if (components.size > 0) {
+                NoteStorage.toJson(this, components)
             }
         }
     }
@@ -126,7 +124,7 @@ class Composite : Component() {
 
             val size = jsonObject.getInt(FileId.SIZE)
             if (size > 0) {
-                NoteStorage.fromJson(context, jsonObject, composite.componentList)
+                NoteStorage.fromJson(context, jsonObject, composite.components)
             }
 
             return composite
