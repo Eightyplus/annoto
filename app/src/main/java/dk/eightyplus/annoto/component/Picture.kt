@@ -24,16 +24,17 @@ class Picture private constructor(@field:Transient private val context: Context,
 
     private val matrix: Matrix
         get() {
-            val values = FloatArray(Matrix.MPERSP_2 + 1)
-            values[Matrix.MSCALE_Y] = scale
-            values[Matrix.MSCALE_X] = values[Matrix.MSCALE_Y]
-            values[Matrix.MTRANS_X] = x
-            values[Matrix.MTRANS_Y] = y
-            values[Matrix.MPERSP_2] = 1f
-            val matrix = Matrix()
-            matrix.reset()
-            matrix.setValues(values)
-            return matrix
+            val values = FloatArray(Matrix.MPERSP_2 + 1).also {
+                it[Matrix.MSCALE_Y] = scale
+                it[Matrix.MSCALE_X] = scale
+                it[Matrix.MTRANS_X] = x
+                it[Matrix.MTRANS_Y] = y
+                it[Matrix.MPERSP_2] = 1f
+            }
+            return Matrix().apply {
+                reset()
+                setValues(values)
+            }
         }
 
     override val bounds: RectF
@@ -48,7 +49,9 @@ class Picture private constructor(@field:Transient private val context: Context,
 
     override fun onDraw(canvas: Canvas, paint: Paint) {
         if (isVisible) {
-            canvas.drawBitmap(bitmap!!, matrix, paint)
+            bitmap?.let {
+                canvas.drawBitmap(it, matrix, paint)
+            }
         }
     }
 
@@ -58,7 +61,7 @@ class Picture private constructor(@field:Transient private val context: Context,
 
     override fun delete(): Boolean {
         super.delete()
-        return Storage.getStorage(context)?.deleteFile(filename) ?: false
+        return Storage.getStorage(context).deleteFile(filename)
     }
 
     /**
@@ -67,27 +70,24 @@ class Picture private constructor(@field:Transient private val context: Context,
      */
     @Throws(IOException::class)
     fun initialise(): Picture {
-        bitmap = Storage.getStorage(context)?.loadFromFile(filename)
-        if (bitmap == null) {
-            throw IOException(context.getString(R.string.log_error_file_missing))
-        }
+        bitmap = Storage.getStorage(context).loadFromFile(filename) ?: throw IOException(context.getString(R.string.log_error_file_missing))
         return this
     }
 
     @Throws(JSONException::class)
     override fun toJson(): JSONObject {
-        val jsonObject = super.toJson()
-        jsonObject.put(FileId.FILE_NAME, filename)
-        return jsonObject
+        return super.toJson().apply {
+            put(FileId.FILE_NAME, filename)
+        }
     }
 
     companion object {
 
         @Throws(JSONException::class)
         fun fromJson(context: Context, jsonObject: JSONObject): Picture {
-            val picture = Picture(context, jsonObject.getString(FileId.FILE_NAME))
-            picture.fromJsonPrimary(jsonObject)
-            return picture
+            return Picture(context, jsonObject.getString(FileId.FILE_NAME)).apply {
+                fromJsonPrimary(jsonObject)
+            }
         }
     }
 }

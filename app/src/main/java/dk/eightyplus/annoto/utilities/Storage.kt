@@ -34,19 +34,25 @@ class Storage private constructor(context: Context) {
     fun writeToFile(save: SaveLoad, fileName: String) {
         val file = getFilename(fileName)
 
-        val outputStream = GZIPOutputStream(FileOutputStream(file))
-        val dataOutputStream = DataOutputStream(outputStream)
-        save.save(context, dataOutputStream)
-        outputStream.flush()
-        dataOutputStream.close()
-        outputStream.close()
+        GZIPOutputStream(FileOutputStream(file)).use { gos ->
+            DataOutputStream(gos).use {  dos ->
+                save.save(context, dos)
+                gos.flush()
+                dos.close()
+                gos.close()
+            }
+        }
     }
 
     fun deleteFile(fileName: String): Boolean {
-        val file = getFilename(fileName)
-        return if (file.exists()) {
-            file.delete()
-        } else false
+        return getFilename(fileName).run {
+            try {
+                delete()
+            } catch (e: IOException) {
+                Log.d(TAG, context.getString(R.string.log_error_exception), e)
+                false
+            }
+        }
     }
 
     fun deleteNoteAndThumb(fileName: String) {
@@ -64,40 +70,42 @@ class Storage private constructor(context: Context) {
     @Throws(IOException::class, ClassNotFoundException::class)
     @JvmOverloads
     fun loadFromFile(load: SaveLoad, fileName: String, isAsset: Boolean = false) {
-        val inputStream = if (isAsset) {
-            GZIPInputStream(context.resources.assets.open(fileName))
-        } else {
-            GZIPInputStream(FileInputStream(getFilename(fileName)))
+        val inputStream = if (isAsset)
+            context.resources.assets.open(fileName)
+        else
+            FileInputStream(getFilename(fileName))
+
+        GZIPInputStream(inputStream).use {gos ->
+            DataInputStream(gos).use {dos ->
+                load.load(context, dos)
+                dos.close()
+            }
+            gos.close()
         }
-        val dataInputStream = DataInputStream(inputStream)
-        load.load(context, dataInputStream)
-        dataInputStream.close()
         inputStream.close()
     }
 
     private fun deleteFromFile(file: File) {
         try {
-            val inputStream = GZIPInputStream(FileInputStream(file))
-            val dataInputStream = DataInputStream(inputStream)
-
-            NoteStorage.fromJsonDelete(context, dataInputStream)
-        } catch (e: IOException) {
-
-        } catch (e: JSONException) {
-
+            GZIPInputStream(FileInputStream(file)).use { gos ->
+                DataInputStream(gos).use { dos ->
+                    NoteStorage.fromJsonDelete(context, dos)
+                }
+            }
+        } catch (e: Exception) {
+            Log.d(TAG, context.getString(R.string.log_error_exception), e)
         }
-
     }
 
     @Throws(IOException::class)
     @JvmOverloads
     fun writeToFile(bitmap: Bitmap, fileName: String = "image.png", quality: Int = 90): File {
-        val file = getFilename(fileName)
-        //  = File.createTempFile("image", ".png", context.getCacheDir());
-        val out = DataOutputStream(FileOutputStream(file))
-        bitmap.compress(Bitmap.CompressFormat.PNG, quality, out)
-        out.close()
-        return file
+        return getFilename(fileName).apply {
+            DataOutputStream(FileOutputStream(this)).use { dos ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, quality, dos)
+                dos.close()
+            }
+        }
     }
 
     @JvmOverloads
@@ -110,11 +118,14 @@ class Storage private constructor(context: Context) {
 
     @Throws(IOException::class)
     fun loadBitmapFromIntent(context: ContextWrapper, data: Intent, sampleSize: Int): Bitmap {
-        val contentURI = Uri.parse(data.dataString)
-        val inputStream = context.contentResolver.openInputStream(contentURI)
-        val options = BitmapFactory.Options()
-        options.inSampleSize = sampleSize
-        return BitmapFactory.decodeStream(inputStream, null, options)
+        Uri.parse(data.dataString).let { contentURI ->
+            context.contentResolver.openInputStream(contentURI).use { inputStream ->
+                val options = BitmapFactory.Options().apply {
+                    inSampleSize = sampleSize
+                }
+                return BitmapFactory.decodeStream(inputStream, null, options)
+            }
+        }
     }
 
     fun getThumb2Notes(fileName: String): File {
@@ -138,9 +149,9 @@ class Storage private constructor(context: Context) {
 
         @Synchronized
         private fun createStorage(context: Context): Storage {
-            val storage = Storage(context)
-            storageReference = SoftReference(storage)
-            return storage
+            return Storage(context).apply {
+                storageReference = SoftReference(this)
+            }
         }
 
         @Throws(IOException::class)
@@ -169,21 +180,11 @@ class Storage private constructor(context: Context) {
 
         @Throws(IOException::class)
         fun readData(inputStream: InputStream?): String? {
-            inputStream ?: return null
-
-            inputStream.use { iStream ->
-                val baos = ByteArrayOutputStream()
-                var read = true
-
-                while (read) {
-                    val byteValue = iStream.read()
-                    read = byteValue != -1
-                    if (read) {
-                        baos.write(byteValue)
-                    }
+            return inputStream?.use { iStream ->
+                ByteArrayOutputStream().use { baos ->
+                    iStream.copyTo(baos)
+                    String(baos.toByteArray())
                 }
-
-                return String(baos.toByteArray())
             }
         }
     }
