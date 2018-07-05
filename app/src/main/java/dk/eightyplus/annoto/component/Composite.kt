@@ -94,28 +94,16 @@ class Composite : Component() {
     }
 
     override fun centerDist(x: Float, y: Float): Float {
-        var minimumDistance = java.lang.Float.MAX_VALUE
-        if (hasComponents()) {
-            minimumDistance = calculateCenterDistance(x, y, bounds)
-            for (component in componentList) {
-                val distance = component.centerDist(x, y)
-                if (distance < minimumDistance) {
-                    minimumDistance = distance
-                }
+        return if (hasComponents()) {
+            val centerDistance = calculateCenterDistance(x, y, bounds)
+            componentList.map { it.centerDist(x, y) }.fold(centerDistance) { min, dist ->
+                if (dist < min) dist else min
             }
-        }
-
-        return minimumDistance
+        } else Float.MAX_VALUE
     }
 
     override fun delete(): Boolean {
-        var result = super.delete()
-        if (hasComponents()) {
-            for (component in componentList) {
-                result = result and component.delete()
-            }
-        }
-        return result
+        return super.delete() && componentList.map { it.delete() }.reduce {  result, del -> result && del }
     }
 
     @Throws(JSONException::class)
@@ -138,7 +126,6 @@ class Composite : Component() {
 
             val size = jsonObject.getInt(FileId.SIZE)
             if (size > 0) {
-                composite.componentList = ArrayList()
                 NoteStorage.fromJson(context, jsonObject, composite.componentList)
             }
 
