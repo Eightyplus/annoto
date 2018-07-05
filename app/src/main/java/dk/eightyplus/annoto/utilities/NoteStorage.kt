@@ -81,21 +81,19 @@ object NoteStorage {
         val list = jsonObject.getJSONArray(FileId.LIST)
         loop@ for (i in 0 until list.length()) {
             val comp = list.get(i) as JSONObject
-
             val type = comp.getString(FileId.TYPE)
 
-            val component: Component
-            when (ComponentType.valueOf(type)) {
-                ComponentType.CompositeType -> component = Composite.fromJson(context, comp)
+            val component = when (ComponentType.valueOf(type)) {
+                ComponentType.CompositeType -> Composite.fromJson(context, comp)
                 ComponentType.PictureType -> try {
-                    component = Picture.fromJson(context, comp).initialise()
+                    Picture.fromJson(context, comp).initialise()
                 } catch (e: IOException) {
                     Log.d(TAG, context.getString(R.string.log_error_exception), e)
                     continue@loop
                 }
 
-                ComponentType.PolygonType -> component = Polygon.fromJson(comp)
-                ComponentType.TextType -> component = Text.fromJson(comp)
+                ComponentType.PolygonType -> Polygon.fromJson(comp)
+                ComponentType.TextType -> Text.fromJson(comp)
             }
 
             components.add(component)
