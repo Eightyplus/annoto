@@ -109,16 +109,17 @@ object NoteStorage {
      */
     @Throws(JSONException::class, IOException::class)
     fun fromJsonDelete(context: Context, dataInputStream: DataInputStream) {
-        val jsonObject = JSONObject(dataInputStream.readUTF())
-        val list = jsonObject.getJSONArray(FileId.LIST)
-        for (i in 0 until list.length()) {
-            val comp = list.get(i) as JSONObject
-            val type = comp.getString(FileId.TYPE)
+        JSONObject(dataInputStream.readUTF()).let {
+            val list = it.getJSONArray(FileId.LIST)
+            for (i in 0 until list.length()) {
+                val comp = list.get(i) as JSONObject
+                val type = comp.getString(FileId.TYPE)
 
-            when (ComponentType.valueOf(type)) {
-                ComponentType.CompositeType -> Composite.fromJson(context, comp).delete()
-                ComponentType.PictureType -> Picture.fromJson(context, comp).delete()
-                ComponentType.PolygonType, ComponentType.TextType -> {}
+                when (ComponentType.valueOf(type)) {
+                    ComponentType.CompositeType -> Composite.fromJson(context, comp).delete()
+                    ComponentType.PictureType -> Picture.fromJson(context, comp).delete()
+                    ComponentType.PolygonType, ComponentType.TextType -> {}
+                }
             }
         }
     }
@@ -131,9 +132,10 @@ object NoteStorage {
      */
     @Throws(JSONException::class)
     fun toJson(jsonObject: JSONObject, components: List<Component>) {
-        val list = JSONArray()
-        for (component in components) {
-            list.put(component.toJson())
+        val list = JSONArray().apply {
+            for (component in components) {
+                put(component.toJson())
+            }
         }
         jsonObject.put(FileId.SIZE, components.size)
         jsonObject.put(FileId.LIST, list)
