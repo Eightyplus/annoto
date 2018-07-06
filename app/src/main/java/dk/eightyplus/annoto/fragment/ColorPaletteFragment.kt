@@ -35,24 +35,21 @@ class ColorPaletteFragment : DialogFragment() {
         this.softPreferences = SoftReference<SharedPreferences>(activity?.getSharedPreferences(Keys.PREFERENCES, Context.MODE_PRIVATE))
     }
 
-    fun preference(key: String, defaultValue: Int = -1): Int {
-        val preferences = softPreferences?.get()
-        return preferences?.getInt(key, defaultValue) ?: defaultValue
-    }
+    private fun preference(key: String, default: Int = -1): Int = softPreferences?.get()?.getInt(key, default) ?: default
 
     fun saveColorPreference(color: Int) {
         val preferences = softPreferences?.get() ?: return
-        var lastColorSlot = preference(Keys.COLOR_LAST, -1)
-
-        lastColorSlot++
-        if (lastColorSlot > 5) {
-            lastColorSlot = 0
+        val lastColorSlot = preference(Keys.COLOR_LAST, -1).run {
+            this + 1
+        }.run {
+            if (this > 5) 0 else this
         }
 
-        val edit = preferences.edit()
-        edit.putInt(Keys.COLOR + lastColorSlot, color)
-        edit.putInt(Keys.COLOR_LAST, lastColorSlot)
-        edit.apply()
+        preferences.edit().run {
+            putInt(Keys.COLOR + lastColorSlot, color)
+            putInt(Keys.COLOR_LAST, lastColorSlot)
+            apply()
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
