@@ -40,8 +40,7 @@ class Picture private constructor(@field:Transient private val context: Context,
     override val bounds: RectF
         get() = RectF(x, y, x + (bitmap?.width ?: 0) * scale, y + (bitmap?.height ?: 0) * scale)
 
-    override val type: ComponentType
-        get() = ComponentType.PictureType
+    override val type = ComponentType.PictureType
 
     constructor(context: Context, bitmap: Bitmap, filename: String) : this(context, filename) {
         this.bitmap = bitmap

@@ -23,8 +23,7 @@ class Polygon() : Component() {
             bottom += height() * (scale - 1)
         }
 
-    override val type: ComponentType
-        get() = ComponentType.PolygonType
+    override val type = ComponentType.PolygonType
 
     fun getPath(): Path {
         return path

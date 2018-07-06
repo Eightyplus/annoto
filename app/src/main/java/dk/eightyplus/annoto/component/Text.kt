@@ -58,8 +58,7 @@ class Text(var text: String = "") : Component() {
             return bounds
         }
 
-    override val type: ComponentType
-        get() = ComponentType.TextType
+    override val type = ComponentType.TextType
 
     override fun onDraw(canvas: Canvas, paint: Paint) {
         if (isVisible) {

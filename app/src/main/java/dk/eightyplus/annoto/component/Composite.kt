@@ -48,12 +48,9 @@ class Composite : Component() {
             return bounds
         }
 
-    override val type: ComponentType
-        get() = ComponentType.CompositeType
+    override val type = ComponentType.CompositeType
 
-    private fun hasComponents(): Boolean {
-        return components.size > 0
-    }
+    private fun hasComponents(): Boolean = components.size > 0
 
     override fun onDraw(canvas: Canvas, paint: Paint) {
         if (isVisible && hasComponents()) {

@@ -65,8 +65,7 @@ class CustomPath() : Path(), Serializable {
 
     class ActionMove(x: Float, y: Float) : ActionLine(x, y) {
 
-        override val type: PathActionType
-            get() = PathActionType.MOVE_TO
+        override val type = PathActionType.MOVE_TO
 
         companion object {
 
@@ -79,8 +78,7 @@ class CustomPath() : Path(), Serializable {
 
     open class ActionLine(override val x: Float, override val y: Float) : PathAction {
 
-        override val type: PathActionType
-            get() = PathActionType.LINE_TO
+        override val type = PathActionType.LINE_TO
 
         override val x2: Float
             get() = 0f
@@ -90,11 +88,11 @@ class CustomPath() : Path(), Serializable {
 
         @Throws(JSONException::class)
         override fun toJson(): JSONObject {
-            val jsonObject = JSONObject()
-            jsonObject.put(FileId.TYPE, type.name)
-            jsonObject.put(FileId.X, x.toDouble())
-            jsonObject.put(FileId.Y, y.toDouble())
-            return jsonObject
+            return JSONObject().apply {
+                put(FileId.TYPE, type.name)
+                put(FileId.X, x.toDouble())
+                put(FileId.Y, y.toDouble())
+            }
         }
 
         companion object {
@@ -108,15 +106,14 @@ class CustomPath() : Path(), Serializable {
 
     class ActionQuadTo(x: Float, y: Float, override val x2: Float, override val y2: Float) : ActionLine(x, y) {
 
-        override val type: PathActionType
-            get() = PathActionType.QUAD_TO
+        override val type = PathActionType.QUAD_TO
 
         @Throws(JSONException::class)
         override fun toJson(): JSONObject {
-            val jsonObject = super.toJson()
-            jsonObject.put(FileId.X2, x2.toDouble())
-            jsonObject.put(FileId.Y2, y2.toDouble())
-            return jsonObject
+            return super.toJson().apply {
+                put(FileId.X2, x2.toDouble())
+                put(FileId.Y2, y2.toDouble())
+            }
         }
 
         companion object {
@@ -131,8 +128,7 @@ class CustomPath() : Path(), Serializable {
 
     class ActionOffset(x: Float, y: Float) : ActionLine(x, y) {
 
-        override val type: PathActionType
-            get() = PathActionType.OFFSET
+        override val type = PathActionType.OFFSET
 
         companion object {
 
@@ -145,15 +141,11 @@ class CustomPath() : Path(), Serializable {
 
     @Throws(JSONException::class)
     fun toJson(): JSONObject {
-        val jsonObject = JSONObject()
-        val actions = JSONArray()
-
-        for (action in this.actions) {
-            actions.put(action.toJson())
+        return JSONObject().apply {
+            put(FileId.ACTIONS, JSONArray().apply {
+                actions.forEach { put(it.toJson()) }
+            })
         }
-        jsonObject.put(FileId.ACTIONS, actions)
-
-        return jsonObject
     }
 
     /**
