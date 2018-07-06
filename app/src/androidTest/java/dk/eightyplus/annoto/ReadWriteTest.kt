@@ -17,6 +17,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.*
+import java.util.zip.GZIPInputStream
 
 @RunWith(AndroidJUnit4::class)
 class ReadWriteTest {
@@ -104,6 +105,17 @@ class ReadWriteTest {
             val drawingView = DrawingView(context, callback)
             Storage.getStorage(context).loadFromFile(drawingView, note, true)
             assertThat("Read components should match size specified in file", drawingView.numComponents, equalTo(5))
+
+            val jsonString = Storage.readData(GZIPInputStream(context.resources.assets.open(note)))
+            Storage.getStorage(context).writeToFile(drawingView, testNote)
+
+            val file = File(context.getExternalFilesDir(null), File.separator + testNote)
+            FileInputStream(file).use {
+                GZIPInputStream(it).use {
+                    val result = Storage.readData(it) ?: throw IOException("not not written during test")
+                    assertThat("read should equal written json", result, equalTo(jsonString))
+                }
+            }
         } catch (e: IOException) {
             Log.e("ERROR", "IOException", e)
             fail("IOException should not be thrown")
