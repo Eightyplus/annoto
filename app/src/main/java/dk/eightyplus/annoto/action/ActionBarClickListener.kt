@@ -14,13 +14,12 @@ class ActionBarClickListener(private val deselect: List<View>, private val click
     private val callback: SoftReference<Callback> = SoftReference(callback)
 
     override fun onClick(v: View) {
-        val callback = this.callback.get()
-        if (callback != null) {
+        this.callback.get()?.let {
             for (view in deselect) {
                 view.isSelected = false
             }
             v.isSelected = true
-            callback.state = clickAction
+            it.state = clickAction
         }
     }
 }
