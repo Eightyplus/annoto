@@ -25,16 +25,16 @@ class ColorPickerView(c: Context, private var mListener: ColorPickerDialog.OnCol
     private val mColors: IntArray = intArrayOf(-0x10000, -0xff01, -0xffff01, -0xff0001, -0xff0100, -0x100, -0x10000)
 
     init {
-        val s = SweepGradient(0f, 0f, mColors, null)
+        mPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            shader = SweepGradient(0f, 0f, mColors, null)
+            style = Paint.Style.STROKE
+            strokeWidth = CENTER_RADIUS.toFloat()
+        }
 
-        mPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-        mPaint.shader = s
-        mPaint.style = Paint.Style.STROKE
-        mPaint.strokeWidth = CENTER_RADIUS.toFloat()
-
-        mCenterPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-        mCenterPaint.color = color
-        mCenterPaint.strokeWidth = 5f
+        mCenterPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            this.color = color
+            strokeWidth = 5f
+        }
 
         val r = CENTER_X - mPaint.strokeWidth * 0.5f
         rect = RectF(-r, -r, r, r)
@@ -68,10 +68,6 @@ class ColorPickerView(c: Context, private var mListener: ColorPickerDialog.OnCol
         setMeasuredDimension(CENTER_X * 2, CENTER_Y * 2)
     }
 
-    private fun floatToByte(x: Float): Int {
-        return Math.round(x)
-    }
-
     private fun pinToByte(n: Int): Int {
         return when {
             n < 0 -> 0
@@ -80,9 +76,7 @@ class ColorPickerView(c: Context, private var mListener: ColorPickerDialog.OnCol
         }
     }
 
-    private fun ave(s: Int, d: Int, p: Float): Int {
-        return s + Math.round(p * (d - s))
-    }
+    private fun ave(s: Int, d: Int, p: Float): Int = s + Math.round(p * (d - s))
 
     private fun interpColor(colors: IntArray, unit: Float): Int {
         if (unit <= 0) {
@@ -124,6 +118,7 @@ class ColorPickerView(c: Context, private var mListener: ColorPickerDialog.OnCol
 
         val a = cm.array
 
+        fun floatToByte(x: Float): Int = Math.round(x)
         val ir = floatToByte(a[0] * r + a[1] * g + a[2] * b)
         val ig = floatToByte(a[5] * r + a[6] * g + a[7] * b)
         val ib = floatToByte(a[10] * r + a[11] * g + a[12] * b)
