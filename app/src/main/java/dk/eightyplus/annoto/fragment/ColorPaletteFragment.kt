@@ -124,41 +124,31 @@ class ColorPaletteFragment : DialogFragment() {
     private fun updatePickedColors(linearLayoutDynamic: LinearLayout, inflater: LayoutInflater, callback: Callback) {
         linearLayoutDynamic.removeAllViews()
         val lastColorSlot = preference(Keys.COLOR_LAST, -1)
-        if (lastColorSlot >= 0) {
-            for (i in 0..5) {
-                val hexWhiteColor = callback.hexColorForResourceId(R.color.white)
-                val hexColor = preference(Keys.COLOR + i, hexWhiteColor)
+        for (i in 0..lastColorSlot) {
+            val hexWhiteColor = callback.hexColorForResourceId(R.color.white)
+            val hexColor = preference(Keys.COLOR + i, hexWhiteColor)
 
-                val button = inflater.inflate(R.layout.color_button, linearLayoutDynamic, false) as ImageButton
-                button.setBackgroundColor(hexColor)
-                linearLayoutDynamic.addView(button)
-
-                button.setOnClickListener(ButtonColorClickListener(callback, hexColor))
-            }
+            val button = inflater.inflate(R.layout.color_button, linearLayoutDynamic, false) as ImageButton
+            button.setBackgroundColor(hexColor)
+            linearLayoutDynamic.addView(button)
+            button.setOnClickListener(ButtonColorClickListener(callback, hexColor))
         }
     }
-
 
     private class ButtonColorClickListener(callback: Callback, private val color: Int) : View.OnClickListener {
 
         private val callbackSoftReference: SoftReference<Callback> = SoftReference(callback)
-        private var animation: Animation? = null
+        private val animation: Animation by lazy {
+            AlphaAnimation(1f, 0f).apply {
+                duration = 50
+                interpolator = LinearInterpolator()
+            }
+        }
 
         override fun onClick(v: View) {
             val callback = callbackSoftReference.get() ?: return
             callback.colorChanged(color)
-            v.startAnimation(getAnimation())
-        }
-
-        private fun getAnimation(): Animation {
-            var animation = animation
-            if (animation == null) {
-                animation = AlphaAnimation(1f, 0f)
-                animation.duration = 50
-                animation.interpolator = LinearInterpolator()
-                this.animation = animation
-            }
-            return animation
+            v.startAnimation(animation)
         }
     }
 }
