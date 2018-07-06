@@ -24,12 +24,12 @@ class Picture private constructor(@field:Transient private val context: Context,
 
     private val matrix: Matrix
         get() {
-            val values = FloatArray(Matrix.MPERSP_2 + 1).also {
-                it[Matrix.MSCALE_Y] = scale
-                it[Matrix.MSCALE_X] = scale
-                it[Matrix.MTRANS_X] = x
-                it[Matrix.MTRANS_Y] = y
-                it[Matrix.MPERSP_2] = 1f
+            val values = FloatArray(Matrix.MPERSP_2 + 1).apply {
+                this[Matrix.MSCALE_Y] = scale
+                this[Matrix.MSCALE_X] = scale
+                this[Matrix.MTRANS_X] = x
+                this[Matrix.MTRANS_Y] = y
+                this[Matrix.MPERSP_2] = 1f
             }
             return Matrix().apply {
                 reset()
