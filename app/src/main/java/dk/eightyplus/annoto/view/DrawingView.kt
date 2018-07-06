@@ -73,12 +73,13 @@ class DrawingView(context: Context, private val callback: Callback) : View(conte
         touch_reset()
         mBitmapPaint = Paint(Paint.DITHER_FLAG)
 
-        mPaint = Paint()
-        mPaint.isAntiAlias = true
-        mPaint.isDither = true
-        mPaint.style = Paint.Style.STROKE
-        mPaint.strokeJoin = Paint.Join.ROUND
-        mPaint.strokeCap = Paint.Cap.ROUND
+        mPaint = Paint().apply {
+            isAntiAlias = true
+            isDither = true
+            style = Paint.Style.STROKE
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
+        }
 
         Compatibility.get().setHardwareAccelerated(this, mPaint)
     }
@@ -88,31 +89,29 @@ class DrawingView(context: Context, private val callback: Callback) : View(conte
         var i = 0
         var component: Any?
 
-        do {
+        loop@ while (true) {
             component = savedInstanceState.get(COMPONENT + i++)
-            if (component is Component) {
-                components.add(component)
+            when (component) {
+                is Component -> components.add(component)
+                null -> break@loop
             }
-        } while (component != null)
+        }
     }
 
     fun onSaveInstanceState(bundle: Bundle) {
-        for (i in components.indices) {
-            val component = components[i]
+        components.forEachIndexed { i, component ->
             bundle.putSerializable(COMPONENT + i, component)
         }
     }
 
     @Throws(IOException::class)
     override fun save(context: Context, outputStream: DataOutputStream) {
-        val components = ArrayList(this.components)
-        NoteStorage.save(context, components, outputStream)
+        NoteStorage.save(context, ArrayList(this.components), outputStream)
     }
 
     @Throws(IOException::class, ClassNotFoundException::class)
     override fun load(context: Context, inputStream: DataInputStream) {
-        val components = ArrayList<Component>()
-        NoteStorage.load(context, components, inputStream)
+        val components = NoteStorage.load(context, inputStream)
 
         this.components.clear()
         this.components.addAll(components)

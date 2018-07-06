@@ -89,7 +89,9 @@ class Storage private constructor(context: Context) {
         try {
             GZIPInputStream(FileInputStream(file)).use { gos ->
                 DataInputStream(gos).use { dos ->
-                    NoteStorage.fromJsonDelete(context, dos)
+                    readData(dos)?.let {
+                        NoteStorage.fromJsonDelete(context, it)
+                    }
                 }
             }
         } catch (e: Exception) {

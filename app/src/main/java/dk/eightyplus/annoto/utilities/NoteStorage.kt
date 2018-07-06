@@ -32,9 +32,10 @@ object NoteStorage {
      */
     fun save(context: Context, components: List<Component>, dataOutputStream: DataOutputStream) {
         try {
-            val jsonObject = JSONObject()
-            toJson(jsonObject, components)
-            Storage.writeData(context, jsonObject.toString().toByteArray(), dataOutputStream)
+            JSONObject().let { jsonObject ->
+                toJson(jsonObject, components)
+                Storage.writeData(context, jsonObject.toString().toByteArray(), dataOutputStream)
+            }
         } catch (e: JSONException) {
             Log.d(TAG, context.getString(R.string.log_error_exception), e)
         } catch (e: IOException) {
@@ -45,62 +46,62 @@ object NoteStorage {
     /**
      * Loads components from input stream
      * @param context the context
-     * @param components list to store components in
      * @param dataInputStream input stream to read from
-     * @return success
+     * @return list of loaded components
+     * @throws IOException
      */
-    fun load(context: Context, components: MutableList<Component>, dataInputStream: DataInputStream) {
+    @Throws(IOException::class)
+    fun load(context: Context, dataInputStream: DataInputStream): List<Component> {
         try {
             val jsonObject = JSONObject(Storage.readData(dataInputStream))
-            fromJson(context, jsonObject, components)
+            return fromJson(context, jsonObject)
         } catch (e: JSONException) {
             Log.d(TAG, context.getString(R.string.log_error_exception), e)
+            throw IOException(e)
         } catch (e: IOException) {
             Log.d(TAG, context.getString(R.string.log_error_exception), e)
+            throw e
         }
     }
 
     /**
      * Loads list of component from json object
      * @param context the context
-     * @param object object containing list
-     * @param components list to store components to
+     * @param jsonObject object containing list
+     * @return components list to store components to
      * @throws JSONException
      */
     @Throws(JSONException::class)
-    fun fromJson(context: Context, jsonObject: JSONObject, components: MutableList<Component>){
-        val list = jsonObject.getJSONArray(FileId.LIST)
-        loop@ for (i in 0 until list.length()) {
-            val comp = list.get(i) as JSONObject
-            val type = comp.getString(FileId.TYPE)
+    fun fromJson(context: Context, jsonObject: JSONObject): List<Component>{
+        val jsonArray = jsonObject.getJSONArray(FileId.LIST)
+        return List(jsonArray.length()) {
+            val obj = jsonArray.get(it) as JSONObject
+            val type = obj.getString(FileId.TYPE)
 
-            val component = when (ComponentType.valueOf(type)) {
-                ComponentType.CompositeType -> Composite.fromJson(context, comp)
+            when (ComponentType.valueOf(type)) {
+                ComponentType.CompositeType -> Composite.fromJson(context, obj)
                 ComponentType.PictureType -> try {
-                    Picture.fromJson(context, comp).initialise()
+                    Picture.fromJson(context, obj).initialise()
                 } catch (e: IOException) {
                     Log.d(TAG, context.getString(R.string.log_error_exception), e)
-                    continue@loop
+                    Text( context.getString(R.string.error_loading_image_user_message))
                 }
-
-                ComponentType.PolygonType -> Polygon.fromJson(comp)
-                ComponentType.TextType -> Text.fromJson(comp)
+                ComponentType.PolygonType -> Polygon.fromJson(obj)
+                ComponentType.TextType -> Text.fromJson(obj)
             }
-
-            components.add(component)
         }
     }
 
     /**
      * Deletes components and their associated files (photos etc.)
      * @param context the context
-     * @param dataInputStream input stream to load components from and delete
+     * @param jsonString string representing a json object
      * @throws JSONException
      * @throws IOException
      */
     @Throws(JSONException::class, IOException::class)
-    fun fromJsonDelete(context: Context, dataInputStream: DataInputStream) {
-        JSONObject(dataInputStream.readUTF()).let {
+    fun fromJsonDelete(context: Context, jsonString: String) {
+        JSONObject(jsonString).let {
             val list = it.getJSONArray(FileId.LIST)
             for (i in 0 until list.length()) {
                 val comp = list.get(i) as JSONObject
@@ -117,7 +118,7 @@ object NoteStorage {
 
     /**
      * Stores a list of components into a json object
-     * @param object object to save list in
+     * @param jsonObject object to save list in
      * @param components list to save
      * @throws JSONException
      */

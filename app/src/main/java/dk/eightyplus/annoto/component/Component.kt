@@ -77,10 +77,12 @@ abstract class Component : Serializable {
      */
     @Throws(JSONException::class)
     protected fun fromJsonPrimary(jsonObject: JSONObject) {
-        x = jsonObject.getDouble(FileId.X).toFloat()
-        y = jsonObject.getDouble(FileId.Y).toFloat()
-        width = jsonObject.getDouble(FileId.WIDTH).toFloat()
-        scale = jsonObject.getDouble(FileId.SCALE).toFloat()
-        color = jsonObject.getInt(FileId.COLOR)
+        with(jsonObject) {
+            x = getDouble(FileId.X).toFloat()
+            y = getDouble(FileId.Y).toFloat()
+            width = getDouble(FileId.WIDTH).toFloat()
+            scale = getDouble(FileId.SCALE).toFloat()
+            color = getInt(FileId.COLOR)
+        }
     }
 }

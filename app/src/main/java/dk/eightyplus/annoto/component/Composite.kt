@@ -120,9 +120,8 @@ class Composite : Component() {
         fun fromJson(context: Context, jsonObject: JSONObject): Composite {
             return Composite().apply {
                 fromJsonPrimary(jsonObject)
-                val size = jsonObject.getInt(FileId.SIZE)
-                if (size > 0) {
-                    NoteStorage.fromJson(context, jsonObject, this.components)
+                if (jsonObject.getInt(FileId.SIZE) > 0) {
+                    components.addAll(NoteStorage.fromJson(context, jsonObject))
                 }
             }
         }
