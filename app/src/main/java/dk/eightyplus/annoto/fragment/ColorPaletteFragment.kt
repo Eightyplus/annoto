@@ -37,7 +37,7 @@ class ColorPaletteFragment : DialogFragment() {
 
     private fun preference(key: String, default: Int = -1): Int = softPreferences?.get()?.getInt(key, default) ?: default
 
-    fun saveColorPreference(color: Int) {
+    private fun saveColorPreference(color: Int) {
         val preferences = softPreferences?.get() ?: return
         val lastColorSlot = preference(Keys.COLOR_LAST, -1).run {
             this + 1
