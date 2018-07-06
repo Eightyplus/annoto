@@ -1,30 +1,32 @@
 package dk.eightyplus.annoto
 
+import android.Manifest
 import android.support.test.InstrumentationRegistry
+import android.support.test.rule.GrantPermissionRule
 import android.support.test.runner.AndroidJUnit4
-import android.test.suitebuilder.annotation.LargeTest
 import android.util.Log
-
-import org.junit.Test
-import org.junit.runner.RunWith
-
-import java.io.DataInputStream
-import java.io.IOException
-import java.io.InputStream
-
 import dk.eightyplus.annoto.action.State
 import dk.eightyplus.annoto.action.Undo
 import dk.eightyplus.annoto.component.Component
 import dk.eightyplus.annoto.utilities.Storage
 import dk.eightyplus.annoto.view.DrawingView
-
 import org.hamcrest.Matchers.equalTo
 import org.junit.Assert.assertThat
 import org.junit.Assert.fail
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import java.io.*
 
-@LargeTest
 @RunWith(AndroidJUnit4::class)
 class ReadWriteTest {
+
+    @Rule @JvmField
+    val mRuntimePermissionRule: GrantPermissionRule =
+            GrantPermissionRule.grant(
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
 
     private val callback = object : Callback {
         override fun hexColorForResourceId(color: Int): Int {
@@ -62,14 +64,24 @@ class ReadWriteTest {
     fun readJsonFile() {
 
         val note = "file-2018-07-03_09-25-38.note"
+        val testNote = "file-test-out-put.note"
 
         try {
-            val inputStream = InstrumentationRegistry.getContext().resources.assets.open(note)
-            //InputStream inputStream = this.getClass().getClassLoader().getResource(note).openStream();
-            val drawingView = DrawingView(InstrumentationRegistry.getContext(), callback)
-            drawingView.load(InstrumentationRegistry.getContext(), DataInputStream(inputStream))
+            val context = InstrumentationRegistry.getContext()
+            val inputStream = context.resources.assets.open(note)
+            val drawingView = DrawingView(context, callback)
+            drawingView.load(context, DataInputStream(inputStream))
 
             assertThat("Read components should match size specified in file", drawingView.numComponents, equalTo(14))
+
+            val jsonString = Storage.readData(context.resources.assets.open(note))
+            val file = File(context.getExternalFilesDir(null), File.separator + testNote)
+            drawingView.save(context, DataOutputStream(FileOutputStream(file)))
+
+            FileInputStream(file).use {
+                val result = Storage.readData(it) ?: throw IOException("not not written during test")
+                assertThat("read should equal written json", result, equalTo(jsonString))
+            }
 
         } catch (e: IOException) {
             Log.e("ERROR", "IOException", e)
@@ -85,10 +97,12 @@ class ReadWriteTest {
     @Test
     fun readGzippedJsonFile() {
         val note = "file-2018-07-03_09-22-01.note"
+        val testNote = "file-test-out-put.gzip"
 
         try {
-            val drawingView = DrawingView(InstrumentationRegistry.getContext(), callback)
-            Storage.getStorage(InstrumentationRegistry.getContext()).loadFromFile(drawingView, note, true)
+            val context = InstrumentationRegistry.getContext()
+            val drawingView = DrawingView(context, callback)
+            Storage.getStorage(context).loadFromFile(drawingView, note, true)
             assertThat("Read components should match size specified in file", drawingView.numComponents, equalTo(5))
         } catch (e: IOException) {
             Log.e("ERROR", "IOException", e)
