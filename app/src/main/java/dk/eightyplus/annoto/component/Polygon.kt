@@ -16,13 +16,11 @@ class Polygon() : Component() {
     var path = CustomPath()
 
     override val bounds: RectF
-        get() {
-            return RectF().apply {
-                path.computeBounds(this, false)
-                offset(x, y)
-                right += width() * (scale - 1)
-                bottom += height() * (scale - 1)
-            }
+        get() = RectF().apply {
+            path.computeBounds(this, false)
+            offset(x, y)
+            right += width() * (scale - 1)
+            bottom += height() * (scale - 1)
         }
 
     override val type: ComponentType
