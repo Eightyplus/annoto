@@ -1,11 +1,9 @@
 package dk.eightyplus.annoto.view
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
-import android.graphics.RectF
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.view.MotionEvent
@@ -20,7 +18,6 @@ import dk.eightyplus.annoto.component.Polygon
 import dk.eightyplus.annoto.utilities.Compatibility
 import dk.eightyplus.annoto.utilities.NoteStorage
 import dk.eightyplus.annoto.utilities.SaveLoad
-
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.IOException
