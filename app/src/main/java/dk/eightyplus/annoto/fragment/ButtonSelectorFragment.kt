@@ -13,51 +13,41 @@ import dk.eightyplus.annoto.action.State
 import dk.eightyplus.annoto.view.ClickMoveView
 
 import java.lang.ref.SoftReference
-import java.util.ArrayList
 
 /**
  * User: fries
  * Date: 17/07/14
  * Time: 07.46
  */
-class ButtonSelectorFragment : DialogFragment {
-
-    private var callbackSoftReference: SoftReference<Callback>? = null
+@SuppressLint("ValidFragment")
+class ButtonSelectorFragment(private var icons: IntArray = IntArray(0),
+                             private var tags: Array<String> = emptyArray()) : DialogFragment() {
     private var unfold = false
-
-    private var icons: IntArray? = null
-    private var tags: Array<String>? = null
-
-    constructor() {}
-
-    @SuppressLint("ValidFragment")
-    constructor(icons: IntArray, tags: Array<String>) {
-        this.icons = icons
-        this.tags = tags
-    }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        outState.putInt(Keys.LENGTH, icons!!.size)
-        for (i in icons!!.indices) {
-            outState.putInt(Keys.ICON + i, icons!![i])
-            outState.putString(Keys.TAG + i, tags!![i])
+        with(outState) {
+            putInt(Keys.LENGTH, icons.size)
+            for (i in icons.indices) {
+                putInt(Keys.ICON + i, icons[i])
+                putString(Keys.TAG + i, tags[i])
+            }
+            putBoolean(Keys.STATE, unfold)
         }
-        outState.putBoolean(Keys.STATE, unfold)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        callbackSoftReference = SoftReference(activity as Callback)
 
         if (savedInstanceState != null) {
-            val length = savedInstanceState.getInt(Keys.LENGTH)
-            if (length > 0) {
-                icons = IntArray(length) { savedInstanceState.getInt(Keys.ICON + it) }
-                tags = Array(length) { savedInstanceState.getString(Keys.TAG + it) }
+            with (savedInstanceState) {
+                getInt(Keys.LENGTH).let {
+                    icons = IntArray(it) { getInt(Keys.ICON + it) }
+                    tags = Array(it) { getString(Keys.TAG + it) }
+                }
+                unfold = getBoolean(Keys.STATE, false)
             }
-            unfold = savedInstanceState.getBoolean(Keys.STATE, false)
         }
     }
 
@@ -65,27 +55,20 @@ class ButtonSelectorFragment : DialogFragment {
         val view = inflater.inflate(R.layout.button_menu_layout, container, false)
         val dynamicButtons = view.findViewById<View>(R.id.dynamic_buttons) as ViewGroup
 
-        val buttons = ArrayList<View>()
-
-        for (i in icons!!.indices) {
-            val icon = icons!![i]
-            val tag = tags!![i]
-
-            val buttonsView = inflater.inflate(R.layout.button_item, dynamicButtons, false)
-            buttonsView.findViewById<View>(R.id.icon).setBackgroundResource(icon)
-
-            val button = buttonsView.findViewById<View>(R.id.button)
-            button.tag = tag
-            buttons.add(button)
+        val buttons = icons.indices.map {
+            val buttonsView = inflater.inflate(R.layout.button_item, dynamicButtons, false).apply {
+                findViewById<View>(R.id.icon).setBackgroundResource(icons[it])
+            }
             dynamicButtons.addView(buttonsView)
-
-            if (i == 0) {
-                button.isSelected = true
+            buttonsView.findViewById<View>(R.id.button).apply {
+                tag = tags[it]
+                isSelected = it == 0
             }
         }
 
+        val callback: SoftReference<Callback> = SoftReference(activity as Callback)
         for (button in buttons) {
-            button.setOnClickListener(ToggleButtonClickListener(callbackSoftReference, buttons, button.tag as String))
+            button.setOnClickListener(ToggleButtonClickListener(callback, buttons, button.tag as String))
         }
 
         val buttonFold = view.findViewById<View>(R.id.button_fold) as ClickMoveView
@@ -110,12 +93,12 @@ class ButtonSelectorFragment : DialogFragment {
         return view
     }
 
-    private class ToggleButtonClickListener(private val callback: SoftReference<Callback>?,
+    private class ToggleButtonClickListener(private val callback: SoftReference<Callback>,
                                             private val deselect: List<View>,
                                             private val tag: String) : View.OnClickListener {
 
         override fun onClick(v: View) {
-            val callback = this.callback?.get() ?: return
+            val callback = this.callback.get() ?: return
             for (view in deselect) {
                 view.isSelected = false
             }
