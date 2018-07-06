@@ -25,6 +25,7 @@
   <string name="share_text">Min tegning</string>
   <string name="share_information">Del via</string>
   <string name="error_loading_image">Det oppstod en feil med bildeopplastingen</string>
+  <string name="error_loading_image_user_message">Bildet er borte eller kunne ikke lastes til minne</string>
   <string name="error_taking_photo">Det oppstod en feil med kameraet</string>
   <string name="select_picture">Velg bilde</string>
   <string name="thumbnail">Bildeutsnitt</string>

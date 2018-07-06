@@ -27,6 +27,7 @@
   <string name="share_text">This is my drawing</string>
   <string name="share_information">Share image using</string>
   <string name="error_loading_image">Error loading image from gallery</string>
+  <string name="error_loading_image_user_message">Image was deleted or could not be loaded</string>
   <string name="error_taking_photo">Error loading image from camera</string>
   <string name="select_picture">Select Picture</string>
   <string name="thumbnail">Thumbnail</string>

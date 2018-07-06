@@ -25,6 +25,7 @@
   <string name="share_text">Dette er min tegning</string>
   <string name="share_information">Del via</string>
   <string name="error_loading_image">Der opstod en fejl ved indlæsning fra billedegalleriet</string>
+  <string name="error_loading_image_user_message">Billedet er blevet slettet eller kan ikke indlæses</string>
   <string name="error_taking_photo">Der opstod en fejl ved optagelse med kameraet</string>
   <string name="select_picture">Vælg billede</string>
   <string name="thumbnail">Miniature billede</string>
