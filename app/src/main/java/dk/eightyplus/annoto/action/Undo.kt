@@ -1,6 +1,5 @@
 package dk.eightyplus.annoto.action
 
-import android.graphics.RectF
 import dk.eightyplus.annoto.component.Component
 import dk.eightyplus.annoto.component.Text
 import dk.eightyplus.annoto.view.ComponentList
@@ -8,32 +7,12 @@ import dk.eightyplus.annoto.view.ComponentList
 /**
  * Undo (Redo) class contains the reverse action of an user interaction, so these can be reversed.
  */
-class Undo(private val component: Component, private var text: String?, private var undoAction: State?) {
-
-    private var x: Float = 0f
-    private var y: Float = 0f
-    private var scale: Float = 0f
-
-    /**
-     * Undo for components being moved
-     * @param component component being moved
-     * @param state action to be undo
-     */
-    constructor(component: Component, state: State) : this(component, 0f, 0f, 1f, state) {}
-
-    /**
-     * Undo for components being moved
-     * @param component component being moved
-     * @param x previous x-coordinate
-     * @param y previous y-coordinate
-     * @param state action to be undo
-     */
-    constructor(component: Component, x: Float, y: Float, scale: Float, state: State) : this(component, null, state) {
-        this.x = x
-        this.y = y
-        this.scale = scale
-        this.undoAction = state
-    }
+class Undo(private val component: Component,
+           private var undoAction: State,
+           private var text: String? = null,
+           private var x: Float = 0f,
+           private var y: Float = 0f,
+           private var scale: Float = 1f) {
 
     /**
      * Undo action taken on component

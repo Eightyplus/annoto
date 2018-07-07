@@ -152,15 +152,13 @@ class MainActivity : FragmentActivity(), ColorPickerDialog.OnColorChangedListene
         if (fragment != null) {
             val editorFragment = fragment as EditorFragment
             val textChanges = editorFragment.textChanges
-            if (textChanges.first != null) {
+            if (textChanges != null) {
                 if (color != 0) {
-                    textChanges.first.color = color
+                    textChanges.component.color = color
                 }
-                view.add(textChanges.first)
+                view.add(textChanges.component)
                 view.redraw()
-                if (textChanges.second != null) {
-                    add(textChanges.second)
-                }
+                add(textChanges.undo)
             }
         }
         if (fragment != null) {

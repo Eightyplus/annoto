@@ -304,7 +304,7 @@ class DrawingView(context: Context, private val callback: Callback) : View(conte
 
     fun move(component: Component, dx: Float, dy: Float, scale: Float) {
         val bounds = component.bounds
-        callback.add(Undo(component, bounds.left, bounds.top, component.scale, State.Move))
+        callback.add(Undo(component, State.Move, x = bounds.left, y = bounds.top, scale = component.scale))
         component.scale = scale
         component.move(dx, dy)
 

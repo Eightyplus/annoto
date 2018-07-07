@@ -5,13 +5,10 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.support.v4.app.DialogFragment
-import android.util.Pair
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.widget.TextView
 import dk.eightyplus.annoto.Callback
 import dk.eightyplus.annoto.R
 import dk.eightyplus.annoto.action.State
@@ -21,53 +18,54 @@ import dk.eightyplus.annoto.component.Text
 import dk.eightyplus.annoto.view.EditTextCustom
 
 /**
+ * Changes returned from fragment
+ */
+class TextChanges(val component: Component, val undo: Undo)
+
+/**
  * EditorFragment for presenting edit text
  */
 @SuppressLint("ValidFragment")
 class EditorFragment(private val callback: Callback, private var component: Text?,
                      private val x: Float, private val y: Float) : DialogFragment() {
-    private var editText: EditTextCustom? = null
+    private lateinit var editText: EditTextCustom
 
-    val textChanges: Pair<Text, Undo>
-        get() {
-            var undo: Undo? = null
-            val text = editText!!.text.toString()
-            if (text.isNotEmpty()) {
-                var component = component
-                if (component == null) {
-                    component = Text()
-                    this.component = component
-                    component.move(x, y)
-                    undo = Undo(component, State.Add)
-                } else {
-                    undo = Undo(component, component.text, State.Text)
-                }
+    val textChanges: TextChanges?
+        get() = editText.text.run {
+            editText.clearFocus()
+            if(isNotEmpty()) {
+                val text = this.toString()
+                val undoText = component?.text
+                val state = if (component == null) State.Add else State.Text
+                val component = component ?: Text().apply {
+                    move(x, y)
+                    component = this
+                 }
                 component.text = text
-            }
-            return Pair<Text, Undo>(component, undo)
+                return TextChanges(component, Undo(component, state, undoText))
+             }
+             null
         }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.editor, container, false)
 
-        val editText = view.findViewById<View>(R.id.edit) as EditTextCustom
+        editText = (view.findViewById<View>(R.id.edit) as EditTextCustom).apply {
+            val keyListener: View.OnKeyListener = View.OnKeyListener { _, _, _ ->
+                callback.textEditDone()
+                true
+            }
+            setOnKeyBoardDownListener(keyListener)
 
-        val keyListener: View.OnKeyListener = View.OnKeyListener { _, _, _ ->
-            callback.textEditDone()
-            true
-        }
-        editText.setOnKeyBoardDownListener(keyListener)
+            component?.text?.let {
+                setText(it)
+            }
 
-        val textComponent = component
-        if (textComponent != null) {
-            editText.setText(textComponent.text)
+            setOnEditorActionListener { _, _, _ ->
+                callback.textEditDone()
+                false
+            }
         }
-
-        editText.setOnEditorActionListener { v, actionId, event ->
-            callback.textEditDone()
-            false
-        }
-        this.editText = editText
 
         showKeyboard()
         return view
@@ -75,14 +73,11 @@ class EditorFragment(private val callback: Callback, private var component: Text
 
     private fun showKeyboard() {
         Handler().post {
-            if (editText!!.requestFocus()) {
-                val imm = activity!!.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-                imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
+            if (editText.requestFocus()) {
+                (activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).run {
+                    showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
+                }
             }
         }
-    }
-
-    companion object {
-        private val TAG = EditorFragment::class.java.toString()
     }
 }
