@@ -10,20 +10,21 @@ import android.widget.SeekBar
 import dk.eightyplus.annoto.Callback
 import dk.eightyplus.annoto.Keys
 import dk.eightyplus.annoto.R
+import java.lang.ref.SoftReference
 
 /**
  * Fragment for width slider
  */
 class SliderFragment : DialogFragment {
 
-    private var callback: Callback? = null
+    private lateinit var callbackSoftReference: SoftReference<Callback>
     private var width: Int = 0
 
     constructor() {}
 
     @SuppressLint("ValidFragment")
     constructor(callback: Callback, width: Int) {
-        this.callback = callback
+        this.callbackSoftReference = SoftReference(callback)
         this.width = width
     }
 
@@ -33,7 +34,7 @@ class SliderFragment : DialogFragment {
             width = savedInstanceState.getInt(Keys.WIDTH)
         }
 
-        callback = activity as Callback?
+        this.callbackSoftReference = SoftReference(activity as Callback)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -52,7 +53,7 @@ class SliderFragment : DialogFragment {
             override fun onStartTrackingTouch(seekBar: SeekBar) {}
 
             override fun onStopTrackingTouch(seekBar: SeekBar) {
-                callback!!.setStrokeWidth(seekBar.progress)
+                callbackSoftReference.get()?.setStrokeWidth(seekBar.progress)
             }
         })
 
