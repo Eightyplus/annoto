@@ -56,10 +56,9 @@ class ClickMoveView : View {
                 MotionEvent.ACTION_UP -> {
                     val touchUpTime = System.currentTimeMillis()
 
-                    var onClickListener = onClickListener
-                    if (onClickListener != null) {
+                    onClickListener?.let {
                         if (touchUpTime - touchDownTime < 100) {
-                            Compatibility.get().callOnClick(this, onClickListener)
+                            Compatibility.get().callOnClick(this, it)
                         }
                     }
                 }
@@ -75,8 +74,6 @@ class ClickMoveView : View {
                     }
 
                     parent.layoutParams = layoutParams
-                }
-                else -> {
                 }
             }
             return true
