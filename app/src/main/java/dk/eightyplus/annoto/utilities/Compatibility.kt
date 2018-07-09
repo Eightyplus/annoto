@@ -97,34 +97,23 @@ private constructor() {
         private val INSTANCE: Compatibility
 
         init {
-            val version = apiVersion
-
-            if (version >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-                INSTANCE = APIVersion15()
-            } else if (version >= Build.VERSION_CODES.HONEYCOMB) {
-                INSTANCE = APIVersion11()
-            } else if (version >= Build.VERSION_CODES.ECLAIR_MR1) {
-                INSTANCE = APIVersion7()
-            } else {
-                INSTANCE = UnsupportedVersion()
+            INSTANCE = when {
+                apiVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 -> APIVersion15()
+                apiVersion >= Build.VERSION_CODES.HONEYCOMB -> APIVersion11()
+                apiVersion >= Build.VERSION_CODES.ECLAIR_MR1 -> APIVersion7()
+                else -> UnsupportedVersion()
             }
             Log.d(TAG, "Instance $INSTANCE")
         }
 
-
         /**
          * @return API version
          */
-        // SDK_INT was introduced in API Level 4
-        val apiVersion: Int
-            get() {
-                var version = 3
-                try {
-                    version = Build.VERSION::class.java.getDeclaredField("SDK_INT").getInt(null)
-                } catch (ignore: Throwable) {
-                }
-
-                return version
+        private val apiVersion
+            get() = try {
+                Build.VERSION::class.java.getDeclaredField("SDK_INT").getInt(null)
+            } catch (ignore: Throwable) {
+                3 // SDK_INT was introduced in API Level 4
             }
 
         /**
@@ -132,14 +121,12 @@ private constructor() {
          * @return version code the app was built with
          */
         fun getVersionCode(context: Context): Int {
-            var versionCode = 0
-            try {
-                versionCode = context.packageManager.getPackageInfo(context.packageName, 0).versionCode
+            return try {
+                context.packageManager.getPackageInfo(context.packageName, 0).versionCode
             } catch (e: PackageManager.NameNotFoundException) {
                 Log.e(TAG, "Error package manager", e)
+                0
             }
-
-            return versionCode
         }
 
         /**
