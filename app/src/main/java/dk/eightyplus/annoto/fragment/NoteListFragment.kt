@@ -31,27 +31,18 @@ class NoteListFragment : DialogFragment() {
 
     override fun onResume() {
         super.onResume()
-        val adapter = adapter
-        if (adapter != null) {
-            adapter.onResume()
-        }
+        adapter?.onResume()
     }
 
     override fun onPause() {
         super.onPause()
-        val adapter = adapter
-        if (adapter != null) {
-            adapter.onPause()
-        }
+        adapter?.onPause()
     }
 
 
     override fun onDestroy() {
         super.onDestroy()
-        val adapter = adapter
-        if (adapter != null) {
-            adapter.onDestroy()
-        }
+        adapter?.onDestroy()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -91,10 +82,7 @@ class NoteListFragment : DialogFragment() {
                 return@OnItemClickListener
             }
 
-            val callback = callbackSoftReference?.get()
-            if (callback != null) {
-                callback.load(fileName)
-            }
+            callbackSoftReference?.get()?.load(fileName)
         }
 
         listView.adapter = adapter
