@@ -75,9 +75,8 @@ class NoteListAdapter(context: Context, listView: ListView, resource: Int, objec
 
     private fun setImage(imageView: ImageView, path: String?): Boolean {
         if (cachedImages.containsKey(path)) {
-            val drawable = cachedImages[path]?.get()
-            if (drawable != null) {
-                imageView.setImageDrawable(drawable)
+            cachedImages[path]?.get().let {
+                imageView.setImageDrawable(it)
                 return true
             }
         }
@@ -123,9 +122,10 @@ class NoteListAdapter(context: Context, listView: ListView, resource: Int, objec
         private val listViewSoftReference: SoftReference<ListView> = SoftReference(listView)
 
         override fun onClick(v: View) {
-            val listView = listViewSoftReference.get() ?: return
-            val position = listView.getPositionForView(v.parent as View)
-            listView.performItemClick(v, position, (v.tag as Int).toLong())
+            listViewSoftReference.get()?.let {
+                val position = it.getPositionForView(v.parent as View)
+            it.performItemClick(v, position, (v.tag as Int).toLong())
+            }
         }
     }
 }
