@@ -37,9 +37,6 @@ class Storage private constructor(context: Context) {
         GZIPOutputStream(FileOutputStream(file)).use { gos ->
             DataOutputStream(gos).use {  dos ->
                 save.save(context, dos)
-                gos.flush()
-                dos.close()
-                gos.close()
             }
         }
     }
@@ -75,21 +72,20 @@ class Storage private constructor(context: Context) {
         else
             FileInputStream(getFilename(fileName))
 
-        GZIPInputStream(inputStream).use {gos ->
-            DataInputStream(gos).use {dos ->
-                load.load(context, dos)
-                dos.close()
+        inputStream.use { iStream ->
+            GZIPInputStream(iStream).use { gis ->
+                DataInputStream(gis).use { dis ->
+                    load.load(context, dis)
+                }
             }
-            gos.close()
         }
-        inputStream.close()
     }
 
     private fun deleteFromFile(file: File) {
         try {
-            GZIPInputStream(FileInputStream(file)).use { gos ->
-                DataInputStream(gos).use { dos ->
-                    readData(dos)?.let {
+            GZIPInputStream(FileInputStream(file)).use { gis ->
+                DataInputStream(gis).use { dis ->
+                    readData(dis)?.let {
                         NoteStorage.fromJsonDelete(context, it)
                     }
                 }
@@ -105,7 +101,6 @@ class Storage private constructor(context: Context) {
         return getFilename(fileName).apply {
             DataOutputStream(FileOutputStream(this)).use { dos ->
                 bitmap.compress(Bitmap.CompressFormat.PNG, quality, dos)
-                dos.close()
             }
         }
     }
