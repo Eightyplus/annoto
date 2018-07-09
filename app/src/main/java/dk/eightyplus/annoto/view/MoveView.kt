@@ -1,5 +1,6 @@
 package dk.eightyplus.annoto.view
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.DashPathEffect
@@ -16,6 +17,7 @@ import java.lang.ref.SoftReference
 /**
  * MoveView to put a single component into and show moves by user
  */
+@SuppressLint("ViewConstructor")
 class MoveView(context: Context, private var component: Component, callBack: Callback) : View(context) {
 
     private val callbackSoftReference = SoftReference(callBack)
@@ -36,29 +38,31 @@ class MoveView(context: Context, private var component: Component, callBack: Cal
     private var points = 1
 
     init {
-        mPaint.isAntiAlias = true
-        mPaint.isDither = true
-        mPaint.strokeJoin = Paint.Join.ROUND
-        mPaint.strokeCap = Paint.Cap.ROUND
-        mPaint.strokeWidth = 12f
+        with (mPaint) {
+            isAntiAlias = true
+            isDither = true
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
+            strokeWidth = 12f
+        }
         Compatibility.get().setHardwareAccelerated(this, mPaint)
 
         setupSize()
     }
 
     private fun setupSize() {
-        val bounds = component.bounds
-        xOffsetComponent = bounds.left - margin
-        yOffsetComponent = bounds.top - margin
+        with(component.bounds) {
+            xOffsetComponent = this.left - margin
+            yOffsetComponent = this.top - margin
 
-        width = bounds.width() + 2 * margin
-        height = bounds.height() + 2 * margin
+            width = this.width() + 2 * margin
+            height = this.height() + 2 * margin
+        }
         setViewBounds()
     }
 
     private fun moveComponentFromMoveView(dx: Float, dy: Float) {
-        val callBack = callbackSoftReference.get() ?: return
-        callBack.move(component, dx - xOffsetComponent, dy - yOffsetComponent, initialScale * scaleFactor)
+        callbackSoftReference.get()?.move(component, dx - xOffsetComponent, dy - yOffsetComponent, initialScale * scaleFactor)
     }
 
     private fun setViewBounds() {
@@ -69,26 +73,29 @@ class MoveView(context: Context, private var component: Component, callBack: Cal
     }
 
     override fun onDraw(canvas: Canvas) {
-        canvas.save()
-        canvas.scale(scaleFactor, scaleFactor)
-        canvas.translate(-xOffsetComponent, -yOffsetComponent)
-        component.isVisible = true
-        component.onDraw(canvas, mPaint)
-        component.isVisible = false
-        canvas.restore()
-
-        drawDashBounds(canvas)
+        with (canvas) {
+            save()
+            scale(scaleFactor, scaleFactor)
+            translate(-xOffsetComponent, -yOffsetComponent)
+            component.isVisible = true
+            component.onDraw(this, mPaint)
+            component.isVisible = false
+            restore()
+            drawDashBounds(this)
+        }
     }
 
     private fun drawDashBounds(canvas: Canvas) {
         val rect = RectF(0f, 0f, (getWidth() - 1).toFloat(), (getHeight() - 1).toFloat())
 
-        mPaint.color = -0x1000000
-        mPaint.strokeWidth = 1.0f
-        mPaint.style = Paint.Style.STROKE
-        mPaint.pathEffect = DashPathEffect(floatArrayOf(10f, 20f), 0f)
-        canvas.drawRoundRect(rect, 5.0f, 5.0f, mPaint)
-        mPaint.pathEffect = null
+        with (mPaint) {
+            color = -0x1000000
+            strokeWidth = 1.0f
+            style = Paint.Style.STROKE
+            pathEffect = DashPathEffect(floatArrayOf(10f, 20f), 0f)
+            canvas.drawRoundRect(rect, 5.0f, 5.0f, this)
+            pathEffect = null
+        }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -158,10 +165,6 @@ class MoveView(context: Context, private var component: Component, callBack: Cal
         val x = event.getX(0) - event.getX(1)
         val y = event.getY(0) - event.getY(1)
         return Math.sqrt((x * x + y * y).toDouble()).toFloat()
-    }
-
-    companion object {
-        private val TAG = MoveView::class.java.toString()
     }
 }
 
