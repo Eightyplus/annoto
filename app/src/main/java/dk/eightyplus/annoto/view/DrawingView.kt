@@ -23,7 +23,7 @@ import java.io.DataOutputStream
 import java.io.IOException
 import java.util.ArrayList
 
-const val COMPONENT = "COMPOTENT_"
+const val COMPONENT = "COMPONENT_"
 const val TOUCH_TOLERANCE = 4f
 const val STROKE_DELTA = 0.001f
 const val STROKE_INCREMENT = 0.1f
@@ -45,11 +45,11 @@ class DrawingView(context: Context, private val callback: Callback) : View(conte
 
     private val mBitmapPaint: Paint
 
-    var drawingColor = -0x1000000
+    private var drawingColor = -0x1000000
     var color = -0x1000000
 
-    private var mX: Float = 0.toFloat()
-    private var mY: Float = 0.toFloat()
+    private var mX: Float = 0.0f
+    private var mY: Float = 0.0f
     private var currentStrokeModify = 1.0f
     var strokeWidth = 6
         set(value) {
@@ -186,9 +186,9 @@ class DrawingView(context: Context, private val callback: Callback) : View(conte
     }
 
     private fun clear() {
-        bitmap.recycle()
         val w = bitmap.width
         val h = bitmap.height
+        bitmap.recycle()
 
         bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
         mCanvas = Canvas(bitmap)
@@ -317,10 +317,10 @@ class DrawingView(context: Context, private val callback: Callback) : View(conte
     private fun getStrokeWidth(eventPressure: Float): Float {
         if (variableWidth) {
             if (Math.abs(eventPressure - currentStrokeModify) > STROKE_DELTA) {
-                if (eventPressure > currentStrokeModify) {
-                    currentStrokeModify = Math.min(eventPressure, currentStrokeModify + STROKE_INCREMENT)
+                currentStrokeModify = if (eventPressure > currentStrokeModify) {
+                    Math.min(eventPressure, currentStrokeModify + STROKE_INCREMENT)
                 } else {
-                    currentStrokeModify = Math.max(eventPressure, currentStrokeModify - STROKE_INCREMENT)
+                    Math.max(eventPressure, currentStrokeModify - STROKE_INCREMENT)
                 }
             }
         }
@@ -328,15 +328,15 @@ class DrawingView(context: Context, private val callback: Callback) : View(conte
     }
 
     private fun saveStrokeWidth(strokeWidth: Int) {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
-        val editor = preferences.edit()
-        editor.putInt(Tags.STROKE_WIDTH, strokeWidth)
-        editor.apply()
+        PreferenceManager.getDefaultSharedPreferences(context).edit().run {
+            putInt(Tags.STROKE_WIDTH, strokeWidth)
+        }.apply()
     }
 
     private fun getSavedStrokeWidth() {
-        val preferences = PreferenceManager.getDefaultSharedPreferences(context)
-        strokeWidth = preferences.getInt(Tags.STROKE_WIDTH, strokeWidth)
+        strokeWidth = PreferenceManager.getDefaultSharedPreferences(context).run {
+            getInt(Tags.STROKE_WIDTH, strokeWidth)
+        }
     }
 
     companion object {
